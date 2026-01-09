@@ -1,0 +1,165 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Core">
+      <UniqueIdentifier>{b0d85abc-626a-4e19-9071-f41277adfb97}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utils">
+      <UniqueIdentifier>{795b77ee-6f8c-41aa-b99c-73a30bf6c585}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers">
+      <UniqueIdentifier>{7b549795-461f-4b0e-904e-755eb2f999a7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Reflection">
+      <UniqueIdentifier>{de8f2ec4-195d-4db0-8a28-3e151d2bb882}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core\World">
+      <UniqueIdentifier>{4071671f-1d9b-4c0f-aab4-59accde801ee}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Graphics">
+      <UniqueIdentifier>{ee3d1452-c666-4b08-996d-3fd69af92025}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Graphics\Scene">
+      <UniqueIdentifier>{b947935e-6ea6-4e69-b600-585c54ffea19}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Manager">
+      <UniqueIdentifier>{fc75f0c4-72d8-4a09-951f-db5c12acf6c3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Minimum">
+      <UniqueIdentifier>{272a34c2-df18-4c9f-a204-291ea2f96d4a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Global">
+      <UniqueIdentifier>{05da2091-25e3-4c6d-a459-c095ee31a0af}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core\Component">
+      <UniqueIdentifier>{97d1e3e2-3653-4744-a374-215f1f635cdc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Reflection\TypeInfo">
+      <UniqueIdentifier>{ba2a2fc2-7daa-4d0f-8afc-2866ebbb70d9}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Core\Game.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Object.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Reflection\Reflection.h">
+      <Filter>Reflection</Filter>
+    </ClInclude>
+    <ClInclude Include="Reflection\TypeTrait.h">
+      <Filter>Reflection</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\TypeUtils.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\World\Actor.h">
+      <Filter>Core\World</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\World\World.h">
+      <Filter>Core\World</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\Scene\Scene.h">
+      <Filter>Graphics\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="CoreMinimum.h">
+      <Filter>Headers\Minimum</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphicMinimum.h">
+      <Filter>Headers\Minimum</Filter>
+    </ClInclude>
+    <ClInclude Include="Defines.h">
+      <Filter>Headers\Global</Filter>
+    </ClInclude>
+    <ClInclude Include="EnginePch.h">
+      <Filter>Headers\Global</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.h">
+      <Filter>Headers\Global</Filter>
+    </ClInclude>
+    <ClInclude Include="Types.h">
+      <Filter>Headers\Global</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Component\ActorComponent.h">
+      <Filter>Core\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\World\Level.h">
+      <Filter>Core\World</Filter>
+    </ClInclude>
+    <ClInclude Include="Reflection\SubClass.h">
+      <Filter>Reflection</Filter>
+    </ClInclude>
+    <ClInclude Include="Reflection\Property.h">
+      <Filter>Reflection</Filter>
+    </ClInclude>
+    <ClInclude Include="Reflection\InterfaceReflector.h">
+      <Filter>Reflection</Filter>
+    </ClInclude>
+    <ClInclude Include="Reflection\TypeInfo.h">
+      <Filter>Reflection\TypeInfo</Filter>
+    </ClInclude>
+    <ClInclude Include="Reflection\ObjectTypeInfo.h">
+      <Filter>Reflection\TypeInfo</Filter>
+    </ClInclude>
+    <ClInclude Include="Reflection\DefaultTypeInfo.h">
+      <Filter>Reflection\TypeInfo</Filter>
+    </ClInclude>
+    <ClInclude Include="Reflection\Method.h">
+      <Filter>Reflection</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Core\Game.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Object.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\TypeUtils.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\World\Actor.cpp">
+      <Filter>Core\World</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\World\World.cpp">
+      <Filter>Core\World</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\Scene\Scene.cpp">
+      <Filter>Graphics\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="pch.cpp">
+      <Filter>Headers\Global</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Component\ActorComponent.cpp">
+      <Filter>Core\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\World\Level.cpp">
+      <Filter>Core\World</Filter>
+    </ClCompile>
+    <ClCompile Include="Reflection\SubClass.cpp">
+      <Filter>Reflection</Filter>
+    </ClCompile>
+    <ClCompile Include="Reflection\Property.cpp">
+      <Filter>Reflection</Filter>
+    </ClCompile>
+    <ClCompile Include="Reflection\InterfaceReflector.cpp">
+      <Filter>Reflection</Filter>
+    </ClCompile>
+    <ClCompile Include="Reflection\TypeInfo.cpp">
+      <Filter>Reflection\TypeInfo</Filter>
+    </ClCompile>
+    <ClCompile Include="Reflection\ObjectTypeInfo.cpp">
+      <Filter>Reflection\TypeInfo</Filter>
+    </ClCompile>
+    <ClCompile Include="Reflection\DefaultTypeInfo.cpp">
+      <Filter>Reflection\TypeInfo</Filter>
+    </ClCompile>
+    <ClCompile Include="Reflection\Method.cpp">
+      <Filter>Reflection</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="IncludeCopy.bat" />
+  </ItemGroup>
+</Project>
