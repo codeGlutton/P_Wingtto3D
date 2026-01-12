@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "ObjectTypeInfo.h"
 
+#include "Utils/ObjectUtils.h"
+
 bool ObjectTypeInfo::IsChildOf(const ObjectTypeInfo& other) const
 {
 	if (IsA(other) == true)
@@ -67,6 +69,15 @@ const Property* ObjectTypeInfo::GetProperty(const char* name) const
 		}
 	}
 	return nullptr;
+}
+
+const Object* ObjectTypeInfo::GetDefaultObject() const
+{
+	if (_mDefaultObject == nullptr)
+	{
+		//NewObject<Object>(nullptr, this, ObjectFlag::CDO);
+	}
+	return _mDefaultObject;
 }
 
 void ObjectTypeInfo::AddMethod(const Method* method)

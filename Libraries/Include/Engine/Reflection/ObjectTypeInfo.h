@@ -3,6 +3,24 @@
 #include "Reflection/TypeInfo.h"
 #include "Utils/TypeUtils.h"
 
+class Object;
+
+template <typename T>
+struct ObjectTypeReflector
+{
+	ObjectTypeReflector()
+	{
+		BOOT_SYSTEM->AddType(
+			[]() {
+				T::GetStaticTypeInfo();
+			},
+			[]() {
+				T::GetDefaultObject();
+			}
+		);
+	}
+};
+
 /**
  * 일반 객체 타입 정보 초기화 구조체
  * @tparam T 초기화 대상
@@ -27,9 +45,31 @@ struct ObjectTypeInfoInitializer : public TypeInfoInitializer<T>
 		}
 	}
 
+	ObjectTypeInfoInitializer(const char* name, std::function<std::shared_ptr<Object>()>&& constructor) :
+		TypeInfoInitializer<T>(),
+		mName(name),
+		mConstructor(constructor)
+	{
+		if constexpr (HasSuper<T> == true && std::same_as<typename T::Super, void> == false)
+		{
+			using TSuperType = typename T::Super;
+			mSuperInfo = &(TSuperType::GetStaticTypeInfo());
+		}
+		if constexpr (IsSameSuperInterface<T> == false && std::same_as<typename T::Interfaces, void> == false)
+		{
+			using TInterfacesType = typename T::Interfaces;
+			auto array = TInterfacesType::GetInterfaceInfos();
+			mAdditionalInterfaces.insert(mAdditionalInterfaces.end(), array.begin(), array.end());
+		}
+	}
+
+public:
 	const char* mName = nullptr;
 	const ObjectTypeInfo* mSuperInfo = nullptr;
 	std::vector<const ObjectTypeInfo*> mAdditionalInterfaces;
+
+public:
+	std::function<std::shared_ptr<Object>()> mConstructor = nullptr;
 };
 
 /**
@@ -49,7 +89,8 @@ public:
 	explicit ObjectTypeInfo(const ObjectTypeInfoInitializer<T>& initializer) :
 		TypeInfo(initializer),
 		_mName(initializer.mName),
-		_mSuperInfo(initializer.mSuperInfo)
+		_mSuperInfo(initializer.mSuperInfo),
+		_mConstructor(initializer.mConstructor)
 	{
 		if (_mSuperInfo != nullptr)
 		{
@@ -59,16 +100,6 @@ public:
 		{
 			_mInterfaces.push_back(interface);
 		}
-	}
-
-public:
-	const ObjectTypeInfo* GetSuper() const
-	{
-		return _mSuperInfo;
-	}
-	bool HasSuper() const
-	{
-		return _mSuperInfo != nullptr;
 	}
 
 public:
@@ -89,8 +120,30 @@ public:
 	bool ImplementsInterface() const;
 
 public:
+	const char* GetName() const
+	{
+		return _mName;
+	}
+
+	const ObjectTypeInfo* GetSuper() const
+	{
+		return _mSuperInfo;
+	}
+	bool HasSuper() const
+	{
+		return _mSuperInfo != nullptr;
+	}
+
+	const std::function<std::shared_ptr<Object>()>& GetConstructor() const
+	{
+		return _mConstructor;
+	}
+
 	const Method* GetMethod(const char* name) const;
 	const Property* GetProperty(const char* name) const;
+
+public:
+	const Object* GetDefaultObject() const;
 
 private:
 	void AddMethod(const Method* method);
@@ -109,6 +162,12 @@ private:
 
 	std::vector<const Method*> _mMethods;
 	std::vector<const Property*> _mProperties;
+
+private:
+	std::function<std::shared_ptr<Object>()> _mConstructor = nullptr;
+
+private:
+	Object* _mDefaultObject = nullptr;
 };
 
 template<typename T>

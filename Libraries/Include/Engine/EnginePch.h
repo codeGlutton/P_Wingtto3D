@@ -14,10 +14,13 @@
 #include <unordered_set>
 #include <unordered_map>
 
-#include <type_traits>
 #include <algorithm>
+#include <type_traits>
+
 #include <optional>
 #include <functional>
+
+#include <format>
 
 /* Window */
 
@@ -53,6 +56,10 @@
 
 #include "Types.h"
 #include "Defines.h"
+
+/* Managers */
+
+#include "Manager/BootSystem.h"
 
 /* Reflection */
 

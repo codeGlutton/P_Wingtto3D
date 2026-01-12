@@ -10,6 +10,13 @@ public:
 	virtual ~IInterfaceTestBase() {}
 };
 
+class IInterfaceTestBase2 abstract
+{
+public:
+	IInterfaceTestBase2() {}
+	virtual ~IInterfaceTestBase2() {}
+};
+
 class IInterfaceTest abstract : public IInterfaceTestBase
 {
 };
@@ -18,7 +25,7 @@ class TestObjectBase
 {
 };
 
-class TestObject : public TestObjectBase, public IInterfaceTest
+class TestObject : public TestObjectBase, public IInterfaceTestBase2, public IInterfaceTest
 {
 };
 
@@ -40,17 +47,26 @@ public:
 	virtual ~IInterfaceReflectionTestBase() {}
 };
 
+class IInterfaceReflectionTestBase2 abstract
+{
+	GEN_INTERFACE_REFLECTION(IInterfaceReflectionTestBase2)
+
+public:
+	IInterfaceReflectionTestBase2() {}
+	virtual ~IInterfaceReflectionTestBase2() {}
+};
+
 class IInterfaceReflectionTest abstract : public InterfaceReflector<IInterfaceReflectionTestBase>
 {
 	GEN_INTERFACE_REFLECTION(IInterfaceReflectionTest)
 };
 
-class ReflectionTestObjectBase
+class ReflectionTestObjectBase : public Object
 {
 	GEN_REFLECTION(ReflectionTestObjectBase)
 };
 
-class ReflectionTestObject : public InterfaceReflector<IInterfaceReflectionTest>
+class ReflectionTestObject : public ReflectionTestObjectBase, public InterfaceReflector<IInterfaceReflectionTestBase2, IInterfaceReflectionTest>
 {
 	GEN_REFLECTION(ReflectionTestObject)
 
@@ -77,24 +93,34 @@ void TestReflectionCast(IInterfaceReflectionTestBase* base)
 
 int main()
 {
-	//{
-	//	IInterfaceTestBase* base = new TestObject();
-	//
-	//	Tester tester(TestDynamicCast, base);
-	//	auto result = tester();
-	//	std::cout << "Dynamic : " << result << std::endl;
-	//
-	//	delete base;
-	//}
-	//{
-	//	IInterfaceReflectionTestBase* base = new ReflectionTestObject();
-	//
-	//	Tester tester(TestReflectionCast, base);
-	//	auto result = tester();
-	//	std::cout << "Reflection : " << result << std::endl;
-	//
-	//	delete base;
-	//}
+	BOOT_SYSTEM->Boot();
+
+	/*const int32 trial = 100;
+
+	std::chrono::microseconds dynamicResult = std::chrono::microseconds{ 0 };
+	std::chrono::microseconds reflectionResult = std::chrono::microseconds{ 0 };
+	for (int32 i = 0; i < trial; ++i)
+	{
+		{
+			IInterfaceTestBase* base = new TestObject();
+
+			Tester tester(TestDynamicCast, base);
+			dynamicResult += tester();
+
+			delete base;
+		}
+		{
+			IInterfaceReflectionTestBase* base = new ReflectionTestObject();
+
+			Tester tester(TestReflectionCast, base);
+			reflectionResult += tester();
+
+			delete base;
+		}
+	}
+	std::cout << "Dynamic : " << dynamicResult / trial << std::endl;
+	std::cout << "Reflection : " << reflectionResult / trial << std::endl;*/
+
 	ReflectionTestObject test;
 	const Method* func = test.GetTypeInfo().GetMethod("Do");
 	if (func != nullptr)

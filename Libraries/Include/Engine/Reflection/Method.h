@@ -29,12 +29,13 @@ public:
 template<class C, typename Ret, typename... Args>
 class MethodCaller : public InterfaceReflector<IMethodCaller<Ret, Args...>>
 {
-	GEN_REFLECTION(MethodCaller<C, Ret, Args...>)
+	GEN_ABSTRACT_REFLECTION(MethodCaller<C, Ret, Args...>)
 
 	// 멤버 변수 포인터
 	using MemFunc = Ret(C::*)(Args...);
 
 public:
+	MethodCaller() = default;
 	explicit MethodCaller(MemFunc func) :
 		_mFunc(func)
 	{
@@ -63,12 +64,13 @@ private:
 template<class C, typename Ret, typename... Args>
 class StaticMethodCaller : public InterfaceReflector<IMethodCaller<Ret, Args...>>
 {
-	GEN_REFLECTION(StaticMethodCaller<C, Ret, Args...>)
+	GEN_ABSTRACT_REFLECTION(StaticMethodCaller<C, Ret, Args...>)
 
 	// 정적 변수 포인터
 	using Func = Ret(*)(Args...);
 
 public:
+	StaticMethodCaller() = default;
 	explicit StaticMethodCaller(Func func) :
 		_mFunc(func)
 	{

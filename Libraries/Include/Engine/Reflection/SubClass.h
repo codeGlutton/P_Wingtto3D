@@ -54,6 +54,7 @@ public:
 	SubClass(const ObjectTypeInfo* typeInfo) :
 		_mTypeInfo(typeInfo)
 	{
+		ASSERT_MSG(typeInfo->IsChildOf<T>(), "Input type is not child of subclass T");
 	}
 
 	// ObjectTypeInfo 객체로 초기화

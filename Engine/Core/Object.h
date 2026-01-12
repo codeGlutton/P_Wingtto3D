@@ -1,6 +1,6 @@
 #pragma once
 
-class Object abstract
+class Object : public std::enable_shared_from_this<Object>
 {
 	GEN_REFLECTION(Object)
 

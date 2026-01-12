@@ -31,12 +31,13 @@ public:
 template<class C, typename P>
 class PropertyHandler : public InterfaceReflector<IPropertyHandler<P>>
 {
-	GEN_REFLECTION(PropertyHandler<C,P>)
+	GEN_ABSTRACT_REFLECTION(PropertyHandler<C,P>)
 
 	// 멤버 변수 포인터
 	using MemPtr = P C::*;
 
 public:
+	PropertyHandler() = default;
 	explicit PropertyHandler(MemPtr ptr) :
 		_mPtr(ptr)
 	{
@@ -66,12 +67,13 @@ private:
 template<class C, typename P>
 class StaticPropertyHandler : public InterfaceReflector<IPropertyHandler<P>>
 {
-	GEN_REFLECTION(StaticPropertyHandler<C, P>)
+	GEN_ABSTRACT_REFLECTION(StaticPropertyHandler<C, P>)
 
 	// 정적 변수 포인터
 	using Ptr = P*;
 
 public:
+	StaticPropertyHandler() = default;
 	explicit StaticPropertyHandler(Ptr ptr) :
 		_mPtr(ptr)
 	{
