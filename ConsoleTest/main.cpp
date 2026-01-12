@@ -72,7 +72,7 @@ class ReflectionTestObject : public ReflectionTestObjectBase, public InterfaceRe
 
 public:
 	METHOD(Do)
-	void Do(int32 param)
+	void Do(int32 param) const
 	{
 		std::cout << "value : " << param << std::endl;
 	}
@@ -122,6 +122,9 @@ int main()
 	std::cout << "Reflection : " << reflectionResult / trial << std::endl;*/
 
 	ReflectionTestObject test;
+	auto cdo = test.GetDefaultObject();
+	cdo->Do(8);
+
 	const Method* func = test.GetTypeInfo().GetMethod("Do");
 	if (func != nullptr)
 	{

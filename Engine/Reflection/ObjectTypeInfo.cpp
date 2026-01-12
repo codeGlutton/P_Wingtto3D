@@ -71,11 +71,11 @@ const Property* ObjectTypeInfo::GetProperty(const char* name) const
 	return nullptr;
 }
 
-const Object* ObjectTypeInfo::GetDefaultObject() const
+std::shared_ptr<const Object> ObjectTypeInfo::GetDefaultObject() const
 {
 	if (_mDefaultObject == nullptr)
 	{
-		//NewObject<Object>(nullptr, this, ObjectFlag::CDO);
+		_mDefaultObject = NewObject<Object>(nullptr, this, ObjectFlag::CDO);
 	}
 	return _mDefaultObject;
 }

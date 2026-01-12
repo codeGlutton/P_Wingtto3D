@@ -143,7 +143,7 @@ public:
 	const Property* GetProperty(const char* name) const;
 
 public:
-	const Object* GetDefaultObject() const;
+	std::shared_ptr<const Object> GetDefaultObject() const;
 
 private:
 	void AddMethod(const Method* method);
@@ -167,7 +167,7 @@ private:
 	std::function<std::shared_ptr<Object>()> _mConstructor = nullptr;
 
 private:
-	Object* _mDefaultObject = nullptr;
+	mutable std::shared_ptr<Object> _mDefaultObject = nullptr;
 };
 
 template<typename T>

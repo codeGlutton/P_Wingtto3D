@@ -30,6 +30,33 @@ To* Cast(From* src)
 	return nullptr;
 }
 
+template<typename To, typename From>
+std::shared_ptr<To> DynamicCastSharedPointer(std::shared_ptr<From> src)
+{
+	if (src != nullptr && src->GetTypeInfo().template IsChildOf<To>() == true)
+	{
+		return std::reinterpret_pointer_cast<To>(src);
+	}
+	return nullptr;
+}
+
+template<typename To, typename From>
+std::shared_ptr<To> CastSharedPointer(std::shared_ptr<From> src)
+{
+	if (src != nullptr)
+	{
+		if constexpr (std::is_base_of_v<To, From> == true)
+		{
+			return std::reinterpret_pointer_cast<To>(src);
+		}
+		else if (src->GetTypeInfo().template IsChildOf<To>() == true)
+		{
+			return std::reinterpret_pointer_cast<To>(src);
+		}
+	}
+	return nullptr;
+}
+
 /**
  * 정수 및 실수 타입
  */

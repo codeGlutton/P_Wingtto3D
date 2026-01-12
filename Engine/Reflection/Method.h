@@ -59,6 +59,41 @@ private:
 };
 
 /**
+ * 멤버 상수 함수에 대한 MethodCaller
+ */
+template<class C, typename Ret, typename... Args>
+class ConstMethodCaller : public InterfaceReflector<IMethodCaller<Ret, Args...>>
+{
+	GEN_ABSTRACT_REFLECTION(ConstMethodCaller<C, Ret, Args...>)
+
+	// 멤버 변수 포인터
+	using MemFuncConst = Ret(C::*)(Args...) const;
+
+public:
+	ConstMethodCaller() = default;
+	explicit ConstMethodCaller(MemFuncConst func) :
+		_mFunc(func)
+	{
+	}
+
+public:
+	virtual Ret Invoke(void* object, Args... args) const override
+	{
+		if constexpr (std::same_as<Ret, void> == true)
+		{
+			(static_cast<C*>(object)->*_mFunc)(std::move(args)...);
+		}
+		else
+		{
+			return (static_cast<C*>(object)->*_mFunc)(std::move(args)...);
+		}
+	}
+
+private:
+	MemFuncConst _mFunc = nullptr;
+};
+
+/**
  * 정적 변수에 대한 MethodCaller
  */
 template<class C, typename Ret, typename... Args>
@@ -102,6 +137,8 @@ class MethodRegister
 public:
 	template<typename Ret, typename... Args>
 	MethodRegister(const char* name, ObjectTypeInfo& ownerTypeInfo, Ret(C::* func)(Args...));
+	template<typename Ret, typename... Args>
+	MethodRegister(const char* name, ObjectTypeInfo& ownerTypeInfo, Ret(C::* func)(Args...) const);
 	template<typename Ret, typename... Args>
 	MethodRegister(const char* name, ObjectTypeInfo& ownerTypeInfo, Ret(* func)(Args...));
 };
@@ -160,6 +197,27 @@ inline MethodRegister<C>::MethodRegister(const char* name, ObjectTypeInfo& owner
 	(paramTypeInfos.push_back(&TypeInfoResolver<Args>::Get()), ...);
 
 	static MethodCaller<C, Ret, Args...> caller(func);
+	static MethodInitializer initializer =
+	{
+		.mName = name,
+		.mRetTypeInfo = TypeInfoResolver<Ret>::Get(),
+		.mParamTypeInfos = std::move(paramTypeInfos),
+		.mCaller = caller
+	};
+	static Method method(ownerTypeInfo, initializer);
+}
+
+template<class C>
+template<typename Ret, typename ...Args>
+inline MethodRegister<C>::MethodRegister(const char* name, ObjectTypeInfo& ownerTypeInfo, Ret(C::* func)(Args...) const)
+{
+	STATIC_ASSERT_MSG(HasAnyReference<Args...> == false, "Not allow ref value");
+
+	std::vector<const TypeInfo*> paramTypeInfos;
+	paramTypeInfos.reserve(sizeof...(Args));
+	(paramTypeInfos.push_back(&TypeInfoResolver<Args>::Get()), ...);
+
+	static ConstMethodCaller<C, Ret, Args...> caller(func);
 	static MethodInitializer initializer =
 	{
 		.mName = name,

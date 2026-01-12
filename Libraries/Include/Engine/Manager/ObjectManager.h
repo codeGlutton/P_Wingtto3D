@@ -20,13 +20,13 @@ namespace ObjectFlag
 struct ObjectInitializeParameters
 {
 public:
-	ObjectInitializeParameters(ObjectTypeInfo* typeInfo) :
+	ObjectInitializeParameters(const ObjectTypeInfo* typeInfo) :
 		mTypeInfo(typeInfo)
 	{
 	}
 
 public:
-	ObjectTypeInfo* mTypeInfo;
+	const ObjectTypeInfo* mTypeInfo;
 	Object* mOuter = nullptr;
 	ObjectFlag::Type mFlags = ObjectFlag::None;
 };

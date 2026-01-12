@@ -9,21 +9,21 @@ const T* GetDefalt()
 }
 
 template<class T>
-T* NewObject(Object* outer, ObjectFlag::Type flags = ObjectFlag::None)
+std::shared_ptr<T> NewObject(Object* outer, ObjectFlag::Type flags = ObjectFlag::None)
 {
 	ObjectInitializeParameters params(T::GetStaticTypeInfo());
 	params.mOuter = outer;
 	params.mFlags = flags;
 
-	return static_cast<T*>(OBJECT_MANAGER->CreateObject(params));
+	return std::static_pointer_cast<T>(OBJECT_MANAGER->CreateObject(params));
 }
 
 template<class T>
-T* NewObject(Object* outer, ObjectTypeInfo* typeInfo, ObjectFlag::Type flags = ObjectFlag::None)
+std::shared_ptr<T> NewObject(Object* outer, const ObjectTypeInfo* typeInfo, ObjectFlag::Type flags = ObjectFlag::None)
 {
-	ObjectInitializeParameters params(T::GetStaticTypeInfo());
+	ObjectInitializeParameters params(typeInfo);
 	params.mOuter = outer;
 	params.mFlags = flags;
 
-	return static_cast<T*>(OBJECT_MANAGER->CreateObject(params));
+	return std::static_pointer_cast<T>(OBJECT_MANAGER->CreateObject(params));
 }
