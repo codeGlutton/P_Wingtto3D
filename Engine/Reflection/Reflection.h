@@ -16,6 +16,7 @@
 #pragma region TYPE_INFO_MACROS
 
 #define DECLARE_OBJECT_TYPE(type)	\
+	friend class ObjectManager;		\
 public:								\
 	using Origin = type;			\
 private:
@@ -60,7 +61,7 @@ private:																							\
 				(																					\
 					#type,																			\
 					[]() {																			\
-					return std::make_shared<type>();												\
+					return new type;																\
 					}																				\
 				)																					\
 			};																						\

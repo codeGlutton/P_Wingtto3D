@@ -9,6 +9,8 @@
 #include <array>
 #include <vector>
 #include <list>
+#include <stack>
+#include <queue>
 #include <set>
 #include <map>
 #include <unordered_set>
@@ -42,20 +44,14 @@
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "d3dcompiler.lib")
 
-//#ifdef _DEBUG
-//#pragma comment(lib, "DirectXTex/DirectXTex_debug.lib")
-//#pragma comment(lib, "FX11/Effects11d.lib")
-//#pragma comment(lib, "Assimp/assimp-vc143-mtd.lib")
-//#else
-//#pragma comment(lib, "DirectXTex/DirectXTex.lib")
-//#pragma comment(lib, "FX11/Effects11.lib")
+#pragma comment(lib, "DirectXTex/DirectXTex.lib")
 //#pragma comment(lib, "Assimp/assimp-vc143-mt.lib")
-//#endif
 
 /* Headers */
 
 #include "Types.h"
 #include "Defines.h"
+#include "TLS.h"
 
 /* Managers */
 

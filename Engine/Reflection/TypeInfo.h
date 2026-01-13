@@ -15,7 +15,6 @@
 #include "Reflection/TypeTrait.h"
 
 class TypeInfo;
-class Object;
 
 /**
  * 타입 정보 초기화 구조체

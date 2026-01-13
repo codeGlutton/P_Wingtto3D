@@ -7,7 +7,7 @@
  */
 class Level : public Object
 {
-	GEN_REFLECTION(Object)
+	GEN_REFLECTION(Level)
 
 public:
 

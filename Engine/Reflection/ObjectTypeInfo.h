@@ -45,7 +45,7 @@ struct ObjectTypeInfoInitializer : public TypeInfoInitializer<T>
 		}
 	}
 
-	ObjectTypeInfoInitializer(const char* name, std::function<std::shared_ptr<Object>()>&& constructor) :
+	ObjectTypeInfoInitializer(const char* name, std::function<Object*()>&& constructor) :
 		TypeInfoInitializer<T>(),
 		mName(name),
 		mConstructor(constructor)
@@ -69,7 +69,7 @@ public:
 	std::vector<const ObjectTypeInfo*> mAdditionalInterfaces;
 
 public:
-	std::function<std::shared_ptr<Object>()> mConstructor = nullptr;
+	std::function<Object*()> mConstructor = nullptr;
 };
 
 /**
@@ -134,7 +134,7 @@ public:
 		return _mSuperInfo != nullptr;
 	}
 
-	const std::function<std::shared_ptr<Object>()>& GetConstructor() const
+	const std::function<Object*()>& GetConstructor() const
 	{
 		return _mConstructor;
 	}
@@ -164,7 +164,7 @@ private:
 	std::vector<const Property*> _mProperties;
 
 private:
-	std::function<std::shared_ptr<Object>()> _mConstructor = nullptr;
+	std::function<Object*()> _mConstructor = nullptr;
 
 private:
 	mutable std::shared_ptr<Object> _mDefaultObject = nullptr;

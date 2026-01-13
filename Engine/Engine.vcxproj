@@ -19,7 +19,15 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\P_Wingtto3D\Engine\Utils\Debugger\Logger.h" />
+    <ClInclude Include="..\..\..\P_Wingtto3D\Engine\Utils\Memory\MemoryPool.h" />
+    <ClInclude Include="..\..\..\P_Wingtto3D\Engine\Utils\Memory\ObjectPool.h" />
+    <ClInclude Include="..\..\..\P_Wingtto3D\Engine\Utils\Thread\Job.h" />
+    <ClInclude Include="..\..\..\P_Wingtto3D\Engine\Utils\Thread\JobQueue.h" />
+    <ClInclude Include="..\..\..\P_Wingtto3D\Engine\Utils\Thread\Lock.h" />
+    <ClInclude Include="..\..\..\P_Wingtto3D\Engine\Utils\Thread\LockQueue.h" />
     <ClInclude Include="CoreMinimum.h" />
+    <ClInclude Include="Core\AppWindow.h" />
     <ClInclude Include="Core\Component\ActorComponent.h" />
     <ClInclude Include="Core\Game.h" />
     <ClInclude Include="Core\Object.h" />
@@ -30,9 +38,13 @@
     <ClInclude Include="EnginePch.h" />
     <ClInclude Include="GraphicMinimum.h" />
     <ClInclude Include="Graphics\Scene\Scene.h" />
+    <ClInclude Include="Graphics\Viewport\SceneViewport.h" />
+    <ClInclude Include="Graphics\Viewport\Viewport.h" />
     <ClInclude Include="Manager\BootSystem.h" />
     <ClInclude Include="Manager\ObjectManager.h" />
     <ClInclude Include="Manager\ResourceManager.h" />
+    <ClInclude Include="Manager\ThreadManager.h" />
+    <ClInclude Include="Manager\TimeManager.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Reflection\DefaultTypeInfo.h" />
     <ClInclude Include="Reflection\InterfaceReflector.h" />
@@ -43,12 +55,21 @@
     <ClInclude Include="Reflection\SubClass.h" />
     <ClInclude Include="Reflection\TypeInfo.h" />
     <ClInclude Include="Reflection\TypeTrait.h" />
+    <ClInclude Include="TLS.h" />
     <ClInclude Include="Types.h" />
-    <ClInclude Include="Utils\Logger.h" />
     <ClInclude Include="Utils\ObjectUtils.h" />
+    <ClInclude Include="Utils\Thread\Thread.h" />
     <ClInclude Include="Utils\TypeUtils.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\P_Wingtto3D\Engine\Utils\Debugger\Logger.cpp" />
+    <ClCompile Include="..\..\..\P_Wingtto3D\Engine\Utils\Memory\MemoryPool.cpp" />
+    <ClCompile Include="..\..\..\P_Wingtto3D\Engine\Utils\Memory\ObjectPool.cpp" />
+    <ClCompile Include="..\..\..\P_Wingtto3D\Engine\Utils\Thread\Job.cpp" />
+    <ClCompile Include="..\..\..\P_Wingtto3D\Engine\Utils\Thread\JobQueue.cpp" />
+    <ClCompile Include="..\..\..\P_Wingtto3D\Engine\Utils\Thread\Lock.cpp" />
+    <ClCompile Include="..\..\..\P_Wingtto3D\Engine\Utils\Thread\LockQueue.cpp" />
+    <ClCompile Include="Core\AppWindow.cpp" />
     <ClCompile Include="Core\Component\ActorComponent.cpp" />
     <ClCompile Include="Core\Game.cpp" />
     <ClCompile Include="Core\Object.cpp" />
@@ -56,9 +77,13 @@
     <ClCompile Include="Core\World\Level.cpp" />
     <ClCompile Include="Core\World\World.cpp" />
     <ClCompile Include="Graphics\Scene\Scene.cpp" />
+    <ClCompile Include="Graphics\Viewport\SceneViewport.cpp" />
+    <ClCompile Include="Graphics\Viewport\Viewport.cpp" />
     <ClCompile Include="Manager\BootSystem.cpp" />
     <ClCompile Include="Manager\ObjectManager.cpp" />
     <ClCompile Include="Manager\ResourceManager.cpp" />
+    <ClCompile Include="Manager\ThreadManager.cpp" />
+    <ClCompile Include="Manager\TimeManager.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -72,8 +97,9 @@
     <ClCompile Include="Reflection\Property.cpp" />
     <ClCompile Include="Reflection\SubClass.cpp" />
     <ClCompile Include="Reflection\TypeInfo.cpp" />
-    <ClCompile Include="Utils\Logger.cpp" />
+    <ClCompile Include="TLS.cpp" />
     <ClCompile Include="Utils\ObjectUtils.cpp" />
+    <ClCompile Include="Utils\Thread\Thread.cpp" />
     <ClCompile Include="Utils\TypeUtils.cpp" />
   </ItemGroup>
   <ItemGroup>

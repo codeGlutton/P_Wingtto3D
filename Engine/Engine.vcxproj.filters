@@ -40,6 +40,27 @@
     <Filter Include="Utils\Debugger">
       <UniqueIdentifier>{715d1f54-8438-4207-a4f5-62b03ce96dca}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Graphics\Viewport">
+      <UniqueIdentifier>{da77c887-8236-4598-9eb1-c7ae338d01f1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Manager\Factories">
+      <UniqueIdentifier>{8202eb28-fc7e-4d1c-8cda-b53b3589510b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Manager\Resources">
+      <UniqueIdentifier>{0e3464f2-463d-4a73-8d01-90943b4c58ff}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Manager\Utils">
+      <UniqueIdentifier>{61931180-112c-46ad-b331-7df3f7de5f83}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utils\Memory">
+      <UniqueIdentifier>{4640cd47-e76e-4623-a539-94baa492f242}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utils\Thread">
+      <UniqueIdentifier>{90b4a2d9-2314-4379-b824-8eaa661a7e28}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core\Widget">
+      <UniqueIdentifier>{9aa8b17b-a28d-4e3f-9f71-77e89348f492}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\Game.h">
@@ -114,17 +135,56 @@
     <ClInclude Include="Manager\BootSystem.h">
       <Filter>Manager</Filter>
     </ClInclude>
-    <ClInclude Include="Utils\Logger.h">
-      <Filter>Utils\Debugger</Filter>
+    <ClInclude Include="Manager\ResourceManager.h">
+      <Filter>Manager\Resources</Filter>
     </ClInclude>
     <ClInclude Include="Manager\ObjectManager.h">
-      <Filter>Manager</Filter>
+      <Filter>Manager\Factories</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\P_Wingtto3D\Engine\Utils\Thread\LockQueue.h">
+      <Filter>Utils\Thread</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\P_Wingtto3D\Engine\Utils\Thread\Job.h">
+      <Filter>Utils\Thread</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\P_Wingtto3D\Engine\Utils\Thread\JobQueue.h">
+      <Filter>Utils\Thread</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\P_Wingtto3D\Engine\Utils\Thread\Lock.h">
+      <Filter>Utils\Thread</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\P_Wingtto3D\Engine\Utils\Memory\MemoryPool.h">
+      <Filter>Utils\Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\P_Wingtto3D\Engine\Utils\Memory\ObjectPool.h">
+      <Filter>Utils\Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\P_Wingtto3D\Engine\Utils\Debugger\Logger.h">
+      <Filter>Utils\Debugger</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\Viewport\SceneViewport.h">
+      <Filter>Graphics\Viewport</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\Viewport\Viewport.h">
+      <Filter>Graphics\Viewport</Filter>
+    </ClInclude>
+    <ClInclude Include="Manager\TimeManager.h">
+      <Filter>Manager\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Manager\ThreadManager.h">
+      <Filter>Manager\Factories</Filter>
+    </ClInclude>
+    <ClInclude Include="TLS.h">
+      <Filter>Headers\Global</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\AppWindow.h">
+      <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="Utils\ObjectUtils.h">
       <Filter>Utils</Filter>
     </ClInclude>
-    <ClInclude Include="Manager\ResourceManager.h">
-      <Filter>Manager</Filter>
+    <ClInclude Include="Utils\Thread\Thread.h">
+      <Filter>Utils\Thread</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -179,17 +239,56 @@
     <ClCompile Include="Manager\BootSystem.cpp">
       <Filter>Manager</Filter>
     </ClCompile>
-    <ClCompile Include="Utils\Logger.cpp">
-      <Filter>Utils\Debugger</Filter>
+    <ClCompile Include="Manager\ResourceManager.cpp">
+      <Filter>Manager\Resources</Filter>
     </ClCompile>
     <ClCompile Include="Manager\ObjectManager.cpp">
-      <Filter>Manager</Filter>
+      <Filter>Manager\Factories</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\P_Wingtto3D\Engine\Utils\Thread\Job.cpp">
+      <Filter>Utils\Thread</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\P_Wingtto3D\Engine\Utils\Thread\JobQueue.cpp">
+      <Filter>Utils\Thread</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\P_Wingtto3D\Engine\Utils\Thread\Lock.cpp">
+      <Filter>Utils\Thread</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\P_Wingtto3D\Engine\Utils\Thread\LockQueue.cpp">
+      <Filter>Utils\Thread</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\P_Wingtto3D\Engine\Utils\Memory\MemoryPool.cpp">
+      <Filter>Utils\Memory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\P_Wingtto3D\Engine\Utils\Memory\ObjectPool.cpp">
+      <Filter>Utils\Memory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\P_Wingtto3D\Engine\Utils\Debugger\Logger.cpp">
+      <Filter>Utils\Debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\Viewport\SceneViewport.cpp">
+      <Filter>Graphics\Viewport</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\Viewport\Viewport.cpp">
+      <Filter>Graphics\Viewport</Filter>
+    </ClCompile>
+    <ClCompile Include="Manager\TimeManager.cpp">
+      <Filter>Manager\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Manager\ThreadManager.cpp">
+      <Filter>Manager\Factories</Filter>
+    </ClCompile>
+    <ClCompile Include="TLS.cpp">
+      <Filter>Headers\Global</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\AppWindow.cpp">
+      <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="Utils\ObjectUtils.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
-    <ClCompile Include="Manager\ResourceManager.cpp">
-      <Filter>Manager</Filter>
+    <ClCompile Include="Utils\Thread\Thread.cpp">
+      <Filter>Utils\Thread</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
