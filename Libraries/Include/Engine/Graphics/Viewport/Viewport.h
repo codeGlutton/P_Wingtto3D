@@ -1,17 +1,29 @@
 #pragma once
 
-#include "GraphicMinimum.h"
+#include "Core/Object.h"
 
 /**
  * 창을 표기할 viewport 베이스 클래스 (렌더 스레드에서 드로우콜)
  */
-class Viewport
+class Viewport abstract : public Object
 {
+	GEN_ABSTRACT_REFLECTION(Viewport)
+
 public:
-	Viewport(float width, float height, float x = 0, float y = 0, float minDepth = 0, float maxDepth = 1);
+	Viewport();
 	~Viewport();
 
+public:
+	void SetSize();
+	void GetSize();
+
 private:
-	D3D11_VIEWPORT _mDesc = { 0 };
+	virtual void ReDraw() = 0;
+
+private:
+	PROPERTY(_mWidth)
+	float _mWidth;
+	PROPERTY(_mHeight)
+	float _mHeight;
 };
 

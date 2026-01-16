@@ -3,24 +3,17 @@
 
 #include "Utils/ObjectUtils.h"
 
-bool ObjectTypeInfo::IsChildOf(const ObjectTypeInfo& other) const
+#include "Core/Archive.h"
+
+bool ObjectTypeInfo::IsChildOf(const StructTypeInfo& other) const
 {
-	if (IsA(other) == true)
+	if (StructTypeInfo::IsChildOf(other) == true)
 	{
 		return true;
 	}
-
-	// 부모를 거쳐가면서 검증
-	for (const ObjectTypeInfo* superInfo = _mSuperInfo; superInfo != nullptr; superInfo = superInfo->GetSuper())
-	{
-		if (superInfo->IsA(other) == true)
-		{
-			return true;
-		}
-	}
-
+	
 	// other이 인터페이스인 경우, 상속 검증
-	return ImplementsInterface(other);
+	return ImplementsInterface(reinterpret_cast<const ObjectTypeInfo&>(other));
 }
 
 bool ObjectTypeInfo::ImplementsInterface(const ObjectTypeInfo& other) const
@@ -30,54 +23,110 @@ bool ObjectTypeInfo::ImplementsInterface(const ObjectTypeInfo& other) const
 		return true;
 	}
 
-	// 인터페이스 부모 거쳐가면서 검증
-	for (const ObjectTypeInfo* interfaceInfo : _mInterfaces)
+	// 새로운 인터페이스들의 부모 거쳐가면서 검증
+	for (const ObjectTypeInfo* interfaceInfo : _mAdditionalInterfaces)
 	{
 		if (interfaceInfo->ImplementsInterface(other) == true)
 		{
 			return true;
 		}
 	}
+
+	// 부모 거쳐가면서 검증
+	if (_mSuperInfo != nullptr)
+	{
+		return GetSuper()->ImplementsInterface(other);
+	}
 	return false;
+}
+
+std::size_t ObjectTypeInfo::GetInterfaceOffsetOf(const ObjectTypeInfo& other, OUT bool& isInherited) const
+{
+	if (IsA(other) == true)
+	{
+		isInherited = true;
+		return 0ull;
+	}
+
+	// 새로운 인터페이스들의 부모 거쳐가면서 검증
+	const std::size_t size = _mAdditionalInterfaces.size();
+	for (size_t i = 0; i < size; ++i)
+	{
+		const std::size_t offset = _mAdditionalInterfaces[i]->GetInterfaceOffsetOf(other, isInherited);
+		if (isInherited == true)
+		{
+			return offset + _mAdditionalInterfaceOffsets[i];
+		}
+	}
+
+	// 부모 거쳐가면서 검증
+	if (_mSuperInfo != nullptr)
+	{
+		return GetSuper()->GetInterfaceOffsetOf(other, isInherited);
+	}
+	isInherited = false;
+	return 0ull;
+}
+
+void ObjectTypeInfo::Serialize(OUT Archive& archive, const void* inst) const
+{
+	std::string name = _mName;
+	TypeInfoResolver<std::string>::Get().Serialize(archive, &name);
+
+	// 부모를 거쳐가면서 검증
+	std::vector<const std::pair<const std::string_view, const Property*>*> changes;
+	for (const ObjectTypeInfo* currentInfo = this; currentInfo != nullptr; currentInfo = currentInfo->GetSuper())
+	{
+		const PropertyMap& propertyMap = currentInfo->_mPropertyMap;
+		for (const auto& propertyPair : propertyMap)
+		{
+			// 기본값과 틀린 항목만 기록
+			if (propertyPair.second->IsEqual(inst, GetDefaultObject().get()) == false)
+			{
+				changes.push_back(&propertyPair);
+			}
+		}
+	}
+
+	archive << changes.size();
+
+	// 저장
+	for (const auto& changePair : changes)
+	{
+		archive << changePair->first;
+		changePair->second->GetTypeInfo().Serialize(archive, inst);
+	}
+}
+
+void ObjectTypeInfo::Deserialize(Archive& archive, OUT void* inst) const
+{
+
 }
 
 const Method* ObjectTypeInfo::GetMethod(const char* name) const
 {
-	// 부모를 거쳐가면서 탐색
-	for (const ObjectTypeInfo* currentInfo = this; currentInfo != nullptr; currentInfo = currentInfo->GetSuper())
+	auto iter = _mMethodMap.find(name);
+	if (iter != _mMethodMap.end())
 	{
-		const auto& methodMap = currentInfo->_mMethodMap;
-		auto iter = methodMap.find(name);
-		if (iter != methodMap.end())
+		return iter->second;
+	}
+
+	// 인터페이스 거쳐가면서 탐색
+	for (const ObjectTypeInfo* interfaceInfo : _mAdditionalInterfaces)
+	{
+		const Method* interfaceMethod = interfaceInfo->GetMethod(name);
+		if (interfaceMethod != nullptr)
 		{
-			return iter->second;
+			return interfaceMethod;
 		}
 	}
-	return nullptr;
-}
 
-const Property* ObjectTypeInfo::GetProperty(const char* name) const
-{
 	// 부모를 거쳐가면서 탐색
-	for (const ObjectTypeInfo* currentInfo = this; currentInfo != nullptr; currentInfo = currentInfo->GetSuper())
+	if (_mSuperInfo != nullptr)
 	{
-		const auto& propertyMap = currentInfo->_mPropertyMap;
-		auto iter = propertyMap.find(name);
-		if (iter != propertyMap.end())
-		{
-			return iter->second;
-		}
+		return GetSuper()->GetMethod(name);
 	}
 	return nullptr;
-}
-
-std::shared_ptr<const Object> ObjectTypeInfo::GetDefaultObject() const
-{
-	if (_mDefaultObject == nullptr)
-	{
-		_mDefaultObject = NewObject<Object>(nullptr, this, ObjectFlag::CDO);
-	}
-	return _mDefaultObject;
 }
 
 void ObjectTypeInfo::AddMethod(const Method* method)
@@ -89,11 +138,12 @@ void ObjectTypeInfo::AddMethod(const Method* method)
 	_mMethods.push_back(method);
 }
 
-void ObjectTypeInfo::AddProperty(const Property* property)
+std::shared_ptr<const Object> ObjectTypeInfo::GetDefaultObject() const
 {
-	const char* propertyName = property->GetName();
-	ASSERT_MSG(_mPropertyMap.contains(propertyName) == false, "Find same name property");
-
-	_mPropertyMap[propertyName] = property;
-	_mProperties.push_back(property);
+	if (_mDefaultObject == nullptr)
+	{
+		_mDefaultObject = NewObject<Object>(nullptr, this, ObjectFlag::CDO);
+	}
+	return _mDefaultObject;
 }
+

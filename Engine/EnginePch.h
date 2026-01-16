@@ -61,6 +61,7 @@
 
 #include "Reflection/Reflection.h"
 #include "Reflection/InterfaceReflector.h"
+#include "Reflection/StructTypeInfo.h"
 #include "Reflection/ObjectTypeInfo.h"
 #include "Reflection/DefaultTypeInfo.h"
 #include "Reflection/Method.h"

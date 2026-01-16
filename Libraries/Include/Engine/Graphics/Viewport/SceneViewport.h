@@ -9,5 +9,7 @@ class SceneViewport : public Viewport
 {
 public:
 
+private:
+	//std::map<int8, std::vector<>> mLayer;
 };
 

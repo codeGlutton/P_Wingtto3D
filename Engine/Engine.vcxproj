@@ -19,32 +19,34 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\P_Wingtto3D\Engine\Utils\Debugger\Logger.h" />
-    <ClInclude Include="..\..\..\P_Wingtto3D\Engine\Utils\Memory\MemoryPool.h" />
-    <ClInclude Include="..\..\..\P_Wingtto3D\Engine\Utils\Memory\ObjectPool.h" />
-    <ClInclude Include="..\..\..\P_Wingtto3D\Engine\Utils\Thread\Job.h" />
-    <ClInclude Include="..\..\..\P_Wingtto3D\Engine\Utils\Thread\JobQueue.h" />
-    <ClInclude Include="..\..\..\P_Wingtto3D\Engine\Utils\Thread\Lock.h" />
-    <ClInclude Include="..\..\..\P_Wingtto3D\Engine\Utils\Thread\LockQueue.h" />
     <ClInclude Include="CoreMinimum.h" />
-    <ClInclude Include="Core\AppWindow.h" />
+    <ClInclude Include="Core\App\App.h" />
+    <ClInclude Include="Core\App\AppWindow\AppWindow.h" />
+    <ClInclude Include="Core\App\AppWindow\GameAppWindow.h" />
+    <ClInclude Include="Core\App\Execute.h" />
+    <ClInclude Include="Core\App\Game.h" />
+    <ClInclude Include="Core\Archive.h" />
     <ClInclude Include="Core\Component\ActorComponent.h" />
-    <ClInclude Include="Core\Game.h" />
+    <ClInclude Include="Core\GUID.h" />
     <ClInclude Include="Core\Object.h" />
+    <ClInclude Include="Core\Resource\Level.h" />
+    <ClInclude Include="Core\Resource\Resource.h" />
     <ClInclude Include="Core\World\Actor.h" />
-    <ClInclude Include="Core\World\Level.h" />
+    <ClInclude Include="Core\World\LevelPartition.h" />
     <ClInclude Include="Core\World\World.h" />
     <ClInclude Include="Defines.h" />
     <ClInclude Include="EnginePch.h" />
     <ClInclude Include="GraphicMinimum.h" />
     <ClInclude Include="Graphics\Scene\Scene.h" />
     <ClInclude Include="Graphics\Viewport\SceneViewport.h" />
+    <ClInclude Include="Graphics\Viewport\ViewportComposite.h" />
     <ClInclude Include="Graphics\Viewport\Viewport.h" />
     <ClInclude Include="Manager\BootSystem.h" />
     <ClInclude Include="Manager\ObjectManager.h" />
     <ClInclude Include="Manager\ResourceManager.h" />
     <ClInclude Include="Manager\ThreadManager.h" />
     <ClInclude Include="Manager\TimeManager.h" />
+    <ClInclude Include="Manager\AppWindowManager.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Reflection\DefaultTypeInfo.h" />
     <ClInclude Include="Reflection\InterfaceReflector.h" />
@@ -52,38 +54,48 @@
     <ClInclude Include="Reflection\ObjectTypeInfo.h" />
     <ClInclude Include="Reflection\Property.h" />
     <ClInclude Include="Reflection\Reflection.h" />
+    <ClInclude Include="Reflection\StructTypeInfo.h" />
     <ClInclude Include="Reflection\SubClass.h" />
     <ClInclude Include="Reflection\TypeInfo.h" />
     <ClInclude Include="Reflection\TypeTrait.h" />
     <ClInclude Include="TLS.h" />
     <ClInclude Include="Types.h" />
+    <ClInclude Include="Utils\Debugger\Logger.h" />
+    <ClInclude Include="Utils\Memory\MemoryPool.h" />
+    <ClInclude Include="Utils\Memory\ObjectPool.h" />
     <ClInclude Include="Utils\ObjectUtils.h" />
+    <ClInclude Include="Utils\Thread\Job.h" />
+    <ClInclude Include="Utils\Thread\JobQueue.h" />
+    <ClInclude Include="Utils\Thread\Lock.h" />
+    <ClInclude Include="Utils\Thread\LockQueue.h" />
     <ClInclude Include="Utils\Thread\Thread.h" />
     <ClInclude Include="Utils\TypeUtils.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\P_Wingtto3D\Engine\Utils\Debugger\Logger.cpp" />
-    <ClCompile Include="..\..\..\P_Wingtto3D\Engine\Utils\Memory\MemoryPool.cpp" />
-    <ClCompile Include="..\..\..\P_Wingtto3D\Engine\Utils\Memory\ObjectPool.cpp" />
-    <ClCompile Include="..\..\..\P_Wingtto3D\Engine\Utils\Thread\Job.cpp" />
-    <ClCompile Include="..\..\..\P_Wingtto3D\Engine\Utils\Thread\JobQueue.cpp" />
-    <ClCompile Include="..\..\..\P_Wingtto3D\Engine\Utils\Thread\Lock.cpp" />
-    <ClCompile Include="..\..\..\P_Wingtto3D\Engine\Utils\Thread\LockQueue.cpp" />
-    <ClCompile Include="Core\AppWindow.cpp" />
+    <ClCompile Include="Core\App\App.cpp" />
+    <ClCompile Include="Core\App\AppWindow\AppWindow.cpp" />
+    <ClCompile Include="Core\App\AppWindow\GameAppWindow.cpp" />
+    <ClCompile Include="Core\App\Execute.cpp" />
+    <ClCompile Include="Core\App\Game.cpp" />
+    <ClCompile Include="Core\Archive.cpp" />
     <ClCompile Include="Core\Component\ActorComponent.cpp" />
-    <ClCompile Include="Core\Game.cpp" />
+    <ClCompile Include="Core\GUID.cpp" />
     <ClCompile Include="Core\Object.cpp" />
+    <ClCompile Include="Core\Resource\Level.cpp" />
+    <ClCompile Include="Core\Resource\Resource.cpp" />
     <ClCompile Include="Core\World\Actor.cpp" />
-    <ClCompile Include="Core\World\Level.cpp" />
+    <ClCompile Include="Core\World\LevelPartition.cpp" />
     <ClCompile Include="Core\World\World.cpp" />
     <ClCompile Include="Graphics\Scene\Scene.cpp" />
     <ClCompile Include="Graphics\Viewport\SceneViewport.cpp" />
+    <ClCompile Include="Graphics\Viewport\ViewportComposite.cpp" />
     <ClCompile Include="Graphics\Viewport\Viewport.cpp" />
     <ClCompile Include="Manager\BootSystem.cpp" />
     <ClCompile Include="Manager\ObjectManager.cpp" />
     <ClCompile Include="Manager\ResourceManager.cpp" />
     <ClCompile Include="Manager\ThreadManager.cpp" />
     <ClCompile Include="Manager\TimeManager.cpp" />
+    <ClCompile Include="Manager\AppWindowManager.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -95,15 +107,29 @@
     <ClCompile Include="Reflection\Method.cpp" />
     <ClCompile Include="Reflection\ObjectTypeInfo.cpp" />
     <ClCompile Include="Reflection\Property.cpp" />
+    <ClCompile Include="Reflection\StructTypeInfo.cpp" />
     <ClCompile Include="Reflection\SubClass.cpp" />
     <ClCompile Include="Reflection\TypeInfo.cpp" />
     <ClCompile Include="TLS.cpp" />
+    <ClCompile Include="Utils\Debugger\Logger.cpp" />
+    <ClCompile Include="Utils\Memory\MemoryPool.cpp" />
+    <ClCompile Include="Utils\Memory\ObjectPool.cpp" />
     <ClCompile Include="Utils\ObjectUtils.cpp" />
+    <ClCompile Include="Utils\Thread\Job.cpp" />
+    <ClCompile Include="Utils\Thread\JobQueue.cpp" />
+    <ClCompile Include="Utils\Thread\Lock.cpp" />
+    <ClCompile Include="Utils\Thread\LockQueue.cpp" />
     <ClCompile Include="Utils\Thread\Thread.cpp" />
     <ClCompile Include="Utils\TypeUtils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="IncludeCopy.bat" />
+    <ClInclude Include="Reflection\DefaultTypeInfo.inl">
+      <FileType>Document</FileType>
+    </ClInclude>
+    <ClInclude Include="Utils\TypeUtils.inl">
+      <FileType>Document</FileType>
+    </ClInclude>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>

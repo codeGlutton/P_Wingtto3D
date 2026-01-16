@@ -15,6 +15,7 @@
 #include "Reflection/TypeTrait.h"
 
 class TypeInfo;
+class Archive;
 
 /**
  * 타입 정보 초기화 구조체
@@ -22,7 +23,7 @@ class TypeInfo;
 template <typename T>
 struct TypeInfoInitializer
 {
-	TypeInfoInitializer(size_t size = 1) :
+	TypeInfoInitializer(size_t size = 0) :
 		mSize(size)
 	{
 	}
@@ -34,7 +35,7 @@ public:
 /**
  * 타입 정보 클래스 (unreal의 uclass와 유사)
  */
-class TypeInfo
+class TypeInfo abstract
 {
 public:
 	template <typename T>
@@ -55,6 +56,11 @@ public:
 	
 	template<typename T>
 	bool IsA() const;
+
+public:
+	virtual bool IsInstanceValueEqual(const void* lhsInst, const void* rhsInst) const = 0;
+	virtual void Serialize(OUT Archive& archive, const void* inst) const = 0;
+	virtual void Deserialize(Archive& archive, OUT void* inst) const = 0;
 
 private:
 	size_t _mTypeHash;

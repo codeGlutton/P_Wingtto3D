@@ -5,7 +5,7 @@
 
 #include "Manager/TimeManager.h"
 
-class Actor : public Object, public InterfaceReflector<IUpdatable>
+class Actor : public InterfaceReflector<Object, IUpdatable>
 {
 	GEN_REFLECTION(Actor)
 

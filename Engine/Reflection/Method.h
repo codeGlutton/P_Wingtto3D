@@ -20,7 +20,7 @@ class IMethodCaller abstract : public InterfaceReflector<IMethodCallerBase>
 	GEN_INTERFACE_REFLECTION(IMethodCaller<Ret, Args...>)
 
 public:
-	virtual Ret Invoke(void* object, Args... args) const = 0;
+	virtual Ret Invoke(const ObjectTypeInfo& objectTypeInfo, void* object, Args... args) const = 0;
 };
 
 /**
@@ -42,15 +42,18 @@ public:
 	}
 
 public:
-	virtual Ret Invoke(void* object, Args... args) const override
+	virtual Ret Invoke(const ObjectTypeInfo& objectTypeInfo, void* object, Args... args) const override
 	{
+		C* originObj = Cast<C>(object, objectTypeInfo);
+		ASSERT_MSG(originObj != nullptr, "Not child object");
+
 		if constexpr (std::same_as<Ret, void> == true)
 		{
-			(static_cast<C*>(object)->*_mFunc)(std::move(args)...);
+			(originObj->*_mFunc)(std::move(args)...);
 		}
 		else
 		{
-			return (static_cast<C*>(object)->*_mFunc)(std::move(args)...);
+			return (originObj->*_mFunc)(std::move(args)...);
 		}
 	}
 
@@ -77,15 +80,18 @@ public:
 	}
 
 public:
-	virtual Ret Invoke(void* object, Args... args) const override
+	virtual Ret Invoke(const ObjectTypeInfo& objectTypeInfo, void* object, Args... args) const override
 	{
+		C* originObj = Cast<C>(object, objectTypeInfo);
+		ASSERT_MSG(originObj != nullptr, "Not child object");
+
 		if constexpr (std::same_as<Ret, void> == true)
 		{
-			(static_cast<C*>(object)->*_mFunc)(std::move(args)...);
+			(originObj->*_mFunc)(std::move(args)...);
 		}
 		else
 		{
-			return (static_cast<C*>(object)->*_mFunc)(std::move(args)...);
+			return (originObj->*_mFunc)(std::move(args)...);
 		}
 	}
 
@@ -112,7 +118,7 @@ public:
 	}
 
 public:
-	virtual Ret Invoke([[maybe_unused]] void* object, Args... args) const override
+	virtual Ret Invoke([[maybe_unused]] const ObjectTypeInfo& objectTypeInfo, [[maybe_unused]] void* object, Args... args) const override
 	{
 		if constexpr (std::same_as<Ret, void> == true)
 		{
@@ -170,8 +176,8 @@ public:
 	}
 
 public:
-	template<typename Ret = void, typename... InputArgs>
-	Ret Invoke(void* object, InputArgs&&... args) const;
+	template<typename Ret = void, typename C, typename... InputArgs>
+	Ret Invoke(C* object, InputArgs&&... args) const;
 
 public:
 	const char* GetName() const
@@ -249,19 +255,19 @@ inline MethodRegister<C>::MethodRegister(const char* name, ObjectTypeInfo& owner
 	static Method method(ownerTypeInfo, initializer);
 }
 
-template<typename Ret, typename... InputArgs>
-inline Ret Method::Invoke(void* object, InputArgs&&... args) const
+template<typename Ret, typename C, typename... InputArgs>
+inline Ret Method::Invoke(C* object, InputArgs&&... args) const
 {
 	if (_mCaller.GetTypeInfo().IsChildOf<IMethodCaller<Ret, std::remove_reference_t<InputArgs>...>>() == true)
 	{
 		auto caller = static_cast<const IMethodCaller<Ret, std::remove_reference_t<InputArgs>...>*>(&_mCaller);
 		if constexpr (std::same_as<Ret, void> == true)
 		{
-			caller->Invoke(object, std::forward<InputArgs>(args)...);
+			caller->Invoke(C::GetStaticTypeInfo(), object, std::forward<InputArgs>(args)...);
 		}
 		else
 		{
-			return caller->Invoke(object, std::forward<InputArgs>(args)...);
+			return caller->Invoke(C::GetStaticTypeInfo(), object, std::forward<InputArgs>(args)...);
 		}
 	}
 	else

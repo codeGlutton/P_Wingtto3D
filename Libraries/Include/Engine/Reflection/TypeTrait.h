@@ -7,6 +7,20 @@ class Object;
 template<typename... Args>
 constexpr bool HasAnyReference = (std::is_reference_v<Args> || ...);
 
+template<typename T>
+constexpr bool IsSharedPtr_Internal = false;
+template<typename T>
+constexpr bool IsSharedPtr_Internal<std::shared_ptr<T>> = true;
+template<typename T>
+constexpr bool IsSharedPtr = IsSharedPtr_Internal<std::remove_cvref_t<T>>;
+
+template<typename T>
+constexpr bool IsWeakPtr_Internal = false;
+template<typename T>
+constexpr bool IsWeakPtr_Internal<std::weak_ptr<T>> = true;
+template<typename T>
+constexpr bool IsWeakPtr = IsWeakPtr_Internal<std::remove_cvref_t<T>>;
+
 /* Super */
 
 template <typename T, typename = void>
@@ -20,49 +34,67 @@ struct SuperTypeDefiner
 	using Type = void;
 };
 template<typename T>
-struct SuperTypeDefiner<T, std::void_t<typename T::Origin>>
+struct SuperTypeDefiner<T, std::void_t<typename T::Base>>
 {
-	using Type = typename T::Origin;
+	using Type = typename T::Base;
 };
 template<typename T>
-using SuperType = SuperTypeDefiner<T>::Type;
+using SuperDefineType = SuperTypeDefiner<T>::Type;
+
+template<typename T, typename U = void>
+struct SuperTypeFinder
+{
+	using Type = void;
+};
+template<typename T>
+struct SuperTypeFinder<T, std::void_t<typename T::Super>>
+{
+	using Type = typename T::Super;
+};
+template<typename T>
+using SuperType = SuperTypeFinder<T>::Type;
 
 
 /* Interface */
 
 template <typename T, typename = void>
-constexpr bool HasInterface = false;
+constexpr bool IsInterface = true;
 template <typename T>
-constexpr bool HasInterface<T, std::void_t<typename T::Interfaces>> = true;
+constexpr bool IsInterface<T, std::void_t<typename T::Base>> = false;
 
 template <typename T, typename = void>
-constexpr bool IsSameSuperInterface = true;
+constexpr bool HasNewInterface = false;
 template <typename T>
-constexpr bool IsSameSuperInterface<T, std::void_t<
-	typename T::Interfaces
-	>> = false;
-template <typename T>
-constexpr bool IsSameSuperInterface<T, std::void_t<
-	typename T::Interfaces,
-	typename T::Super,
-	typename T::Super::Interfaces
-	>> = std::is_same_v<typename T::Interfaces, typename T::Super::Interfaces>;
+constexpr bool HasNewInterface<T, std::void_t<typename T::Interfaces>> = true;
 
 template<typename T, typename U = void>
-struct InterfaceTypeDefiner
+struct InterfaceTypeFinderInternal
 {
 	using Type = void;
 };
 template<typename T>
-struct InterfaceTypeDefiner<T, std::void_t<typename T::Interfaces>>
+struct InterfaceTypeFinderInternal<T, std::void_t<typename T::Interfaces>>
 {
 	using Type = typename T::Interfaces;
 };
+template<typename T, typename U = void>
+struct InterfaceTypeFinder
+{
+	using Type = InterfaceTypeFinderInternal<T>::Type;
+};
 template<typename T>
-using InterfaceType = InterfaceTypeDefiner<T>::Type;
+struct InterfaceTypeFinder<T, std::void_t<typename T::Interfaces, typename T::Super, typename T::Super::Interfaces>>
+{
+	using Type = std::conditional_t<std::is_same_v<typename T::Interfaces, typename T::Super::Interfaces>, void, typename T::Interfaces>;
+};
+template<typename T>
+using InterfaceDefineType = InterfaceTypeFinder<T>::Type;
+template<typename T>
+using InterfaceType = InterfaceTypeFinder<T>::Type;
 
 
 /* Object */
 
 template<typename T>
 constexpr bool IsChildOfObject = std::is_base_of_v<Object, T>;
+

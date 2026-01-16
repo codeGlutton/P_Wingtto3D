@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Reflection/ObjectTypeInfo.h"
+#include "Reflection/StructTypeInfo.h"
 #include "Utils/TypeUtils.h"
 
 /**
@@ -9,6 +9,10 @@
 class IPropertyHandlerBase abstract
 { 
 	GEN_INTERFACE_REFLECTION(IPropertyHandlerBase)
+
+public:
+	virtual const void* GetRawPtr(const void* object) const = 0;
+	virtual void SetRawPtr(void* object, const void* value) const = 0;
 };
 
 /**
@@ -20,7 +24,7 @@ class IPropertyHandler abstract : public InterfaceReflector<IPropertyHandlerBase
 	GEN_INTERFACE_REFLECTION(IPropertyHandler<T>)
 
 public:
-	virtual const T& Get(void* object) const = 0;
+	virtual const T& Get(const void* object) const = 0;
 	virtual void Set(void* object, T& value) const = 0;
 	virtual void Set(void* object, T&& value) const = 0;
 };
@@ -31,7 +35,7 @@ public:
 template<class C, typename P>
 class PropertyHandler : public InterfaceReflector<IPropertyHandler<P>>
 {
-	GEN_ABSTRACT_REFLECTION(PropertyHandler<C,P>)
+	GEN_ABSTRACT_REFLECTION(PropertyHandler<C, P>)
 
 	// 멤버 변수 포인터
 	using MemPtr = P C::*;
@@ -44,9 +48,19 @@ public:
 	}
 
 public:
-	virtual const P& Get(void* object) const override
+	virtual const void* GetRawPtr(const void* object) const override
 	{
-		return static_cast<C*>(object)->*_mPtr;
+		return &(static_cast<const C*>(object)->*_mPtr);
+	}
+	virtual void SetRawPtr(void* object, const void* value) const override
+	{
+		static_cast<C*>(object)->*_mPtr = *reinterpret_cast<const P*>(value);
+	}
+
+public:
+	virtual const P& Get(const void* object) const override
+	{
+		return static_cast<const C*>(object)->*_mPtr;
 	}
 	virtual void Set(void* object, P& value) const override
 	{
@@ -80,15 +94,25 @@ public:
 	}
 
 public:
+	virtual const void* GetRawPtr([[maybe_unused]] const void* object) const override
+	{
+		return &_mPtr;
+	}
+	virtual void SetRawPtr([[maybe_unused]] void* object, const void* value) const override
+	{
+		*_mPtr = *reinterpret_cast<const P*>(value);
+	}
+
+public:
 	virtual const P& Get([[maybe_unused]] void* object) const override
 	{
 		return *_mPtr;
 	}
-	virtual void Set([[maybe_unused]] void* object, P& value) const override
+	virtual void Set([[maybe_unused]] const void* object, P& value) const override
 	{
 		*_mPtr = value;
 	}
-	virtual void Set([[maybe_unused]] void* object, P&& value) const override
+	virtual void Set([[maybe_unused]] const void* object, P&& value) const override
 	{
 		*_mPtr = std::move(value);
 	}
@@ -104,7 +128,7 @@ template<class C, typename P, typename Ptr, Ptr ptr>
 class PropertyRegister
 {
 public:
-	PropertyRegister(const char* name, ObjectTypeInfo& ownerTypeInfo);
+	PropertyRegister(const char* name, StructTypeInfo& ownerTypeInfo);
 };
 
 /**
@@ -153,7 +177,7 @@ private:
 class Property
 {
 public:
-	Property(ObjectTypeInfo& ownerTypeInfo, const PropertyInitializer& initializer) :
+	Property(StructTypeInfo& ownerTypeInfo, const PropertyInitializer& initializer) :
 		_mName(initializer.mName),
 		_mTypeInfo(initializer.mTypeInfo),
 		_mHandler(initializer.mHandler)
@@ -162,8 +186,23 @@ public:
 	}
 
 public:
+	bool IsEqual(const void* lhsObject, const void* rhsObject) const
+	{
+		return _mTypeInfo.IsInstanceValueEqual(GetRawPtr(lhsObject), GetRawPtr(rhsObject));
+	}
+
+	const void* GetRawPtr(const void* object) const
+	{
+		return _mHandler.GetRawPtr(object);
+	}
+	void SetRawPtr(void* object, const void* value) const
+	{
+		_mHandler.SetRawPtr(object, value);
+	}
+
+public:
 	template<typename T>
-	ReturnPropertyWrapper<T> Get(void* object) const;
+	ReturnPropertyWrapper<T> Get(const void* object) const;
 
 	template<typename T>
 	void Set(void* object, T&& value) const;
@@ -173,6 +212,10 @@ public:
 	{
 		return _mName;
 	}
+	const TypeInfo& GetTypeInfo() const
+	{
+		return _mTypeInfo;
+	}
 
 private:
 	const char* _mName = nullptr;
@@ -181,7 +224,7 @@ private:
 };
 
 template<class C, typename P, typename Ptr, Ptr ptr>
-inline PropertyRegister<C, P, Ptr, ptr>::PropertyRegister(const char* name, ObjectTypeInfo& ownerTypeInfo)
+inline PropertyRegister<C, P, Ptr, ptr>::PropertyRegister(const char* name, StructTypeInfo& ownerTypeInfo)
 {
 	STATIC_ASSERT_MSG(std::is_reference_v<P> == false, "Not allow ref value");
 
@@ -212,7 +255,7 @@ inline PropertyRegister<C, P, Ptr, ptr>::PropertyRegister(const char* name, Obje
 }
 
 template<typename T>
-inline ReturnPropertyWrapper<T> Property::Get(void* object) const
+inline ReturnPropertyWrapper<T> Property::Get(const void* object) const
 {
 	if (_mHandler.GetTypeInfo().IsChildOf<IPropertyHandler<T>>() == true)
 	{

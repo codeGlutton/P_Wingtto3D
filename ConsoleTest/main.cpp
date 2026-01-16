@@ -23,6 +23,8 @@ class IInterfaceTest abstract : public IInterfaceTestBase
 
 class TestObjectBase
 {
+public:
+	virtual ~TestObjectBase() {}
 };
 
 class TestObject : public TestObjectBase, public IInterfaceTestBase2, public IInterfaceTest
@@ -42,9 +44,9 @@ class IInterfaceReflectionTestBase abstract
 {
 	GEN_INTERFACE_REFLECTION(IInterfaceReflectionTestBase)
 
-public:
-	IInterfaceReflectionTestBase() {}
-	virtual ~IInterfaceReflectionTestBase() {}
+//public:
+//	IInterfaceReflectionTestBase() {}
+//	virtual ~IInterfaceReflectionTestBase() {}
 };
 
 class IInterfaceReflectionTestBase2 abstract
@@ -59,14 +61,44 @@ public:
 class IInterfaceReflectionTest abstract : public InterfaceReflector<IInterfaceReflectionTestBase>
 {
 	GEN_INTERFACE_REFLECTION(IInterfaceReflectionTest)
+
+public:
+	METHOD(DoInterface)
+		virtual void DoInterface(int32 param) const
+	{
+		std::cout << "interface value : " << param << std::endl;
+	}
+};
+
+enum TestEnum
+{
+	None,
+	One,
+	Two
+};
+
+struct ReflectionTestStruct
+{
+	GEN_STRUCT_REFLECTION(ReflectionTestStruct)
+
+public:
+	PROPERTY(mE)
+	TestEnum mE = TestEnum::Two;
 };
 
 class ReflectionTestObjectBase : public Object
 {
 	GEN_REFLECTION(ReflectionTestObjectBase)
+
+public:
+	PROPERTY(mStruct)
+	ReflectionTestStruct mStruct{};
+
+	PROPERTY(mSP)
+	std::shared_ptr<Object> mSP;
 };
 
-class ReflectionTestObject : public ReflectionTestObjectBase, public InterfaceReflector<IInterfaceReflectionTestBase2, IInterfaceReflectionTest>
+class ReflectionTestObject : public InterfaceReflector<ReflectionTestObjectBase, IInterfaceReflectionTestBase2, IInterfaceReflectionTest>
 {
 	GEN_REFLECTION(ReflectionTestObject)
 
@@ -75,6 +107,11 @@ public:
 	void Do(int32 param) const
 	{
 		std::cout << "value : " << param << std::endl;
+	}
+
+	virtual void DoInterface(int32 param) const override
+	{
+		std::cout << "override value : " << param << std::endl;
 	}
 
 public:
@@ -121,23 +158,62 @@ int main()
 	std::cout << "Dynamic : " << dynamicResult / trial << std::endl;
 	std::cout << "Reflection : " << reflectionResult / trial << std::endl;*/
 
-	ReflectionTestObject test;
-	auto cdo = test.GetDefaultObject();
+	std::shared_ptr<ReflectionTestObject> test = std::make_shared<ReflectionTestObject>();
+	auto cdo = test->GetDefaultObject();
 	cdo->Do(8);
 
-	const Method* func = test.GetTypeInfo().GetMethod("Do");
-	if (func != nullptr)
+	auto typeInfo = BOOT_SYSTEM->GetObjectTypeInfo("ReflectionTestObject");
 	{
-		int32 s = 3;
-		func->Invoke(&test, s);
-		func->Invoke(&test, 6);
+		const Method* func = typeInfo->GetMethod("Do");
+		if (func != nullptr)
+		{
+			int32 s = 3;
+			func->Invoke(test.get(), s);
+			func->Invoke(test.get(), 6);
+		}
 	}
-	const Property* property = test.GetTypeInfo().GetProperty("mA");
-	if (property != nullptr)
 	{
-		int32 s = 3;
-		property->Set(&test, s);
-		property->Set(&test, 5);
+		const Method* func = typeInfo->GetMethod("DoInterface");
+		if (func != nullptr)
+		{
+			func->Invoke(test.get(), 6);
+			IInterfaceReflectionTest* testInterface = static_cast<IInterfaceReflectionTest*>(test.get());
+			func->Invoke(testInterface, 10);
+		}
+	}
+	{
+		const Property* property = typeInfo->GetProperty("mA");
+		if (property != nullptr)
+		{
+			int32 s = 3;
+			property->Set(test.get(), s);
+			property->Set(test.get(), 5);
+		}
+	}
+	{
+		const Property* property = typeInfo->GetProperty("mSP");
+		if (property != nullptr)
+		{
+			property->GetRawPtr(test.get());
+			property->SetRawPtr(test.get(), &test);
+
+			property->Set<std::shared_ptr<Object>>(test.get(), test);
+		}
+	}
+	{
+		const Property* property = typeInfo->GetProperty("mStruct");
+		if (property != nullptr)
+		{
+			const ReflectionTestStruct& resultStruct = property->Get<ReflectionTestStruct>(&test);
+
+			const StructTypeInfo* structTypeInfo = reinterpret_cast<const StructTypeInfo*>(&property->GetTypeInfo());
+			const Property* structEnumProperty = structTypeInfo->GetProperty("mE");
+			if (structEnumProperty != nullptr)
+			{
+				structEnumProperty->Set(&test->mStruct, TestEnum::None);
+				structEnumProperty->Set(&test->mStruct, TestEnum::One);
+			}
+		}
 	}
 
 	return 0;

@@ -1,105 +1,116 @@
 #pragma once
 
-#include "Reflection/TypeInfo.h"
-#include "Utils/TypeUtils.h"
+#include "Reflection/StructTypeInfo.h"
 
 class Object;
-
-template <typename T>
-struct ObjectTypeReflector
-{
-	ObjectTypeReflector()
-	{
-		BOOT_SYSTEM->AddType(
-			[]() {
-				T::GetStaticTypeInfo();
-			},
-			[]() {
-				T::GetDefaultObject();
-			}
-		);
-	}
-};
+class ObjectTypeInfo;
 
 /**
  * 일반 객체 타입 정보 초기화 구조체
  * @tparam T 초기화 대상
  */
 template<typename T>
-struct ObjectTypeInfoInitializer : public TypeInfoInitializer<T>
+struct ObjectTypeInfoInitializer : public StructTypeInfoInitializer<T>
 {
 	ObjectTypeInfoInitializer(const char* name) :
-		TypeInfoInitializer<T>(),
-		mName(name)
+		StructTypeInfoInitializer<T>(name)
 	{
-		if constexpr (HasSuper<T> == true && std::same_as<typename T::Super, void> == false)
+		if constexpr (std::same_as<T::Interfaces, void> == false)
 		{
-			using TSuperType = typename T::Super;
-			mSuperInfo = &(TSuperType::GetStaticTypeInfo());
-		}
-		if constexpr (IsSameSuperInterface<T> == false && std::same_as<typename T::Interfaces, void> == false)
-		{
-			using TInterfacesType = typename T::Interfaces;
-			auto array = TInterfacesType::GetInterfaceInfos();
-			mAdditionalInterfaces.insert(mAdditionalInterfaces.end(), array.begin(), array.end());
+			using TInterfacesType = T::Interfaces;
+
+			auto infoArray = TInterfacesType::GetInterfaceInfos();
+			mAdditionalInterfaces.insert(mAdditionalInterfaces.end(), infoArray.begin(), infoArray.end());
+			auto offsetArray = TInterfacesType::template GetInterfaceOffsets<T>();
+			mAdditionalInterfaceOffsets.insert(mAdditionalInterfaceOffsets.end(), offsetArray.begin(), offsetArray.end());
 		}
 	}
 
-	ObjectTypeInfoInitializer(const char* name, std::function<Object*()>&& constructor) :
-		TypeInfoInitializer<T>(),
-		mName(name),
+	ObjectTypeInfoInitializer(const char* name, std::function<Object*()> constructor) :
+		StructTypeInfoInitializer<T>(name),
 		mConstructor(constructor)
 	{
-		if constexpr (HasSuper<T> == true && std::same_as<typename T::Super, void> == false)
+		if constexpr (std::same_as<T::Interfaces, void> == false)
 		{
-			using TSuperType = typename T::Super;
-			mSuperInfo = &(TSuperType::GetStaticTypeInfo());
-		}
-		if constexpr (IsSameSuperInterface<T> == false && std::same_as<typename T::Interfaces, void> == false)
-		{
-			using TInterfacesType = typename T::Interfaces;
-			auto array = TInterfacesType::GetInterfaceInfos();
-			mAdditionalInterfaces.insert(mAdditionalInterfaces.end(), array.begin(), array.end());
+			using TInterfacesType = T::Interfaces;
+
+			auto infoArray = TInterfacesType::GetInterfaceInfos();
+			mAdditionalInterfaces.insert(mAdditionalInterfaces.end(), infoArray.begin(), infoArray.end());
+			auto offsetArray = TInterfacesType::template GetInterfaceOffsets<T>();
+			mAdditionalInterfaceOffsets.insert(mAdditionalInterfaceOffsets.end(), offsetArray.begin(), offsetArray.end());
 		}
 	}
 
 public:
-	const char* mName = nullptr;
-	const ObjectTypeInfo* mSuperInfo = nullptr;
 	std::vector<const ObjectTypeInfo*> mAdditionalInterfaces;
+	std::vector<std::size_t> mAdditionalInterfaceOffsets;
 
 public:
 	std::function<Object*()> mConstructor = nullptr;
 };
 
+template<template<typename...> class C, typename... Args>
+struct ObjectTypeInfoInitializer<C<Args...>> : public StructTypeInfoInitializer<C<Args...>>
+{
+	using T = C<Args...>;
+
+	ObjectTypeInfoInitializer(const char* name) :
+		StructTypeInfoInitializer<T>(typeid(C<Args...>).name())
+	{
+		if constexpr (std::same_as<T::Interfaces, void> == false)
+		{
+			using TInterfacesType = T::Interfaces;
+
+			auto infoArray = TInterfacesType::GetInterfaceInfos();
+			mAdditionalInterfaces.insert(mAdditionalInterfaces.end(), infoArray.begin(), infoArray.end());
+			auto offsetArray = TInterfacesType::template GetInterfaceOffsets<T>();
+			mAdditionalInterfaceOffsets.insert(mAdditionalInterfaceOffsets.end(), offsetArray.begin(), offsetArray.end());
+		}
+	}
+
+	ObjectTypeInfoInitializer(const char* name, std::function<Object*()> constructor) :
+		TypeInfoInitializer<T>(typeid(C<Args...>).name()),
+		mConstructor(constructor)
+	{
+		if constexpr (std::same_as<T::Interfaces, void> == false)
+		{
+			using TInterfacesType = T::Interfaces;
+
+			auto infoArray = TInterfacesType::GetInterfaceInfos();
+			mAdditionalInterfaces.insert(mAdditionalInterfaces.end(), infoArray.begin(), infoArray.end());
+			auto offsetArray = TInterfacesType::template GetInterfaceOffsets<T>();
+			mAdditionalInterfaceOffsets.insert(mAdditionalInterfaceOffsets.end(), offsetArray.begin(), offsetArray.end());
+		}
+	}
+
+public:
+	std::vector<const ObjectTypeInfo*> mAdditionalInterfaces;
+	std::vector<std::size_t> mAdditionalInterfaceOffsets;
+
+public:
+	std::function<Object* ()> mConstructor = nullptr;
+};
+
 /**
  * 일반 객체 타입 정보 클래스 (unreal의 uclass와 유사)
  */
-class ObjectTypeInfo : public TypeInfo
+class ObjectTypeInfo : public StructTypeInfo
 {
 	friend class Method;
 	friend class Property;
 
-private:
+protected:
 	using MethodMap = std::unordered_map<std::string_view, const Method*>;
-	using PropertyMap = std::unordered_map<std::string_view, const Property*>;
+	using PropertyMap = typename StructTypeInfo::PropertyMap;
 
 public:
 	template <typename T>
 	explicit ObjectTypeInfo(const ObjectTypeInfoInitializer<T>& initializer) :
-		TypeInfo(initializer),
-		_mName(initializer.mName),
-		_mSuperInfo(initializer.mSuperInfo),
-		_mConstructor(initializer.mConstructor)
+		StructTypeInfo(initializer),
+		_mConstructor(initializer.mConstructor),
+		_mAdditionalInterfaces(initializer.mAdditionalInterfaces),
+		_mAdditionalInterfaceOffsets(initializer.mAdditionalInterfaceOffsets)
 	{
-		if (_mSuperInfo != nullptr)
-		{
-			_mInterfaces = _mSuperInfo->_mInterfaces;
-		}
-		for (const ObjectTypeInfo* interface : initializer.mAdditionalInterfaces)
-		{
-			_mInterfaces.push_back(interface);
-		}
 	}
 
 public:
@@ -108,10 +119,8 @@ public:
 	 * \param other 동일 및 부모 대상
 	 * \return 동일 및 파생 여부
 	 */
-	bool IsChildOf(const ObjectTypeInfo& other) const;
-
-	template<typename T>
-	bool IsChildOf() const;
+	using StructTypeInfo::IsChildOf;
+	virtual bool IsChildOf(const StructTypeInfo& other) const override;
 
 public:
 	bool ImplementsInterface(const ObjectTypeInfo& other) const;
@@ -120,18 +129,19 @@ public:
 	bool ImplementsInterface() const;
 
 public:
-	const char* GetName() const
-	{
-		return _mName;
-	}
+	std::size_t GetInterfaceOffsetOf(const ObjectTypeInfo& other, OUT bool& isInherited) const;
 
-	const ObjectTypeInfo* GetSuper() const
+	template<typename T>
+	std::size_t GetInterfaceOffsetOf(OUT bool& isImplemented) const;
+
+public:
+	virtual void Serialize(OUT Archive& archive, const void* inst) const override;
+	virtual void Deserialize(Archive& archive, OUT void* inst) const override;
+
+public:
+	virtual const ObjectTypeInfo* GetSuper() const override
 	{
-		return _mSuperInfo;
-	}
-	bool HasSuper() const
-	{
-		return _mSuperInfo != nullptr;
+		return reinterpret_cast<const ObjectTypeInfo*>(_mSuperInfo);
 	}
 
 	const std::function<Object*()>& GetConstructor() const
@@ -140,28 +150,20 @@ public:
 	}
 
 	const Method* GetMethod(const char* name) const;
-	const Property* GetProperty(const char* name) const;
+
+protected:
+	void AddMethod(const Method* method);
 
 public:
 	std::shared_ptr<const Object> GetDefaultObject() const;
 
-private:
-	void AddMethod(const Method* method);
-	void AddProperty(const Property* property);
-
-private:
-	const char* _mName = nullptr;
-
-private:
-	const ObjectTypeInfo* _mSuperInfo = nullptr;
-	std::vector<const ObjectTypeInfo*> _mInterfaces;
+protected:
+	std::vector<const ObjectTypeInfo*> _mAdditionalInterfaces;
+	std::vector<std::size_t> _mAdditionalInterfaceOffsets;
 
 private:
 	MethodMap _mMethodMap;
-	PropertyMap _mPropertyMap;
-
 	std::vector<const Method*> _mMethods;
-	std::vector<const Property*> _mProperties;
 
 private:
 	std::function<Object*()> _mConstructor = nullptr;
@@ -171,14 +173,14 @@ private:
 };
 
 template<typename T>
-inline bool ObjectTypeInfo::IsChildOf() const
-{
-	return IsChildOf(T::GetStaticTypeInfo());
-}
-
-template<typename T>
 inline bool ObjectTypeInfo::ImplementsInterface() const
 {
 	return ImplementsInterface(T::GetStaticTypeInfo());
+}
+
+template<typename T>
+inline std::size_t ObjectTypeInfo::GetInterfaceOffsetOf(OUT bool& isImplemented) const
+{
+	return GetInterfaceOffsetOf(T::GetStaticTypeInfo(), isImplemented);
 }
 

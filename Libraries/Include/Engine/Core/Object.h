@@ -1,8 +1,10 @@
 #pragma once
 
-class Object : public std::enable_shared_from_this<Object>
+class Archive;
+
+class Object abstract : public std::enable_shared_from_this<Object>
 {
-	GEN_REFLECTION(Object)
+	GEN_ABSTRACT_REFLECTION(Object)
 
 protected:
 	Object() {}
@@ -21,7 +23,6 @@ protected:
 	 * 실제 제거 시점
 	 */
 	virtual void BeginDestroy();
-	//virtual void Serialize(FArchive& Ar) = 0;
 
 public:
 	bool IsA(const TypeInfo* typeInfo) const
@@ -38,6 +39,10 @@ public:
 	{
 		return IsA(T::GetStaticTypeInfo());
 	}
+
+protected:
+	virtual void Serialize(Archive& archive);
+	virtual void Deserialize(Archive& archive);
 
 private:
 	// 저장 계층구조

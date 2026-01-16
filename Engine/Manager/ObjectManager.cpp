@@ -13,7 +13,7 @@ ObjectManager::~ObjectManager()
 {
 }
 
-std::shared_ptr<Object> ObjectManager::CreateObject(ObjectInitializeParameters params)
+std::shared_ptr<Object> ObjectManager::CreateObject(ObjectInitializeParameters params) const
 {
 	const std::function<Object*()>& constructor = params.mTypeInfo->GetConstructor();
 	ASSERT_MSG(constructor != nullptr, "Can't create object because of invalid constructor");
@@ -32,4 +32,13 @@ std::shared_ptr<Object> ObjectManager::CreateObject(ObjectInitializeParameters p
 	}
 
 	return result;
+}
+
+void ObjectManager::LoadObjects(const std::vector<std::shared_ptr<Object>>& objects) const
+{
+	for (auto& object : objects)
+	{
+		// TODO : RESOURCE_MANAGER
+		object->PostLoad();
+	}
 }
