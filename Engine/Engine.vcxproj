@@ -27,6 +27,7 @@
     <ClInclude Include="Core\App\Game.h" />
     <ClInclude Include="Core\Archive.h" />
     <ClInclude Include="Core\Component\ActorComponent.h" />
+    <ClInclude Include="Core\Delegate.h" />
     <ClInclude Include="Core\GUID.h" />
     <ClInclude Include="Core\Object.h" />
     <ClInclude Include="Core\Resource\Level.h" />
@@ -49,6 +50,7 @@
     <ClInclude Include="Manager\AppWindowManager.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Reflection\DefaultTypeInfo.h" />
+    <ClInclude Include="Reflection\DelegateTypeInfo.h" />
     <ClInclude Include="Reflection\InterfaceReflector.h" />
     <ClInclude Include="Reflection\Method.h" />
     <ClInclude Include="Reflection\ObjectTypeInfo.h" />
@@ -79,6 +81,7 @@
     <ClCompile Include="Core\App\Game.cpp" />
     <ClCompile Include="Core\Archive.cpp" />
     <ClCompile Include="Core\Component\ActorComponent.cpp" />
+    <ClCompile Include="Core\Delegate.cpp" />
     <ClCompile Include="Core\GUID.cpp" />
     <ClCompile Include="Core\Object.cpp" />
     <ClCompile Include="Core\Resource\Level.cpp" />
@@ -103,6 +106,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Reflection\DefaultTypeInfo.cpp" />
+    <ClCompile Include="Reflection\DelegateTypeInfo.cpp" />
     <ClCompile Include="Reflection\InterfaceReflector.cpp" />
     <ClCompile Include="Reflection\Method.cpp" />
     <ClCompile Include="Reflection\ObjectTypeInfo.cpp" />

@@ -44,9 +44,9 @@ class IInterfaceReflectionTestBase abstract
 {
 	GEN_INTERFACE_REFLECTION(IInterfaceReflectionTestBase)
 
-//public:
-//	IInterfaceReflectionTestBase() {}
-//	virtual ~IInterfaceReflectionTestBase() {}
+public:
+	IInterfaceReflectionTestBase() {}
+	virtual ~IInterfaceReflectionTestBase() {}
 };
 
 class IInterfaceReflectionTestBase2 abstract
@@ -64,7 +64,7 @@ class IInterfaceReflectionTest abstract : public InterfaceReflector<IInterfaceRe
 
 public:
 	METHOD(DoInterface)
-		virtual void DoInterface(int32 param) const
+	virtual void DoInterface(int32 param) const
 	{
 		std::cout << "interface value : " << param << std::endl;
 	}
@@ -128,11 +128,20 @@ void TestReflectionCast(IInterfaceReflectionTestBase* base)
 	}
 }
 
+DECLARE_DELEGATE_1_PARAM(OnTest, int);
+DECLARE_MULTICAST_DELEGATE_1_PARAM(OnTestMulti, IInterfaceTestBase*);
+
 int main()
 {
 	BOOT_SYSTEM->Boot();
 
-	/*const int32 trial = 100;
+	/*std::shared_ptr<const ReflectionTestObject> t = std::make_shared<ReflectionTestObject>();
+	OnTest testDelegate;
+	auto handle = testDelegate.BindNativeMethod<IInterfaceReflectionTest>(t, &IInterfaceReflectionTest::DoInterface);
+	OnTestMulti testMultiDelegate;
+	auto handleMulti = testMultiDelegate.BindStatic(&TestDynamicCast);
+
+	const int32 trial = 100;
 
 	std::chrono::microseconds dynamicResult = std::chrono::microseconds{ 0 };
 	std::chrono::microseconds reflectionResult = std::chrono::microseconds{ 0 };
@@ -156,9 +165,18 @@ int main()
 		}
 	}
 	std::cout << "Dynamic : " << dynamicResult / trial << std::endl;
-	std::cout << "Reflection : " << reflectionResult / trial << std::endl;*/
+	std::cout << "Reflection : " << reflectionResult / trial << std::endl;
 
-	std::shared_ptr<ReflectionTestObject> test = std::make_shared<ReflectionTestObject>();
+	testDelegate.ExecuteIfBound(5);
+	testDelegate.Unbind(handle);
+	testDelegate.ExecuteIfBound(5);
+
+	std::shared_ptr<IInterfaceTestBase> multiDelegateTarget = std::make_shared<TestObject>();
+	testMultiDelegate.Multicast(multiDelegateTarget.get());
+	testMultiDelegate.Unbind(handleMulti);
+	testMultiDelegate.Multicast(multiDelegateTarget.get());*/
+
+	/*std::shared_ptr<ReflectionTestObject> test = std::make_shared<ReflectionTestObject>();
 	auto cdo = test->GetDefaultObject();
 	cdo->Do(8);
 
@@ -214,7 +232,7 @@ int main()
 				structEnumProperty->Set(&test->mStruct, TestEnum::One);
 			}
 		}
-	}
+	}*/
 
 	return 0;
 }

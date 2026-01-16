@@ -72,3 +72,6 @@
 
 #include "Utils/TypeUtils.h"
 
+/* Others */
+
+#include "Core/Delegate.h"

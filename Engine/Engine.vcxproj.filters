@@ -231,6 +231,12 @@
     <ClInclude Include="Utils\TypeUtils.inl">
       <Filter>Utils</Filter>
     </ClInclude>
+    <ClInclude Include="Reflection\DelegateTypeInfo.h">
+      <Filter>Reflection\TypeInfo</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Delegate.h">
+      <Filter>Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\Object.cpp">
@@ -364,6 +370,12 @@
     </ClCompile>
     <ClCompile Include="Core\Resource\Level.cpp">
       <Filter>Core\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Reflection\DelegateTypeInfo.cpp">
+      <Filter>Reflection\TypeInfo</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Delegate.cpp">
+      <Filter>Core</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
