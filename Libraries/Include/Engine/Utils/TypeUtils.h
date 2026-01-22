@@ -1,6 +1,8 @@
-#pragma once
+ï»¿#pragma once
 
 #include "Reflection/TypeInfo.h"
+#include "Core/CommonType/SoftObjectPtr.h"
+#include "Core/CommonType/SubClass.h"
 
 template<typename To, typename From>
 To* Cast(From* src);
@@ -15,63 +17,69 @@ template<typename To>
 std::shared_ptr<To> CastSharedPointer(std::shared_ptr<void> src, const ObjectTypeInfo& srcTypeInfo);
 
 /**
- * Á¤¼ö ¹× ½Ç¼ö Å¸ÀÔ
+ * ì •ìˆ˜ ë° ì‹¤ìˆ˜ íƒ€ì…
  */
 template<typename T, typename C = void>
 struct TypeInfoResolver;
 
 /**
- * void Å¸ÀÔ
+ * void íƒ€ì…
  */
 template<>
 struct TypeInfoResolver<void, void>;
 
 /**
- * ¿­°ÅÇü
+ * ì—´ê±°í˜•
  */
 template<typename T>
 struct TypeInfoResolver<T, std::enable_if_t<std::is_enum_v<T>>>;
 
 /**
- * Å¬·¡½º ¹× ±¸Á¶Ã¼
+ * í´ë˜ìŠ¤ ë° êµ¬ì¡°ì²´
  */
 template<typename T>
 struct TypeInfoResolver<T, std::enable_if_t<std::is_class_v<T> && HasSuper<T>>>;
 
 /**
- * Æ÷ÀÎÅÍ
+ * í¬ì¸í„°
  */
-template<typename T>
+template<typename T> requires IsChildOfObject<T>
 struct TypeInfoResolver<T*, void>;
 
-template<typename T>
+template<typename T> requires IsChildOfObject<T>
 struct TypeInfoResolver<std::shared_ptr<T>, void>;
 
-template<typename T>
+template<typename T> requires IsChildOfObject<T>
 struct TypeInfoResolver<std::weak_ptr<T>, void>;
 
+template<typename T> requires IsChildOfObject<T>
+struct TypeInfoResolver<SubClass<T>, void>;
+
+template<typename T> requires IsChildOfObject<T>
+struct TypeInfoResolver<SoftObjectPtr<T>, void>;
+
+template<typename T> requires IsBulk<T>
+struct TypeInfoResolver<std::shared_ptr<T>, void>;
+
 /**
- * ¹è¿­
+ * Pair
+ */
+template<typename K, typename D>
+struct TypeInfoResolver<std::pair<K, D>, void>;
+
+/**
+ * ë°°ì—´
  */
 template<typename T, size_t N>
 struct TypeInfoResolver<T[N], void>;
 
-/**
- * µ¿Àû ¹è¿­
- */
-template<typename T>
-struct TypeInfoResolver<std::vector<T>, void>;
-
-template<typename T>
-struct TypeInfoResolver<std::list<T>, void>;
+template<typename T, size_t N>
+struct TypeInfoResolver<std::array<T, N>, void>;
 
 /**
- * ¹®ÀÚ¿­
+ * ì–´ëŒ‘í„°ë¥¼ ì œì™¸í•œ ë™ì  ë°°ì—´ ë° ë¬¸ìì—´
  */
-template<>
-struct TypeInfoResolver<std::string, void>;
-
-template<>
-struct TypeInfoResolver<std::wstring, void>;
+template<typename T>
+struct TypeInfoResolver<T, std::enable_if_t<IsIteratorContanier<T> && UseAllocator<T>>>;
 
 #include "TypeUtils.inl"

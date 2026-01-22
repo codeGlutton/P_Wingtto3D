@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <type_traits>
 
@@ -6,6 +6,9 @@ class Object;
 
 template<typename... Args>
 constexpr bool HasAnyReference = (std::is_reference_v<Args> || ...);
+
+
+/* Shared Ptr */
 
 template<typename T>
 constexpr bool IsSharedPtr_Internal = false;
@@ -20,6 +23,34 @@ template<typename T>
 constexpr bool IsWeakPtr_Internal<std::weak_ptr<T>> = true;
 template<typename T>
 constexpr bool IsWeakPtr = IsWeakPtr_Internal<std::remove_cvref_t<T>>;
+
+
+/* Container */
+
+template <typename T, typename = void>
+constexpr bool UseAllocator = false;
+template <typename T>
+constexpr bool UseAllocator<T, std::void_t<typename T::allocator_type>> = true;
+
+template <typename T>
+concept AdaptorContainer = requires(T container, typename T::value_type element) {
+	typename T::container_type;
+	container.push(element);
+	container.pop();
+};
+template <typename T>
+constexpr bool IsAdaptorContainer = AdaptorContainer<T>;
+
+template <typename T>
+concept IteratorContainer = std::ranges::range<T> && requires {
+	typename T::value_type;
+};
+template <typename T>
+constexpr bool IsIteratorContanier = IteratorContainer<T>;
+
+template <typename T>
+using IteratorElementType = std::ranges::range_value_t<T>;
+
 
 /* Super */
 
@@ -98,3 +129,10 @@ using InterfaceType = InterfaceTypeFinder<T>::Type;
 template<typename T>
 constexpr bool IsChildOfObject = std::is_base_of_v<Object, T>;
 
+
+/* Bulk */
+
+template <typename T, typename = void>
+constexpr bool IsBulk = false;
+template <typename T>
+constexpr bool IsBulk<T, std::void_t<typename T::Bulk>> = true;

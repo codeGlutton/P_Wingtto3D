@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #define READ_LOCK(lock) ReadLockGuard readLockGuard_##lock(lock, typeid(this).name())
 #define WRITE_LOCK(lock) WriteLockGuard writeLockGuard_##lock(lock, typeid(this).name())
@@ -7,8 +7,8 @@ class Lock
 {
 	enum : uint32
 	{
-		ACQUIRE_TIMEOUT_TICK = 10000,	// lock ÃÖ´ë °æÀï »óÅÂ·Î ÀÎÇÑ Áö¿¬ Æ½
-		MAX_SPIN_COUNT = 5000,			// spin lock ½Ãµµ Á¾·á È½¼ö
+		ACQUIRE_TIMEOUT_TICK = 10000,	// lock ìµœëŒ€ ê²½ìŸ ìƒíƒœë¡œ ì¸í•œ ì§€ì—° í‹±
+		MAX_SPIN_COUNT = 5000,			// spin lock ì‹œë„ ì¢…ë£Œ íšŸìˆ˜
 
 		WRITE_THREAD_MASK = 0xFFFF'0000,
 		READ_COUNT_MASK = 0x0000'FFFF,
@@ -22,14 +22,14 @@ public:
 	void ReadUnlock(const char* thread);
 
 private:
-	// »óÀ§ 16ºñÆ®´Â Thread id, ÇÏÀ§ 16ºñÆ®´Â °É¸° read lock ¼ö
+	// ìƒìœ„ 16ë¹„íŠ¸ëŠ” Thread id, í•˜ìœ„ 16ë¹„íŠ¸ëŠ” ê±¸ë¦° read lock ìˆ˜
 	std::atomic<uint32>	_mLockFlag = EMPTY_FLAG;
-	// ¾ó¸¶³ª ¸¹Àº write lockÀÌ °É·ÁÀÖ´ÂÁö
+	// ì–¼ë§ˆë‚˜ ë§ì€ write lockì´ ê±¸ë ¤ìˆëŠ”ì§€
 	uint16 _mWriterCount = 0;
 };
 
 
-/* Wrapper Å¬·¡½ºµé */
+/* Wrapper í´ë˜ìŠ¤ë“¤ */
 
 class ReadLockGuard
 {

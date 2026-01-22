@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #define BOOT_SYSTEM BootSystem::GetInst()
 
@@ -30,6 +30,10 @@ public:
 	}
 
 public:
+	void Init();
+	void Destroy();
+
+public:
 	const StructTypeInfo* GetStructTypeInfo(const char* name) const;
 	const ObjectTypeInfo* GetObjectTypeInfo(const char* name) const;
 
@@ -45,7 +49,6 @@ private:
 	void CreateTypeInfos();
 	void CreateTypeMemberInfos();
 	void CreateCDOs();
-	void CreateInstances();
 
 private:
 	std::vector<std::function<const StructTypeInfo*()>> _mStructTypeInfoRegisters;

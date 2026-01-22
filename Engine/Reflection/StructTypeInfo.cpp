@@ -1,5 +1,8 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "StructTypeInfo.h"
+
+#include "Core/Resource/BulkWrapper.h"
+#include "Core/Resource/Package.h"
 
 bool StructTypeInfo::IsChildOf(const StructTypeInfo& other) const
 {
@@ -8,7 +11,7 @@ bool StructTypeInfo::IsChildOf(const StructTypeInfo& other) const
 		return true;
 	}
 
-	// �θ� ���İ��鼭 ����
+	// 부모를 거쳐가면서 검증
 	for (const StructTypeInfo* superInfo = _mSuperInfo; superInfo != nullptr; superInfo = superInfo->GetSuper())
 	{
 		if (superInfo->IsA(other) == true)
@@ -19,9 +22,47 @@ bool StructTypeInfo::IsChildOf(const StructTypeInfo& other) const
 	return false;
 }
 
+void StructTypeInfo::CollectHeaderDatas(const void* inst, OUT std::unordered_map<std::wstring, std::string> externalPackageDatas, OUT std::vector<std::shared_ptr<BulkData>>& bulkDatas) const
+{
+	// 부모를 거쳐가면서 패키징 헤더에 필요한 데이터 추출
+	for (const StructTypeInfo* currentInfo = this; currentInfo != nullptr; currentInfo = currentInfo->GetSuper())
+	{
+		const PropertyMap& propertyMap = currentInfo->_mPropertyMap;
+		for (const auto& propertyPair : propertyMap)
+		{
+			const HardRefTypeInfo* hardRefTypeInfo = Cast<const HardRefTypeInfo>(&propertyPair.second->GetTypeInfo());
+			if (hardRefTypeInfo != nullptr)
+			{
+				std::shared_ptr<Package> instPackage = hardRefTypeInfo->GetInstancePackage(inst);
+				if (instPackage != nullptr)
+				{
+					externalPackageDatas[instPackage->GetPath()] = instPackage->GetTypeInfo().GetName();
+				}
+			}
+			else
+			{
+				const BulkBaseTypeInfo* bulkTypeInfo = Cast<const BulkBaseTypeInfo>(&propertyPair.second->GetTypeInfo());
+				if (bulkTypeInfo != nullptr)
+				{
+					const std::shared_ptr<BulkData>& bulkData = *reinterpret_cast<const std::shared_ptr<BulkData>*>(propertyPair.second->GetRawPtr(inst));
+					bulkDatas.push_back(bulkData);
+				}
+				else
+				{
+					const StructTypeInfo* structTypeInfo = Cast<const StructTypeInfo>(&propertyPair.second->GetTypeInfo());
+					if (structTypeInfo != nullptr)
+					{
+						structTypeInfo->CollectHeaderDatas(propertyPair.second->GetRawPtr(inst), externalPackageDatas, bulkDatas);
+					}
+				}
+			}
+		}
+	}
+}
+
 bool StructTypeInfo::IsInstanceValueEqual(const void* lhsInst, const void* rhsInst) const
 {
-	// �θ� ���İ��鼭 ����
+	// 부모를 거쳐가면서 검증
 	for (const StructTypeInfo* currentInfo = this; currentInfo != nullptr; currentInfo = currentInfo->GetSuper())
 	{
 		const PropertyMap& propertyMap = currentInfo->_mPropertyMap;
@@ -38,10 +79,7 @@ bool StructTypeInfo::IsInstanceValueEqual(const void* lhsInst, const void* rhsIn
 
 void StructTypeInfo::Serialize(OUT Archive& archive, const void* inst) const
 {
-	std::string name = _mName;
-	TypeInfoResolver<std::string>::Get().Serialize(archive, &name);
-
-	// �θ� ���İ��鼭 ����
+	// 부모를 거쳐가면서 전부 포함
 	std::vector<const std::pair<const std::string_view, const Property*>*> changes;
 	for (const StructTypeInfo* currentInfo = this; currentInfo != nullptr; currentInfo = currentInfo->GetSuper())
 	{
@@ -52,23 +90,51 @@ void StructTypeInfo::Serialize(OUT Archive& archive, const void* inst) const
 		}
 	}
 
-	archive << changes.size();
+	// 프로퍼티 갯수 저장
+	std::size_t propertyCount;
+	TypeInfoResolver<std::size_t>::Get().Serialize(archive, &propertyCount);
 
-	// ����
+	// 각 프로퍼티 저장
 	for (const auto& changePair : changes)
 	{
-		archive << changePair->first;
+		// 프로퍼티 이름 저장
+		std::string propertyName = changePair->first.data();
+		TypeInfoResolver<std::string>::Get().Serialize(archive, &propertyName);
+
+		// 값 저장
 		changePair->second->GetTypeInfo().Serialize(archive, inst);
 	}
 }
 
 void StructTypeInfo::Deserialize(Archive& archive, OUT void* inst) const
 {
+	// 프로퍼티 갯수 저장
+	std::size_t propertyCount;
+	TypeInfoResolver<std::size_t>::Get().Deserialize(archive, &propertyCount);
+
+	// 로드
+	for (std::size_t i = 0; i < propertyCount; ++i)
+	{
+		// 프로퍼티 이름 로드
+		std::string propertyName;
+		TypeInfoResolver<std::string>::Get().Deserialize(archive, &propertyName);
+
+		// 부모를 거쳐가면서 값 찾아 로드
+		for (const StructTypeInfo* currentInfo = this; currentInfo != nullptr; currentInfo = currentInfo->GetSuper())
+		{
+			const PropertyMap& propertyMap = currentInfo->_mPropertyMap;
+			auto iter = propertyMap.find(propertyName);
+			if (iter != propertyMap.end())
+			{
+				iter->second->GetTypeInfo().Deserialize(archive, inst);
+			}
+		}
+	}
 }
 
 const Property* StructTypeInfo::GetProperty(const char* name) const
 {
-	// �θ� ���İ��鼭 Ž��
+	// 부모를 거쳐가면서 탐색
 	for (const StructTypeInfo* currentInfo = this; currentInfo != nullptr; currentInfo = currentInfo->GetSuper())
 	{
 		const auto& propertyMap = currentInfo->_mPropertyMap;

@@ -1,10 +1,10 @@
-#pragma once
+ï»¿#pragma once
 
 #include "Reflection/StructTypeInfo.h"
 #include "Utils/TypeUtils.h"
 
 /**
- * Template È¸ÇÇ¸¦ À§ÇÑ º£ÀÌ½º PropertyHandler ÀÎÅÍÆäÀÌ½º
+ * Template íšŒí”¼ë¥¼ ìœ„í•œ ë² ì´ìŠ¤ PropertyHandler ì¸í„°í˜ì´ìŠ¤
  */
 class IPropertyHandlerBase abstract
 { 
@@ -12,11 +12,13 @@ class IPropertyHandlerBase abstract
 
 public:
 	virtual const void* GetRawPtr(const void* object) const = 0;
+	virtual void* GetRawPtr(void* object) const = 0;
+
 	virtual void SetRawPtr(void* object, const void* value) const = 0;
 };
 
 /**
- * Á¶ÀÛ °¡´ÉÇÑ PropertyHandler ÀÎÅÍÆäÀÌ½º
+ * ì¡°ì‘ ê°€ëŠ¥í•œ PropertyHandler ì¸í„°í˜ì´ìŠ¤
  */
 template<typename T>
 class IPropertyHandler abstract : public InterfaceReflector<IPropertyHandlerBase>
@@ -30,14 +32,14 @@ public:
 };
 
 /**
- * ¸â¹ö º¯¼ö¿¡ ´ëÇÑ PropertyHandler
+ * ë©¤ë²„ ë³€ìˆ˜ì— ëŒ€í•œ PropertyHandler
  */
 template<class C, typename P>
 class PropertyHandler : public InterfaceReflector<IPropertyHandler<P>>
 {
 	GEN_ABSTRACT_REFLECTION(PropertyHandler<C, P>)
 
-	// ¸â¹ö º¯¼ö Æ÷ÀÎÅÍ
+	// ë©¤ë²„ ë³€ìˆ˜ í¬ì¸í„°
 	using MemPtr = P C::*;
 
 public:
@@ -51,6 +53,10 @@ public:
 	virtual const void* GetRawPtr(const void* object) const override
 	{
 		return &(static_cast<const C*>(object)->*_mPtr);
+	}
+	virtual void* GetRawPtr(void* object) const override
+	{
+		return &(static_cast<C*>(object)->*_mPtr);
 	}
 	virtual void SetRawPtr(void* object, const void* value) const override
 	{
@@ -75,15 +81,66 @@ private:
 	MemPtr _mPtr = nullptr;
 };
 
+template<class C, typename M, std::size_t N>
+class PropertyHandler<C, M[N]> : public InterfaceReflector<IPropertyHandler<M[N]>>
+{
+	GEN_ABSTRACT_REFLECTION(PropertyHandler<C, M[N]>)
+
+	using P = M[N];
+	using MemPtr = P C::*;
+
+public:
+	PropertyHandler() = default;
+	explicit PropertyHandler(MemPtr ptr) :
+		_mPtr(ptr)
+	{
+	}
+
+public:
+	virtual const void* GetRawPtr(const void* object) const override
+	{
+		return &(static_cast<const C*>(object)->*_mPtr);
+	}
+	virtual void* GetRawPtr(void* object) const override
+	{
+		return &(static_cast<C*>(object)->*_mPtr);
+	}
+	virtual void SetRawPtr(void* object, const void* value) const override
+	{
+		P& memRef = static_cast<C*>(object)->*_mPtr;
+		const P& valueRef = *reinterpret_cast<const P*>(value);
+		std::copy(std::begin(valueRef), std::end(valueRef), std::begin(memRef));
+	}
+
+public:
+	virtual const P& Get(const void* object) const override
+	{
+		return static_cast<const C*>(object)->*_mPtr;
+	}
+	virtual void Set(void* object, P& value) const override
+	{
+		P& memRef = static_cast<C*>(object)->*_mPtr;
+		std::copy(std::begin(value), std::end(value), std::begin(memRef));
+	}
+	virtual void Set(void* object, P&& value) const override
+	{
+		P& memRef = static_cast<C*>(object)->*_mPtr;
+		std::copy(std::begin(value), std::end(value), std::begin(memRef));
+	}
+
+private:
+	MemPtr _mPtr = nullptr;
+};
+
 /**
- * Á¤Àû º¯¼ö¿¡ ´ëÇÑ PropertyHandler
+ * ì •ì  ë³€ìˆ˜ì— ëŒ€í•œ PropertyHandler
  */
 template<class C, typename P>
 class StaticPropertyHandler : public InterfaceReflector<IPropertyHandler<P>>
 {
 	GEN_ABSTRACT_REFLECTION(StaticPropertyHandler<C, P>)
 
-	// Á¤Àû º¯¼ö Æ÷ÀÎÅÍ
+	// ì •ì  ë³€ìˆ˜ í¬ì¸í„°
 	using Ptr = P*;
 
 public:
@@ -96,7 +153,11 @@ public:
 public:
 	virtual const void* GetRawPtr([[maybe_unused]] const void* object) const override
 	{
-		return &_mPtr;
+		return _mPtr;
+	}
+	virtual void* GetRawPtr([[maybe_unused]] void* object) const override
+	{
+		return _mPtr;
 	}
 	virtual void SetRawPtr([[maybe_unused]] void* object, const void* value) const override
 	{
@@ -121,8 +182,56 @@ private:
 	Ptr _mPtr = nullptr;
 };
 
+template<class C, typename M, std::size_t N>
+class StaticPropertyHandler<C, M[N]> : public InterfaceReflector<IPropertyHandler<M[N]>>
+{
+	GEN_ABSTRACT_REFLECTION(StaticPropertyHandler<C, M[N]>)
+
+	using P = M[N];
+	using Ptr = P*;
+
+public:
+	StaticPropertyHandler() = default;
+	explicit StaticPropertyHandler(Ptr ptr) :
+		_mPtr(ptr)
+	{
+	}
+
+public:
+	virtual const void* GetRawPtr([[maybe_unused]] const void* object) const override
+	{
+		return _mPtr;
+	}
+	virtual void* GetRawPtr([[maybe_unused]] void* object) const override
+	{
+		return _mPtr;
+	}
+	virtual void SetRawPtr([[maybe_unused]] void* object, const void* value) const override
+	{
+		const P& valueRef = *reinterpret_cast<const P*>(value);
+		std::copy(std::begin(valueRef), std::end(valueRef), std::begin(_mPtr));
+	}
+
+public:
+	virtual const P& Get([[maybe_unused]] void* object) const override
+	{
+		return *_mPtr;
+	}
+	virtual void Set([[maybe_unused]] const void* object, P& value) const override
+	{
+		std::copy(std::begin(value), std::end(value), std::begin(_mPtr));
+	}
+	virtual void Set([[maybe_unused]] const void* object, P&& value) const override
+	{
+		std::copy(std::begin(value), std::end(value), std::begin(_mPtr));
+	}
+
+private:
+	Ptr _mPtr = nullptr;
+};
+
 /**
- * Property µî·Ï ÁÖÃ¼
+ * Property ë“±ë¡ ì£¼ì²´
  */
 template<class C, typename P, typename Ptr, Ptr ptr>
 class PropertyRegister
@@ -132,7 +241,7 @@ public:
 };
 
 /**
- * Property »ı¼º ½Ã ÃÊ±âÈ­ ÀÎÀÚ ±¸Á¶Ã¼
+ * Property ìƒì„± ì‹œ ì´ˆê¸°í™” ì¸ì êµ¬ì¡°ì²´
  */
 struct PropertyInitializer
 {
@@ -172,7 +281,7 @@ private:
 };
 
 /**
- * Property ¸®ÇÃ·º¼Ç Å¸ÀÔ
+ * Property ë¦¬í”Œë ‰ì…˜ íƒ€ì…
  */
 class Property
 {
@@ -192,6 +301,10 @@ public:
 	}
 
 	const void* GetRawPtr(const void* object) const
+	{
+		return _mHandler.GetRawPtr(object);
+	}
+	void* GetRawPtr(void* object) const
 	{
 		return _mHandler.GetRawPtr(object);
 	}
@@ -228,7 +341,7 @@ inline PropertyRegister<C, P, Ptr, ptr>::PropertyRegister(const char* name, Stru
 {
 	STATIC_ASSERT_MSG(std::is_reference_v<P> == false, "Not allow ref value");
 
-	// ¸â¹ö º¯¼ö
+	// ë©¤ë²„ ë³€ìˆ˜
 	if constexpr (std::is_member_pointer_v<Ptr> == true)
 	{
 		static PropertyHandler<C, P> handler(ptr);
@@ -240,7 +353,7 @@ inline PropertyRegister<C, P, Ptr, ptr>::PropertyRegister(const char* name, Stru
 		};
 		static Property property(ownerTypeInfo, initializer);
 	}
-	// Á¤Àû º¯¼ö
+	// ì •ì  ë³€ìˆ˜
 	else
 	{
 		static StaticPropertyHandler<C, P> handler(ptr);

@@ -1,18 +1,18 @@
-/*********************************************************************
+Ôªø/*********************************************************************
  * \file   Reflection.h
  * \brief  
- * DynamicCast √÷¿˚»≠ π◊ ±‚∫ª∞™ ∫Ø∞Ê ø©∫Œ∏¶ »Æ¿Œ«œ±‚ ¿ß«— Reflection
+ * DynamicCast ÏµúÏ†ÅÌôî Î∞è Í∏∞Î≥∏Í∞í Î≥ÄÍ≤Ω Ïó¨Î∂ÄÎ•º ÌôïÏù∏ÌïòÍ∏∞ ÏúÑÌïú Reflection
  * 
- * ¬¸∞Ì ¿⁄∑·
+ * Ï∞∏Í≥† ÏûêÎ£å
  * https://xtozero.tistory.com/8
  * 
- * \author ∏»£¿Á
+ * \author Î™®Ìò∏Ïû¨
  * \date   January 2026
  *********************************************************************/
 
 #pragma once
 
-// ≈∏¿‘ ¡§∫∏ ∏≈≈©∑Œ
+// ÌÉÄÏûÖ Ï†ïÎ≥¥ Îß§ÌÅ¨Î°ú
 #pragma region TYPE_INFO_MACROS
 
 #define DECLARE_STRUCT_TYPE(type)	\
@@ -20,10 +20,67 @@ public:								\
 	using Base = type;				\
 private:
 
+#define GEN_STRUCT_REFLECTION_HEADER(type)						\
+public:															\
+	using Super = SuperDefineType<type>;						\
+	using This = type;											\
+	DECLARE_STRUCT_TYPE(type)									\
+																\
+public:															\
+	virtual const StructTypeInfo& GetTypeInfo() const;			\
+	static const StructTypeInfo& GetStaticTypeInfo();			\
+																\
+private:														\
+	static StructTypeInfo& GetMutableStaticTypeInfo();			\
+																\
+private:														\
+	inline static StructTypeInfo* _mTypeInfo = nullptr;			\
+																\
+private:														\
+	inline static struct StructTypeReflector					\
+	{															\
+		StructTypeReflector()									\
+		{														\
+			BOOT_SYSTEM->AddType(								\
+				[]() {											\
+					return &type::GetStaticTypeInfo();			\
+				}												\
+			);													\
+		}														\
+	} _mTypeReflector;											\
+																\
+public:
+
+#define GEN_STRUCT_REFLECTION_SOURCE(type)						\
+	const StructTypeInfo& type::GetTypeInfo() const				\
+	{															\
+		return *_mTypeInfo;										\
+	}															\
+																\
+	const StructTypeInfo& type::GetStaticTypeInfo()				\
+	{															\
+		return GetMutableStaticTypeInfo();						\
+	}															\
+																\
+	StructTypeInfo& type::GetMutableStaticTypeInfo()			\
+	{															\
+		if (_mTypeInfo == nullptr)								\
+		{														\
+			static StructTypeInfo typeInfo						\
+			{													\
+				StructTypeInfoInitializer<This>(#type)			\
+			};													\
+			_mTypeInfo = &typeInfo;								\
+		}														\
+		return *_mTypeInfo;										\
+	}
+
+
 #define GEN_STRUCT_REFLECTION_INTERNAL(type)					\
 public:															\
 	using Super = SuperDefineType<type>;						\
 	using This = type;											\
+	DECLARE_STRUCT_TYPE(type)									\
 																\
 public:															\
 	virtual const StructTypeInfo& GetTypeInfo() const			\
@@ -66,9 +123,10 @@ private:														\
 		}														\
 	} _mTypeReflector;											\
 																\
-private:
+public:
 
 #define DECLARE_OBJECT_TYPE(type)	\
+	friend class Package;			\
 	friend class ObjectManager;		\
 	DECLARE_STRUCT_TYPE(type)		\
 private:
@@ -178,16 +236,13 @@ private:
 #define GEN_REFLECTION(...) GEN_OBJECT_REFLECTION_INTERNAL(__VA_ARGS__)
 #define GEN_INTERFACE_REFLECTION(...) GEN_INTERFACE_REFLECTION_INTERNAL(__VA_ARGS__)
 #define GEN_ABSTRACT_REFLECTION(...) GEN_ABSTRACT_REFLECTION_INTERNAL(__VA_ARGS__)
-
-#define GEN_STRUCT_REFLECTION(type)						\
-	GEN_STRUCT_REFLECTION_INTERNAL(type)				\
-	DECLARE_STRUCT_TYPE(type)
+#define GEN_STRUCT_REFLECTION(...) GEN_STRUCT_REFLECTION_INTERNAL(__VA_ARGS__)
 
 #pragma endregion
-// ≈∏¿‘ ¡§∫∏ ∏≈≈©∑Œ
+// ÌÉÄÏûÖ Ï†ïÎ≥¥ Îß§ÌÅ¨Î°ú
 
 
-// ∏‚πˆ ∫Øºˆ ¡§∫∏ ∏≈≈©∑Œ
+// Î©§Î≤Ñ Î≥ÄÏàò Ï†ïÎ≥¥ Îß§ÌÅ¨Î°ú
 #pragma region MEMBER_INFO_MACROS
 
 #define METHOD(name)																							\
@@ -222,4 +277,4 @@ private:
 	} mPropertyReflector_##name;
 
 #pragma endregion
-// ∏‚πˆ ∫Øºˆ ¡§∫∏ ∏≈≈©∑Œ
+// Î©§Î≤Ñ Î≥ÄÏàò Ï†ïÎ≥¥ Îß§ÌÅ¨Î°ú

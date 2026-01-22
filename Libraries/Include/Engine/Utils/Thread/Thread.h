@@ -1,26 +1,31 @@
-#pragma once
+﻿#pragma once
 
 #include <thread>
 
 class Thread
 {
 public:
-	void Run();
+	virtual void Init() {}
+	virtual void Run() = 0;
+};
+
+class WorkerThread : public Thread
+{
+public:
+	virtual void Run() final;
 
 private:
 	virtual bool IsRunnable()
 	{
 		return true;
 	}
-	virtual void Work()
-	{
-	}
+	virtual void Work() = 0;
 
 public:
-	const uint64 mThreadTick = 64;
+	const uint64 mThreadMaxTick = 64;
 };
 
-class CustomThread : public Thread
+class CustomThread : public WorkerThread
 {
 public:
 	CustomThread(std::function<void()> work, std::function<bool()> condition = nullptr);

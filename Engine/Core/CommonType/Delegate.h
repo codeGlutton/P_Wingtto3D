@@ -651,34 +651,10 @@ inline void NativeMulticastDelegate<Args...>::Multicast(InputArgs&& ...args) con
 #pragma endregion
 
 
+// TODO:
 //template<typename Ret, typename... Args>
-//class NativeMulticastDelegate
-//{
-//public:
-//	void BindStatic(Ret(*func)(Args...));
-//	template<typename C>
-//	void BindNativeMethod(const C* object, Ret(C::* func)(Args...));
-//	template<typename C>
-//	void BindNativeMethod(const C* object, Ret(C::* func)(Args...) const);
-//
-//	template<typename C>
-//	void BindMethod(const C* object, const Method* method);
-//
-//public:
-//	bool IsBound();
-//
-//public:
-//	template<typename... InputArgs>
-//	void
-//
-//protected:
-//	std::vector<std::function<void()>> _mCallbacks;
-//};
-//
-//struct CallbackDesc
-//{
-//	std::weak_ptr<Object> mObject;
-//	std::string mMethodName;
-//};
-//
+//class DynamicSingleDelegate {};
+// 
+//template<typename... Args>
+//class DynamicMulticastDelegate {};
 

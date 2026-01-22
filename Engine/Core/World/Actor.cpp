@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "Actor.h"
 
 Actor::Actor()
@@ -23,7 +23,7 @@ void Actor::PostLoad()
 
 void Actor::BeginPlay()
 {
-	TIME_MANAGER->AddTarget(_mUpdateContext);
+	TIME_MANAGER->NotifyToAddTarget(_mUpdateContext);
 }
 
 void Actor::Update(float deltaTime)
@@ -32,7 +32,7 @@ void Actor::Update(float deltaTime)
 
 void Actor::EndPlay()
 {
-	TIME_MANAGER->RemoveTarget(_mUpdateContext);
+	TIME_MANAGER->NotifyToRemoveTarget(_mUpdateContext);
 }
 
 void Actor::BeginDestroy()

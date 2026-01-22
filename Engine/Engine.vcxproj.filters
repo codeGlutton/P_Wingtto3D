@@ -70,6 +70,18 @@
     <Filter Include="Manager\Utils">
       <UniqueIdentifier>{61931180-112c-46ad-b331-7df3f7de5f83}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Manager\Framework">
+      <UniqueIdentifier>{5510128c-b711-4688-9416-c4663aa3f0b4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utils\Thread\Job">
+      <UniqueIdentifier>{54af8f59-cf3f-4bf9-ba67-fbbeadfab10e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utils\Thread\Lock">
+      <UniqueIdentifier>{55ef2332-9e53-49d6-8d84-4260aa1a939f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core\CommonType">
+      <UniqueIdentifier>{51897e5a-fcdb-405e-ab91-679d987f1fc5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\Object.h">
@@ -114,9 +126,6 @@
     <ClInclude Include="Core\Component\ActorComponent.h">
       <Filter>Core\Component</Filter>
     </ClInclude>
-    <ClInclude Include="Reflection\SubClass.h">
-      <Filter>Reflection</Filter>
-    </ClInclude>
     <ClInclude Include="Reflection\Property.h">
       <Filter>Reflection</Filter>
     </ClInclude>
@@ -134,9 +143,6 @@
     </ClInclude>
     <ClInclude Include="Reflection\Method.h">
       <Filter>Reflection</Filter>
-    </ClInclude>
-    <ClInclude Include="Manager\BootSystem.h">
-      <Filter>Manager</Filter>
     </ClInclude>
     <ClInclude Include="Manager\ResourceManager.h">
       <Filter>Manager\Resources</Filter>
@@ -180,18 +186,6 @@
     <ClInclude Include="Graphics\Viewport\ViewportComposite.h">
       <Filter>Graphics\Viewport</Filter>
     </ClInclude>
-    <ClInclude Include="Utils\Thread\Job.h">
-      <Filter>Utils\Thread</Filter>
-    </ClInclude>
-    <ClInclude Include="Utils\Thread\JobQueue.h">
-      <Filter>Utils\Thread</Filter>
-    </ClInclude>
-    <ClInclude Include="Utils\Thread\Lock.h">
-      <Filter>Utils\Thread</Filter>
-    </ClInclude>
-    <ClInclude Include="Utils\Thread\LockQueue.h">
-      <Filter>Utils\Thread</Filter>
-    </ClInclude>
     <ClInclude Include="Utils\Memory\MemoryPool.h">
       <Filter>Utils\Memory</Filter>
     </ClInclude>
@@ -231,11 +225,80 @@
     <ClInclude Include="Utils\TypeUtils.inl">
       <Filter>Utils</Filter>
     </ClInclude>
-    <ClInclude Include="Reflection\DelegateTypeInfo.h">
+    <ClInclude Include="Reflection\CommonTypeInfo.h">
       <Filter>Reflection\TypeInfo</Filter>
     </ClInclude>
-    <ClInclude Include="Core\Delegate.h">
+    <ClInclude Include="Core\App\Editor.h">
+      <Filter>Core\App</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\ObjectLinker.h">
       <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\StringUtils.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\Viewport\LogViewport.h">
+      <Filter>Graphics\Viewport</Filter>
+    </ClInclude>
+    <ClInclude Include="Manager\RenderManager.h">
+      <Filter>Manager\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="Manager\BootSystem.h">
+      <Filter>Manager\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\Thread\MainThread.h">
+      <Filter>Utils\Thread</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\Thread\Job.h">
+      <Filter>Utils\Thread\Job</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\Thread\JobQueue.h">
+      <Filter>Utils\Thread\Job</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\Thread\Lock.h">
+      <Filter>Utils\Thread\Lock</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\Thread\LockQueue.h">
+      <Filter>Utils\Thread\Lock</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\Thread\MPSCJobQueue.h">
+      <Filter>Utils\Thread\Job</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\Thread\RenderJobQueue.h">
+      <Filter>Utils\Thread\Job</Filter>
+    </ClInclude>
+    <ClInclude Include="Manager\PathManager.h">
+      <Filter>Manager\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Resource\Package.h">
+      <Filter>Core\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\CommonType\Delegate.h">
+      <Filter>Core\CommonType</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\CommonType\SoftObjectPtr.h">
+      <Filter>Core\CommonType</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\CommonType\SubClass.h">
+      <Filter>Core\CommonType</Filter>
+    </ClInclude>
+    <ClInclude Include="Reflection\CommonTypeInfo.inl">
+      <Filter>Reflection\TypeInfo</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Resource\BulkWrapper.h">
+      <Filter>Core\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Resource\PackageHeader.h">
+      <Filter>Core\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Manager\PackageManager.h">
+      <Filter>Manager\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Resource\ResourceHeader.h">
+      <Filter>Core\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="ManagerMaximum.h">
+      <Filter>Headers\Minimum</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -260,9 +323,6 @@
     <ClCompile Include="Core\Component\ActorComponent.cpp">
       <Filter>Core\Component</Filter>
     </ClCompile>
-    <ClCompile Include="Reflection\SubClass.cpp">
-      <Filter>Reflection</Filter>
-    </ClCompile>
     <ClCompile Include="Reflection\Property.cpp">
       <Filter>Reflection</Filter>
     </ClCompile>
@@ -280,9 +340,6 @@
     </ClCompile>
     <ClCompile Include="Reflection\Method.cpp">
       <Filter>Reflection</Filter>
-    </ClCompile>
-    <ClCompile Include="Manager\BootSystem.cpp">
-      <Filter>Manager</Filter>
     </ClCompile>
     <ClCompile Include="Manager\ResourceManager.cpp">
       <Filter>Manager\Resources</Filter>
@@ -326,18 +383,6 @@
     <ClCompile Include="Graphics\Viewport\ViewportComposite.cpp">
       <Filter>Graphics\Viewport</Filter>
     </ClCompile>
-    <ClCompile Include="Utils\Thread\Job.cpp">
-      <Filter>Utils\Thread</Filter>
-    </ClCompile>
-    <ClCompile Include="Utils\Thread\JobQueue.cpp">
-      <Filter>Utils\Thread</Filter>
-    </ClCompile>
-    <ClCompile Include="Utils\Thread\Lock.cpp">
-      <Filter>Utils\Thread</Filter>
-    </ClCompile>
-    <ClCompile Include="Utils\Thread\LockQueue.cpp">
-      <Filter>Utils\Thread</Filter>
-    </ClCompile>
     <ClCompile Include="Utils\Memory\MemoryPool.cpp">
       <Filter>Utils\Memory</Filter>
     </ClCompile>
@@ -371,11 +416,74 @@
     <ClCompile Include="Core\Resource\Level.cpp">
       <Filter>Core\Resource</Filter>
     </ClCompile>
-    <ClCompile Include="Reflection\DelegateTypeInfo.cpp">
+    <ClCompile Include="Reflection\CommonTypeInfo.cpp">
       <Filter>Reflection\TypeInfo</Filter>
     </ClCompile>
-    <ClCompile Include="Core\Delegate.cpp">
+    <ClCompile Include="Core\App\Editor.cpp">
+      <Filter>Core\App</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\ObjectLinker.cpp">
       <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\StringUtils.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\Viewport\LogViewport.cpp">
+      <Filter>Graphics\Viewport</Filter>
+    </ClCompile>
+    <ClCompile Include="Manager\RenderManager.cpp">
+      <Filter>Manager\Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="Manager\BootSystem.cpp">
+      <Filter>Manager\Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\Thread\MainThread.cpp">
+      <Filter>Utils\Thread</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\Thread\Job.cpp">
+      <Filter>Utils\Thread\Job</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\Thread\JobQueue.cpp">
+      <Filter>Utils\Thread\Job</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\Thread\Lock.cpp">
+      <Filter>Utils\Thread\Lock</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\Thread\LockQueue.cpp">
+      <Filter>Utils\Thread\Lock</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\Thread\MPSCJobQueue.cpp">
+      <Filter>Utils\Thread\Job</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\Thread\RenderJobQueue.cpp">
+      <Filter>Utils\Thread\Job</Filter>
+    </ClCompile>
+    <ClCompile Include="Manager\PathManager.cpp">
+      <Filter>Manager\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Resource\Package.cpp">
+      <Filter>Core\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\CommonType\Delegate.cpp">
+      <Filter>Core\CommonType</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\CommonType\SoftObjectPtr.cpp">
+      <Filter>Core\CommonType</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\CommonType\SubClass.cpp">
+      <Filter>Core\CommonType</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Resource\BulkWrapper.cpp">
+      <Filter>Core\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Resource\PackageHeader.cpp">
+      <Filter>Core\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Manager\PackageManager.cpp">
+      <Filter>Manager\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Resource\ResourceHeader.cpp">
+      <Filter>Core\Resource</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #define WIN32_LEAN_AND_MEAN   
 
@@ -35,11 +35,9 @@
 //#include <Assimp/scene.h>
 //#include <Assimp/postprocess.h>
 
-///* ImGui */
-//
-//#include "imgui.h"
-//#include "imgui_impl_win32.h"
-//#include "imgui_impl_dx11.h"
+/* nlohmann Json */
+
+#include "nlohmann/json.hpp"
 
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "d3dcompiler.lib")
@@ -63,15 +61,19 @@
 #include "Reflection/InterfaceReflector.h"
 #include "Reflection/StructTypeInfo.h"
 #include "Reflection/ObjectTypeInfo.h"
-#include "Reflection/DefaultTypeInfo.h"
 #include "Reflection/Method.h"
 #include "Reflection/Property.h"
-#include "Reflection/SubClass.h"
+#include "Reflection/DefaultTypeInfo.h"
+#include "Reflection/CommonTypeInfo.h"
 
 /* Utils */
 
 #include "Utils/TypeUtils.h"
+#include "Utils/StringUtils.h"
+#include "Utils/Debugger/Logger.h"
 
 /* Others */
 
-#include "Core/Delegate.h"
+#include "Core/CommonType/Delegate.h"
+#include "Core/CommonType/SoftObjectPtr.h"
+#include "Core/CommonType/SubClass.h"

@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "BootSystem.h"
 
 #include "Manager/ObjectManager.h"
@@ -11,6 +11,14 @@ BootSystem::BootSystem() :
 }
 
 BootSystem::~BootSystem()
+{
+}
+
+void BootSystem::Init()
+{
+}
+
+void BootSystem::Destroy()
 {
 }
 
@@ -75,7 +83,6 @@ void BootSystem::Boot()
 	CreateTypeInfos();
 	CreateTypeMemberInfos();
 	CreateCDOs();
-	CreateInstances();
 }
 
 void BootSystem::CreateTypeInfos()
@@ -115,7 +122,3 @@ void BootSystem::CreateCDOs()
 	_mPhase = BootPhase::CDOReady;
 }
 
-void BootSystem::CreateInstances()
-{
-	//OBJECT_MANAGER->CreateObject
-}

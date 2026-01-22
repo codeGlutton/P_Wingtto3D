@@ -1,21 +1,51 @@
-#pragma once
+Ôªø#pragma once
 
 #include "Reflection/TypeInfo.h"
 
-#include "Core/Archive.h"
+class Archive;
+class Package;
+
+template<typename T>
+class DefaultTypeInfo abstract : public TypeInfo
+{
+	GEN_STRUCT_REFLECTION(DefaultTypeInfo<T>)
+
+protected:
+	DefaultTypeInfo() :
+		TypeInfo(TypeInfoInitializer<T>(sizeof(T)))
+	{
+	}
+};
+
+template<>
+class DefaultTypeInfo<void> abstract : public TypeInfo
+{
+	GEN_STRUCT_REFLECTION(DefaultTypeInfo<void>)
+
+protected:
+	DefaultTypeInfo() :
+		TypeInfo(TypeInfoInitializer<void>(sizeof(0)))
+	{
+	}
+};
+
+template<typename T>
+class ComparableDefaultTypeInfo abstract : public DefaultTypeInfo<T>
+{
+	GEN_STRUCT_REFLECTION(ComparableDefaultTypeInfo<T>)
+
+public:
+	virtual bool IsInstanceValueEqual(const void* lhsInst, const void* rhsInst) const override;
+};
 
 #pragma region VOID
 
 /**
  * void
  */
-class VoidTypeInfo : public TypeInfo
+class VoidTypeInfo : public DefaultTypeInfo<void>
 {
-protected:
-	VoidTypeInfo() :
-		TypeInfo(TypeInfoInitializer<void>())
-	{
-	}
+	GEN_STRUCT_REFLECTION(VoidTypeInfo)
 
 public:
 	virtual bool IsInstanceValueEqual(const void* lhsInst, const void* rhsInst) const override
@@ -44,19 +74,14 @@ public:
 #pragma region NUMERIC
 
 /**
- * ¡§ºˆ π◊ Ω«ºˆ
+ * Ï†ïÏàò Î∞è Ïã§Ïàò
  */
 template<typename T>
-class NumericTypeInfo : public TypeInfo
+class NumericTypeInfo : public ComparableDefaultTypeInfo<T>
 {
-protected:
-	NumericTypeInfo() :
-		TypeInfo(TypeInfoInitializer<T>(sizeof(T)))
-	{
-	}
+	GEN_STRUCT_REFLECTION(NumericTypeInfo)
 
 public:
-	virtual bool IsInstanceValueEqual(const void* lhsInst, const void* rhsInst) const override;
 	virtual void Serialize(OUT Archive& archive, const void* inst) const override;
 	virtual void Deserialize(Archive& archive, OUT void* inst) const override;
 
@@ -70,19 +95,14 @@ public:
 #pragma region ENUM
 
 /**
- * ø≠∞≈«¸
+ * Ïó¥Í±∞Ìòï
  */
 template<typename T>
-class EnumTypeInfo : public TypeInfo
+class EnumTypeInfo : public ComparableDefaultTypeInfo<T>
 {
-protected:
-	EnumTypeInfo() :
-		TypeInfo(TypeInfoInitializer<T>(sizeof(T)))
-	{
-	}
+	GEN_STRUCT_REFLECTION(EnumTypeInfo<T>)
 
 public:
-	virtual bool IsInstanceValueEqual(const void* lhsInst, const void* rhsInst) const override;
 	virtual void Serialize(OUT Archive& archive, const void* inst) const override;
 	virtual void Deserialize(Archive& archive, OUT void* inst) const override;
 
@@ -96,18 +116,35 @@ public:
 #pragma region ARRAY
 
 /**
- * πËø≠
+ * Pair
  */
-template<typename E, size_t N, typename C>
-class ArrayTypeInfo : public TypeInfo
+template<typename K, typename D> requires (IsChildOfObject<K> == false && IsChildOfObject<D> == false)
+class PairTypeInfo : public ComparableDefaultTypeInfo<std::pair<K, D>>
 {
-	using Element = E;
+	GEN_STRUCT_REFLECTION(PairTypeInfo<K, D>)
 
-protected:
-	ArrayTypeInfo() :
-		TypeInfo(TypeInfoInitializer<C>(sizeof(E) * N))
-	{
-	}
+private:
+	using C = std::pair<K,D>;
+
+public:
+	virtual void Serialize(OUT Archive& archive, const void* inst) const override;
+	virtual void Deserialize(Archive& archive, OUT void* inst) const override;
+
+public:
+	static const PairTypeInfo<K, D> mStatic;
+};
+
+/**
+ * Î∞∞Ïó¥
+ */
+template<typename E, size_t N> requires (IsChildOfObject<E> == false)
+class ArrayTypeInfo : public DefaultTypeInfo<E[N]>
+{
+	GEN_STRUCT_REFLECTION(ArrayTypeInfo<E, N>)
+
+private:
+	using C = E[N];
+	using Element = E;
 
 public:
 	virtual bool IsInstanceValueEqual(const void* lhsInst, const void* rhsInst) const override;
@@ -115,7 +152,24 @@ public:
 	virtual void Deserialize(Archive& archive, OUT void* inst) const override;
 
 public:
-	static const ArrayTypeInfo<E, N, C> mStatic;
+	static const ArrayTypeInfo<E, N> mStatic;
+};
+
+template<typename E, size_t N> requires (IsChildOfObject<E> == false)
+class ArrayContanierTypeInfo : public ComparableDefaultTypeInfo<std::array<E, N>>
+{
+	GEN_STRUCT_REFLECTION(ArrayContanierTypeInfo<E, N>)
+
+private:
+	using C = std::array<E, N>;
+	using Element = E;
+
+public:
+	virtual void Serialize(OUT Archive& archive, const void* inst) const override;
+	virtual void Deserialize(Archive& archive, OUT void* inst) const override;
+
+public:
+	static const ArrayContanierTypeInfo<E, N> mStatic;
 };
 
 #pragma endregion
@@ -124,30 +178,19 @@ public:
 #pragma region DYNAMIC_CONTAINER
 
 /**
- * µø¿˚ ≈©±‚ ≈∏¿‘
+ * ÎèôÏ†Å ÌÅ¨Í∏∞ ÌÉÄÏûÖ
  */
-template<typename E, typename C>
-class DynamicContainerTypeInfo abstract : public TypeInfo
+template<typename E, typename C> requires (IsChildOfObject<E> == false)
+class DynamicIterableContainerTypeInfo : public ComparableDefaultTypeInfo<C>
 {
-	using Element = E;
+	GEN_STRUCT_REFLECTION(DynamicIterableContainerTypeInfo<E, C>)
 
-protected:
-	DynamicContainerTypeInfo() :
-		TypeInfo(TypeInfoInitializer<C>(sizeof(C)))
-	{
-	}
-};
-
-template<typename E, typename C>
-class DynamicSequenceContainerTypeInfo : public DynamicContainerTypeInfo<E, C>
-{
 public:
-	virtual bool IsInstanceValueEqual(const void* lhsInst, const void* rhsInst) const override;
 	virtual void Serialize(OUT Archive& archive, const void* inst) const override;
 	virtual void Deserialize(Archive& archive, OUT void* inst) const override;
 
 public:
-	static const DynamicSequenceContainerTypeInfo<E, C> mStatic;
+	static const DynamicIterableContainerTypeInfo<E, C> mStatic;
 };
 
 #pragma endregion
@@ -155,15 +198,32 @@ public:
 
 #pragma region POINTER
 
+class HardRefTypeInfo abstract : public TypeInfo
+{
+	GEN_STRUCT_REFLECTION(HardRefTypeInfo)
+
+protected:
+	template<typename T>
+	HardRefTypeInfo(const TypeInfoInitializer<T>& initializer) :
+		TypeInfo(initializer)
+	{
+	}
+
+public:
+	virtual std::shared_ptr<Package> GetInstancePackage(const void* inst) const = 0;
+};
+
 /**
- * ∆˜¿Œ≈Õ
+ * Ìè¨Ïù∏ÌÑ∞
  */
 template<typename T> requires IsChildOfObject<T>
-class PointerTypeInfo : public TypeInfo
+class PointerTypeInfo : public HardRefTypeInfo
 {
+	GEN_STRUCT_REFLECTION(PointerTypeInfo<T>)
+
 protected:
 	PointerTypeInfo() :
-		TypeInfo(TypeInfoInitializer<T*>(sizeof(T*)))
+		HardRefTypeInfo(TypeInfoInitializer<T*>(sizeof(T*)))
 	{
 	}
 
@@ -171,17 +231,22 @@ public:
 	virtual bool IsInstanceValueEqual(const void* lhsInst, const void* rhsInst) const override;
 	virtual void Serialize(OUT Archive& archive, const void* inst) const override;
 	virtual void Deserialize(Archive& archive, OUT void* inst) const override;
+
+public:
+	virtual std::shared_ptr<Package> GetInstancePackage(const void* inst) const override;
 
 public:
 	static const PointerTypeInfo<T> mStatic;
 };
 
 template<typename T> requires IsChildOfObject<T>
-class SharedPointerTypeInfo : public TypeInfo
+class SharedPointerTypeInfo : public HardRefTypeInfo
 {
+	GEN_STRUCT_REFLECTION(SharedPointerTypeInfo<T>)
+
 protected:
 	SharedPointerTypeInfo() :
-		TypeInfo(TypeInfoInitializer<std::shared_ptr<T>>(sizeof(std::shared_ptr<T>)))
+		HardRefTypeInfo(TypeInfoInitializer<std::shared_ptr<T>>(sizeof(std::shared_ptr<T>)))
 	{
 	}
 
@@ -189,17 +254,22 @@ public:
 	virtual bool IsInstanceValueEqual(const void* lhsInst, const void* rhsInst) const override;
 	virtual void Serialize(OUT Archive& archive, const void* inst) const override;
 	virtual void Deserialize(Archive& archive, OUT void* inst) const override;
+
+public:
+	virtual std::shared_ptr<Package> GetInstancePackage(const void* inst) const override;
 
 public:
 	static const SharedPointerTypeInfo<T> mStatic;
 };
 
 template<typename T> requires IsChildOfObject<T>
-class WeakPointerTypeInfo : public TypeInfo
+class WeakPointerTypeInfo : public HardRefTypeInfo
 {
+	GEN_STRUCT_REFLECTION(WeakPointerTypeInfo<T>)
+
 protected:
 	WeakPointerTypeInfo() :
-		TypeInfo(TypeInfoInitializer<std::weak_ptr<T>>(sizeof(std::weak_ptr<T>)))
+		HardRefTypeInfo(TypeInfoInitializer<std::weak_ptr<T>>(sizeof(std::weak_ptr<T>)))
 	{
 	}
 
@@ -207,6 +277,9 @@ public:
 	virtual bool IsInstanceValueEqual(const void* lhsInst, const void* rhsInst) const override;
 	virtual void Serialize(OUT Archive& archive, const void* inst) const override;
 	virtual void Deserialize(Archive& archive, OUT void* inst) const override;
+
+public:
+	virtual std::shared_ptr<Package> GetInstancePackage(const void* inst) const override;
 
 public:
 	static const WeakPointerTypeInfo<T> mStatic;
@@ -215,3 +288,4 @@ public:
 #pragma endregion
 
 #include "DefaultTypeInfo.inl"
+

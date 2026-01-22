@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include "Core/App/App.h"
 #include "Core/App/Execute.h"
@@ -8,11 +8,14 @@
 class Game : public IExecute
 {
 public:
+	using BuildConstraint = AppBuildConstraint<AppBuildTargetFlag::Game | AppBuildTargetFlag::DebugAndRelease>;
+
+public:
 	Game();
 	virtual ~Game() override;
 
 public:
-	void Create() override;
+	void PreBoot() override;
 	void Init() override;
 	void Update() override;
 	void End() override;
@@ -22,5 +25,4 @@ private:
 
 private:
 	std::shared_ptr<AppWindow> _mMainWindow;
-	//std::vector<std::shared_ptr<AppWindow>> _mSubWindows; ¿¡µðÅÍ Àü¿ë
 };

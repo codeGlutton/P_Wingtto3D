@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "ViewportComposite.h"
 
 #include "Graphics/Viewport/Viewport.h"
@@ -12,6 +12,6 @@ void ViewportComposite::UpdateViewports()
 {
 }
 
-void ViewportComposite::ReDraw()
+void ViewportComposite::Render()
 {
 }

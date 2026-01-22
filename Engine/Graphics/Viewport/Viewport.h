@@ -1,9 +1,19 @@
-#pragma once
+ï»¿#pragma once
 
 #include "Core/Object.h"
 
+struct ViewportDesc
+{
+	GEN_STRUCT_REFLECTION(ViewportDesc)
+
+	PROPERTY(mWidth)
+	float mWidth = 800.f;
+	PROPERTY(mHeight)
+	float mHeight = 600.f;
+};
+
 /**
- * Ã¢À» Ç¥±âÇÒ viewport º£ÀÌ½º Å¬·¡½º (·»´õ ½º·¹µå¿¡¼­ µå·Î¿ìÄİ)
+ * ì°½ì„ í‘œê¸°í•  viewport ë² ì´ìŠ¤ í´ë˜ìŠ¤ (ë Œë” ìŠ¤ë ˆë“œì—ì„œ ë“œë¡œìš°ì½œ)
  */
 class Viewport abstract : public Object
 {
@@ -18,12 +28,10 @@ public:
 	void GetSize();
 
 private:
-	virtual void ReDraw() = 0;
+	virtual void Render() = 0;
 
 private:
-	PROPERTY(_mWidth)
-	float _mWidth;
-	PROPERTY(_mHeight)
-	float _mHeight;
+	PROPERTY(_mDesc)
+	ViewportDesc _mDesc;
 };
 

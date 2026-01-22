@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include "Graphics/Viewport/Viewport.h"
 
@@ -11,7 +11,7 @@ enum class SplitDirection
 };
 
 /**
- * Viewport ÄÄÆ÷Áş
+ * Viewport ì»´í¬ì§“
  */
 class ViewportComposite : public Viewport
 {
@@ -48,7 +48,7 @@ public:
 
 private:
 	void UpdateViewports();
-	void ReDraw() override;
+	virtual void Render() override;
 
 private:
 	SplitDirection _mDir;

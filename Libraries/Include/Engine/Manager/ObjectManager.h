@@ -1,32 +1,35 @@
-#pragma once
+ï»¿#pragma once
 
 #define OBJECT_MANAGER ObjectManager::GetInst()
 
 class Object;
 
-namespace ObjectFlag
+namespace ObjectCreateFlag
 {
 	enum Type : uint8
 	{
 		None = 0,
 
-		CDO = 1 << 0,			// ÃÊ±â CDO »ý¼º ½Ã
-		DeferredLoad = 1 << 1,	// Object Index¸¦ ÅëÇØ Pointer ÃÊ±âÈ­ ÇÊ¿ä
+		CDO = 1 << 0,			// ì´ˆê¸° CDO ìƒì„± ì‹œ
+		DeferredLoad = 1 << 1,	// Object Indexë¥¼ í†µí•´ Pointer ì´ˆê¸°í™” í•„ìš”
 	};
 }
 
 struct ObjectInitializeParameters
 {
 public:
-	ObjectInitializeParameters(const ObjectTypeInfo* typeInfo) :
-		mTypeInfo(typeInfo)
+	ObjectInitializeParameters(const ObjectTypeInfo* typeInfo, const std::wstring& name) :
+		mTypeInfo(typeInfo),
+		mName(name)
 	{
 	}
 
 public:
 	const ObjectTypeInfo* mTypeInfo;
-	Object* mOuter = nullptr;
-	ObjectFlag::Type mFlags = ObjectFlag::None;
+	std::wstring mName;
+	std::wstring mPath = L"";
+	std::shared_ptr<Package> mOuter = nullptr;
+	ObjectCreateFlag::Type mFlags = ObjectCreateFlag::None;
 };
 
 class ObjectManager
@@ -43,13 +46,23 @@ public:
 	}
 
 public:
+	void Init();
+	void Destroy();
+
+public:
 	std::shared_ptr<Object> CreateObject(ObjectInitializeParameters params) const;
-	void LoadObjects(const std::vector<std::shared_ptr<Object>>& objects) const;
+
+public:
+	void NotifyToAddObject(const std::wstring& name);
+	void NotifyToRemoveObject(const std::wstring& name);
 
 private:
-	inline bool ShouldLoadProperties(ObjectFlag::Type flags) const
+	inline bool ShouldLoadProperties(ObjectCreateFlag::Type flags) const
 	{
-		return !(flags & (ObjectFlag::CDO | ObjectFlag::DeferredLoad));
+		return !(flags & (ObjectCreateFlag::CDO | ObjectCreateFlag::DeferredLoad));
 	}
+
+private:
+	std::unordered_set<std::wstring> _mNameSet;
 };
 

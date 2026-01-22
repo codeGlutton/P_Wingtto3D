@@ -1,7 +1,8 @@
-#pragma once
+ï»¿#pragma once
 
 #include "Reflection/ObjectTypeInfo.h"
 #include "Reflection/DefaultTypeInfo.h"
+#include "Reflection/CommonTypeInfo.h"
 
 template<typename To, typename From>
 To* Cast(From* src)
@@ -98,7 +99,7 @@ std::shared_ptr<To> CastSharedPointer(std::shared_ptr<void> src, const ObjectTyp
 }
 
 /**
- * Á¤¼ö ¹× ½Ç¼ö Å¸ÀÔ
+ * ì •ìˆ˜ ë° ì‹¤ìˆ˜ íƒ€ì…
  */
 template<typename T, typename C>
 struct TypeInfoResolver
@@ -111,7 +112,7 @@ struct TypeInfoResolver
 };
 
 /**
- * void Å¸ÀÔ
+ * void íƒ€ì…
  */
 template<>
 struct TypeInfoResolver<void, void>
@@ -123,7 +124,7 @@ struct TypeInfoResolver<void, void>
 };
 
 /**
- * ¿­°ÅÇü
+ * ì—´ê±°í˜•
  */
 template<typename T>
 struct TypeInfoResolver<T, std::enable_if_t<std::is_enum_v<T>>>
@@ -135,7 +136,7 @@ struct TypeInfoResolver<T, std::enable_if_t<std::is_enum_v<T>>>
 };
 
 /**
- * Å¬·¡½º ¹× ±¸Á¶Ã¼
+ * í´ë˜ìŠ¤ ë° êµ¬ì¡°ì²´
  */
 template<typename T>
 struct TypeInfoResolver<T, std::enable_if_t<std::is_class_v<T> && HasSuper<T>>>
@@ -147,9 +148,9 @@ struct TypeInfoResolver<T, std::enable_if_t<std::is_class_v<T> && HasSuper<T>>>
 };
 
 /**
- * Æ÷ÀÎÅÍ
+ * í¬ì¸í„°
  */
-template<typename T>
+template<typename T> requires IsChildOfObject<T>
 struct TypeInfoResolver<T*, void>
 {
 	static const PointerTypeInfo<T>& Get()
@@ -159,7 +160,7 @@ struct TypeInfoResolver<T*, void>
 	}
 };
 
-template<typename T>
+template<typename T> requires IsChildOfObject<T>
 struct TypeInfoResolver<std::shared_ptr<T>, void>
 {
 	static const SharedPointerTypeInfo<T>& Get()
@@ -169,7 +170,7 @@ struct TypeInfoResolver<std::shared_ptr<T>, void>
 	}
 };
 
-template<typename T>
+template<typename T> requires IsChildOfObject<T>
 struct TypeInfoResolver<std::weak_ptr<T>, void>
 {
 	static const WeakPointerTypeInfo<T>& Get()
@@ -179,56 +180,76 @@ struct TypeInfoResolver<std::weak_ptr<T>, void>
 	}
 };
 
+template<typename T> requires IsChildOfObject<T>
+struct TypeInfoResolver<SubClass<T>, void>
+{
+	static const SubClassTypeInfo<T>& Get()
+	{
+		STATIC_ASSERT_MSG(IsChildOfObject<T> == true, "Allow only object pointer");
+		return SubClassTypeInfo<T>::mStatic;
+	}
+};
+
+template<typename T> requires IsChildOfObject<T>
+struct TypeInfoResolver<SoftObjectPtr<T>, void>
+{
+	static const SoftRefTypeInfo<T>& Get()
+	{
+		return SoftRefTypeInfo<T>::mStatic;
+	}
+};
+
+template<typename T> requires IsBulk<T>
+struct TypeInfoResolver<std::shared_ptr<T>, void>
+{
+	static const BulkTypeInfo<T>& Get()
+	{
+		return BulkTypeInfo<T>::mStatic;
+	}
+};
+
 /**
- * ¹è¿­
+ * Pair
+ */
+template<typename K, typename D>
+struct TypeInfoResolver<std::pair<K,D>, void>
+{
+	static const PairTypeInfo<K, D>& Get()
+	{
+		return PairTypeInfo<K, D>::mStatic;
+	}
+};
+
+/**
+ * ë°°ì—´
  */
 template<typename T, size_t N>
 struct TypeInfoResolver<T[N], void>
 {
-	static const ArrayTypeInfo<T, N, T[N]>& Get()
+	static const ArrayTypeInfo<T, N>& Get()
 	{
-		return ArrayTypeInfo<T, N, T[N]>::mStatic;
+		return ArrayTypeInfo<T, N>::mStatic;
+	}
+};
+
+template<typename T, size_t N>
+struct TypeInfoResolver<std::array<T, N>, void>
+{
+	static const ArrayContanierTypeInfo<T, N>& Get()
+	{
+		return ArrayContanierTypeInfo<T, N>::mStatic;
 	}
 };
 
 /**
- * µ¿Àû ¹è¿­
+ * ì–´ëŒ‘í„°ë¥¼ ì œì™¸í•œ ë™ì  ë°°ì—´ ë° ë¬¸ìì—´
  */
 template<typename T>
-struct TypeInfoResolver<std::vector<T>, void>
+struct TypeInfoResolver<T, std::enable_if_t<IsIteratorContanier<T> && UseAllocator<T>>>
 {
-	static const DynamicSequenceContainerTypeInfo<T, std::vector<T>>& Get()
+	static const DynamicIterableContainerTypeInfo<IteratorElementType<T>, T>& Get()
 	{
-		return DynamicSequenceContainerTypeInfo<T, std::vector<T>>::mStatic;
+		return DynamicIterableContainerTypeInfo<IteratorElementType<T>, T>::mStatic;
 	}
 };
 
-template<typename T>
-struct TypeInfoResolver<std::list<T>, void>
-{
-	static const DynamicSequenceContainerTypeInfo<T, std::list<T>>& Get()
-	{
-		return DynamicSequenceContainerTypeInfo<T, std::list<T>>::mStatic;
-	}
-};
-
-/**
- * ¹®ÀÚ¿­
- */
-template<>
-struct TypeInfoResolver<std::string, void>
-{
-	static const DynamicSequenceContainerTypeInfo<char, std::string>& Get()
-	{
-		return DynamicSequenceContainerTypeInfo<char, std::string>::mStatic;
-	}
-};
-
-template<>
-struct TypeInfoResolver<std::wstring, void>
-{
-	static const DynamicSequenceContainerTypeInfo<wchar_t, std::wstring>& Get()
-	{
-		return DynamicSequenceContainerTypeInfo<wchar_t, std::wstring>::mStatic;
-	}
-};

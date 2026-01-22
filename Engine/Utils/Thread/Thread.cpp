@@ -1,13 +1,13 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "Thread.h"
 
 #include "Manager/ThreadManager.h"
 
-void Thread::Run()
+void WorkerThread::Run()
 {
-	while (IsRunnable() == true && THREAD_MANAGER->IsThreadAlive() == true)
+	while (IsRunnable() == true && THREAD_MANAGER->IsAlive() == true)
 	{
-		LEndTickCount = GetTickCount64() + mThreadTick;
+		LEndTickCount = GetTickCount64() + mThreadMaxTick;
 		Work();
 	}
 }

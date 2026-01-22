@@ -1,8 +1,6 @@
 #include "pch.h"
 #include "App.h"
 
-#include "Core/App/Execute.h"
-
 App::App()
 {
 }
@@ -11,40 +9,20 @@ App::~App()
 {
 }
 
-WPARAM App::Run(AppDesc& desc)
+LRESULT App::WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	_mDesc = desc;
-	assert(_mDesc.mMode != nullptr);
-
-	// 윈도우에 콜백 등록
-	RegisterClassToWindow();
-
-	// 윈도우 창 등록
-	_mDesc.mMode->Create();
-
-	// 리플렉션 및 CDO 등록
-	BOOT_SYSTEM->Boot();
-
-	// 객체 초기화
-	_mDesc.mMode->Init();
-
-	MSG msg = { 0 };
-	while (msg.message != WM_QUIT)
+	switch (message)
 	{
-		// 메세지 처리
-		if (::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
-		{
-			::TranslateMessage(&msg);
-			::DispatchMessage(&msg);
-		}
-		else
-		{
-			_mDesc.mMode->Update();
-		}
+	case WM_SIZE:
+		break;
+	case WM_CLOSE:
+	case WM_DESTROY:
+		::PostQuitMessage(0);
+		break;
+	default:
+		return ::DefWindowProc(hwnd, message, wParam, lParam);
 	}
-	_mDesc.mMode->End();
-
-	return msg.wParam;
+	return LRESULT();
 }
 
 ATOM App::RegisterClassToWindow()
@@ -67,18 +45,3 @@ ATOM App::RegisterClassToWindow()
 	return ::RegisterClassExW(&wcex);
 }
 
-LRESULT App::WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
-{
-	switch (message)
-	{
-	case WM_SIZE:
-		break;
-	case WM_CLOSE:
-	case WM_DESTROY:
-		::PostQuitMessage(0);
-		break;
-	default:
-		return ::DefWindowProc(hwnd, message, wParam, lParam);
-	}
-	return LRESULT();
-}

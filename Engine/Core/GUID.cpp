@@ -1,4 +1,4 @@
-#include "pch.h"
+Ôªø#include "pch.h"
 #include "GUID.h"
 
 #include <combaseapi.h>
@@ -6,11 +6,11 @@
 ObjectGUID ObjectGUID::NewGUID()
 {
 	GUID winGuid;
-	CHECK(CoCreateGuid(&winGuid));
+	CHECK_WIN(CoCreateGuid(&winGuid));
 
 	ObjectGUID out;
-	out.mA = winGuid.Data1;										// 4πŸ¿Ã∆Æ
-	out.mB = (uint32(winGuid.Data2) << 16) | winGuid.Data3;		// 2 + 2πŸ¿Ã∆Æ
-	std::memcpy(&out.mC, winGuid.Data4, 8);						// 8πŸ¿Ã∆Æ
+	out.mA = winGuid.Data1;										// 4Î∞îÏù¥Ìä∏
+	out.mB = (uint32(winGuid.Data2) << 16) | winGuid.Data3;		// 2 + 2Î∞îÏù¥Ìä∏
+	std::memcpy(&out.mC, winGuid.Data4, 8);						// 8Î∞îÏù¥Ìä∏
 	return out;
 }

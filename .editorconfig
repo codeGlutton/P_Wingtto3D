@@ -1,0 +1,2 @@
+﻿[*.{cpp,h,inl}]
+charset = utf-8-bom

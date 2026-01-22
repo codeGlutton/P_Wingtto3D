@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Core/Object.h"
 #include "Core/Component/ActorComponent.h"
@@ -22,7 +22,18 @@ protected:
 	virtual void BeginDestroy() override;
 
 public:
+	std::shared_ptr<Object> GetOwner() const
+	{
+		return _mOwner.lock();
+	}
+
+public:
 	std::shared_ptr<ActorComponent> FindComponentByClass(const SubClass<ActorComponent> targetClass);
+
+private:
+	// 부모 객체
+	PROPERTY(_mOwner)
+	std::weak_ptr<Actor> _mOwner;
 
 private:
 	std::shared_ptr<ActorComponent> _mRootComp;

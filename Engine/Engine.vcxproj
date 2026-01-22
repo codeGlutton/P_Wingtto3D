@@ -5,6 +5,22 @@
       <Configuration>Debug</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="EditorDebug|Win32">
+      <Configuration>EditorDebug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="EditorDebug|x64">
+      <Configuration>EditorDebug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="EditorRelease|Win32">
+      <Configuration>EditorRelease</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="EditorRelease|x64">
+      <Configuration>EditorRelease</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Release|Win32">
       <Configuration>Release</Configuration>
       <Platform>Win32</Platform>
@@ -23,15 +39,23 @@
     <ClInclude Include="Core\App\App.h" />
     <ClInclude Include="Core\App\AppWindow\AppWindow.h" />
     <ClInclude Include="Core\App\AppWindow\GameAppWindow.h" />
+    <ClInclude Include="Core\App\Editor.h" />
     <ClInclude Include="Core\App\Execute.h" />
     <ClInclude Include="Core\App\Game.h" />
     <ClInclude Include="Core\Archive.h" />
+    <ClInclude Include="Core\CommonType\Delegate.h" />
+    <ClInclude Include="Core\CommonType\SoftObjectPtr.h" />
+    <ClInclude Include="Core\CommonType\SubClass.h" />
     <ClInclude Include="Core\Component\ActorComponent.h" />
-    <ClInclude Include="Core\Delegate.h" />
     <ClInclude Include="Core\GUID.h" />
     <ClInclude Include="Core\Object.h" />
+    <ClInclude Include="Core\ObjectLinker.h" />
+    <ClInclude Include="Core\Resource\BulkWrapper.h" />
     <ClInclude Include="Core\Resource\Level.h" />
+    <ClInclude Include="Core\Resource\Package.h" />
+    <ClInclude Include="Core\Resource\PackageHeader.h" />
     <ClInclude Include="Core\Resource\Resource.h" />
+    <ClInclude Include="Core\Resource\ResourceHeader.h" />
     <ClInclude Include="Core\World\Actor.h" />
     <ClInclude Include="Core\World\LevelPartition.h" />
     <ClInclude Include="Core\World\World.h" />
@@ -39,25 +63,29 @@
     <ClInclude Include="EnginePch.h" />
     <ClInclude Include="GraphicMinimum.h" />
     <ClInclude Include="Graphics\Scene\Scene.h" />
+    <ClInclude Include="Graphics\Viewport\LogViewport.h" />
     <ClInclude Include="Graphics\Viewport\SceneViewport.h" />
     <ClInclude Include="Graphics\Viewport\ViewportComposite.h" />
     <ClInclude Include="Graphics\Viewport\Viewport.h" />
+    <ClInclude Include="ManagerMaximum.h" />
     <ClInclude Include="Manager\BootSystem.h" />
     <ClInclude Include="Manager\ObjectManager.h" />
+    <ClInclude Include="Manager\PackageManager.h" />
+    <ClInclude Include="Manager\PathManager.h" />
+    <ClInclude Include="Manager\RenderManager.h" />
     <ClInclude Include="Manager\ResourceManager.h" />
     <ClInclude Include="Manager\ThreadManager.h" />
     <ClInclude Include="Manager\TimeManager.h" />
     <ClInclude Include="Manager\AppWindowManager.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Reflection\DefaultTypeInfo.h" />
-    <ClInclude Include="Reflection\DelegateTypeInfo.h" />
+    <ClInclude Include="Reflection\CommonTypeInfo.h" />
     <ClInclude Include="Reflection\InterfaceReflector.h" />
     <ClInclude Include="Reflection\Method.h" />
     <ClInclude Include="Reflection\ObjectTypeInfo.h" />
     <ClInclude Include="Reflection\Property.h" />
     <ClInclude Include="Reflection\Reflection.h" />
     <ClInclude Include="Reflection\StructTypeInfo.h" />
-    <ClInclude Include="Reflection\SubClass.h" />
     <ClInclude Include="Reflection\TypeInfo.h" />
     <ClInclude Include="Reflection\TypeTrait.h" />
     <ClInclude Include="TLS.h" />
@@ -66,10 +94,14 @@
     <ClInclude Include="Utils\Memory\MemoryPool.h" />
     <ClInclude Include="Utils\Memory\ObjectPool.h" />
     <ClInclude Include="Utils\ObjectUtils.h" />
+    <ClInclude Include="Utils\StringUtils.h" />
     <ClInclude Include="Utils\Thread\Job.h" />
     <ClInclude Include="Utils\Thread\JobQueue.h" />
     <ClInclude Include="Utils\Thread\Lock.h" />
     <ClInclude Include="Utils\Thread\LockQueue.h" />
+    <ClInclude Include="Utils\Thread\MainThread.h" />
+    <ClInclude Include="Utils\Thread\MPSCJobQueue.h" />
+    <ClInclude Include="Utils\Thread\RenderJobQueue.h" />
     <ClInclude Include="Utils\Thread\Thread.h" />
     <ClInclude Include="Utils\TypeUtils.h" />
   </ItemGroup>
@@ -77,52 +109,71 @@
     <ClCompile Include="Core\App\App.cpp" />
     <ClCompile Include="Core\App\AppWindow\AppWindow.cpp" />
     <ClCompile Include="Core\App\AppWindow\GameAppWindow.cpp" />
+    <ClCompile Include="Core\App\Editor.cpp" />
     <ClCompile Include="Core\App\Execute.cpp" />
     <ClCompile Include="Core\App\Game.cpp" />
     <ClCompile Include="Core\Archive.cpp" />
+    <ClCompile Include="Core\CommonType\Delegate.cpp" />
+    <ClCompile Include="Core\CommonType\SoftObjectPtr.cpp" />
+    <ClCompile Include="Core\CommonType\SubClass.cpp" />
     <ClCompile Include="Core\Component\ActorComponent.cpp" />
-    <ClCompile Include="Core\Delegate.cpp" />
     <ClCompile Include="Core\GUID.cpp" />
     <ClCompile Include="Core\Object.cpp" />
+    <ClCompile Include="Core\ObjectLinker.cpp" />
+    <ClCompile Include="Core\Resource\BulkWrapper.cpp" />
     <ClCompile Include="Core\Resource\Level.cpp" />
+    <ClCompile Include="Core\Resource\Package.cpp" />
+    <ClCompile Include="Core\Resource\PackageHeader.cpp" />
     <ClCompile Include="Core\Resource\Resource.cpp" />
+    <ClCompile Include="Core\Resource\ResourceHeader.cpp" />
     <ClCompile Include="Core\World\Actor.cpp" />
     <ClCompile Include="Core\World\LevelPartition.cpp" />
     <ClCompile Include="Core\World\World.cpp" />
     <ClCompile Include="Graphics\Scene\Scene.cpp" />
+    <ClCompile Include="Graphics\Viewport\LogViewport.cpp" />
     <ClCompile Include="Graphics\Viewport\SceneViewport.cpp" />
     <ClCompile Include="Graphics\Viewport\ViewportComposite.cpp" />
     <ClCompile Include="Graphics\Viewport\Viewport.cpp" />
     <ClCompile Include="Manager\BootSystem.cpp" />
     <ClCompile Include="Manager\ObjectManager.cpp" />
+    <ClCompile Include="Manager\PackageManager.cpp" />
+    <ClCompile Include="Manager\PathManager.cpp" />
+    <ClCompile Include="Manager\RenderManager.cpp" />
     <ClCompile Include="Manager\ResourceManager.cpp" />
     <ClCompile Include="Manager\ThreadManager.cpp" />
     <ClCompile Include="Manager\TimeManager.cpp" />
     <ClCompile Include="Manager\AppWindowManager.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='EditorDebug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='EditorRelease|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='EditorDebug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='EditorRelease|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Reflection\DefaultTypeInfo.cpp" />
-    <ClCompile Include="Reflection\DelegateTypeInfo.cpp" />
+    <ClCompile Include="Reflection\CommonTypeInfo.cpp" />
     <ClCompile Include="Reflection\InterfaceReflector.cpp" />
     <ClCompile Include="Reflection\Method.cpp" />
     <ClCompile Include="Reflection\ObjectTypeInfo.cpp" />
     <ClCompile Include="Reflection\Property.cpp" />
     <ClCompile Include="Reflection\StructTypeInfo.cpp" />
-    <ClCompile Include="Reflection\SubClass.cpp" />
     <ClCompile Include="Reflection\TypeInfo.cpp" />
     <ClCompile Include="TLS.cpp" />
     <ClCompile Include="Utils\Debugger\Logger.cpp" />
     <ClCompile Include="Utils\Memory\MemoryPool.cpp" />
     <ClCompile Include="Utils\Memory\ObjectPool.cpp" />
     <ClCompile Include="Utils\ObjectUtils.cpp" />
+    <ClCompile Include="Utils\StringUtils.cpp" />
     <ClCompile Include="Utils\Thread\Job.cpp" />
     <ClCompile Include="Utils\Thread\JobQueue.cpp" />
     <ClCompile Include="Utils\Thread\Lock.cpp" />
     <ClCompile Include="Utils\Thread\LockQueue.cpp" />
+    <ClCompile Include="Utils\Thread\MainThread.cpp" />
+    <ClCompile Include="Utils\Thread\MPSCJobQueue.cpp" />
+    <ClCompile Include="Utils\Thread\RenderJobQueue.cpp" />
     <ClCompile Include="Utils\Thread\Thread.cpp" />
     <ClCompile Include="Utils\TypeUtils.cpp" />
   </ItemGroup>
@@ -132,6 +183,9 @@
       <FileType>Document</FileType>
     </ClInclude>
     <ClInclude Include="Utils\TypeUtils.inl">
+      <FileType>Document</FileType>
+    </ClInclude>
+    <ClInclude Include="Reflection\CommonTypeInfo.inl">
       <FileType>Document</FileType>
     </ClInclude>
   </ItemGroup>
@@ -149,7 +203,20 @@
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='EditorDebug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='EditorRelease|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
@@ -162,7 +229,20 @@
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='EditorDebug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='EditorRelease|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
@@ -177,13 +257,25 @@
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='EditorDebug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='EditorRelease|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='EditorDebug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='EditorRelease|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
@@ -191,7 +283,15 @@
     <OutDir>$(SolutionDir)Libraries\Lib\$(Configuration)\$(ProjectName)\</OutDir>
     <IntDir>$(SolutionDir)Intermediates\$(Configuration)\$(ProjectName)\</IntDir>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='EditorDebug|Win32'">
+    <OutDir>$(SolutionDir)Libraries\Lib\$(Configuration)\$(ProjectName)\</OutDir>
+    <IntDir>$(SolutionDir)Intermediates\$(Configuration)\$(ProjectName)\</IntDir>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>$(SolutionDir)Libraries\Lib\$(Configuration)\$(ProjectName)\</OutDir>
+    <IntDir>$(SolutionDir)Intermediates\$(Configuration)\$(ProjectName)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='EditorRelease|Win32'">
     <OutDir>$(SolutionDir)Libraries\Lib\$(Configuration)\$(ProjectName)\</OutDir>
     <IntDir>$(SolutionDir)Intermediates\$(Configuration)\$(ProjectName)\</IntDir>
   </PropertyGroup>
@@ -199,7 +299,15 @@
     <OutDir>$(SolutionDir)Libraries\Lib\$(Configuration)\$(ProjectName)\</OutDir>
     <IntDir>$(SolutionDir)Intermediates\$(Configuration)\$(ProjectName)\</IntDir>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='EditorDebug|x64'">
+    <OutDir>$(SolutionDir)Libraries\Lib\$(Configuration)\$(ProjectName)\</OutDir>
+    <IntDir>$(SolutionDir)Intermediates\$(Configuration)\$(ProjectName)\</IntDir>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(SolutionDir)Libraries\Lib\$(Configuration)\$(ProjectName)\</OutDir>
+    <IntDir>$(SolutionDir)Intermediates\$(Configuration)\$(ProjectName)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='EditorRelease|x64'">
     <OutDir>$(SolutionDir)Libraries\Lib\$(Configuration)\$(ProjectName)\</OutDir>
     <IntDir>$(SolutionDir)Intermediates\$(Configuration)\$(ProjectName)\</IntDir>
   </PropertyGroup>
@@ -207,7 +315,33 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NEDITOR;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)Libraries\Include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>
+      </SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <Lib>
+      <AdditionalLibraryDirectories>$(SolutionDir)Libraies\Lib\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Lib>
+    <PostBuildEvent>
+      <Command>call "$(ProjectDir)IncludeCopy.bat" "$(SolutionDir)" "$(ProjectName)"</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Header, ini copy</Message>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='EditorDebug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_EDITOR;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
@@ -235,7 +369,35 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;NEDITOR;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)Libraries\Include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>
+      </SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <Lib>
+      <AdditionalLibraryDirectories>$(SolutionDir)Libraies\Lib\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Lib>
+    <PostBuildEvent>
+      <Command>call "$(ProjectDir)IncludeCopy.bat" "$(SolutionDir)" "$(ProjectName)"</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Header, ini copy</Message>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='EditorRelease|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_EDITOR;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
@@ -261,7 +423,33 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NEDITOR;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)Libraries\Include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>
+      </SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <Lib>
+      <AdditionalLibraryDirectories>$(SolutionDir)Libraies\Lib\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Lib>
+    <PostBuildEvent>
+      <Command>call "$(ProjectDir)IncludeCopy.bat" "$(SolutionDir)" "$(ProjectName)"</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Header, ini copy</Message>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='EditorDebug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_EDITOR;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
@@ -289,7 +477,35 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;NEDITOR;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)Libraries\Include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>
+      </SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <Lib>
+      <AdditionalLibraryDirectories>$(SolutionDir)Libraies\Lib\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Lib>
+    <PostBuildEvent>
+      <Command>call "$(ProjectDir)IncludeCopy.bat" "$(SolutionDir)" "$(ProjectName)"</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Header, ini copy</Message>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='EditorRelease|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_EDITOR;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>

@@ -1,9 +1,20 @@
-#pragma once
+﻿#pragma once
 
 #include "Core/Object.h"
 
-class Resource : public Object
+class ResourceHeader;
+
+class Resource abstract : public Object
 {
-	GEN_REFLECTION(Resource)
+	GEN_ABSTRACT_REFLECTION(Resource)
+
+	friend class ResourceManager;
+
+protected:
+	virtual void PostCreate() override;
+	virtual void BeginDestroy() override;
+
+private:
+	std::shared_ptr<ResourceHeader> _mHeader;
 };
 

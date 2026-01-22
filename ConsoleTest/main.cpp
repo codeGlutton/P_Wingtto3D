@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "Core/Object.h"
 
 #include <chrono>
@@ -96,6 +96,12 @@ public:
 
 	PROPERTY(mSP)
 	std::shared_ptr<Object> mSP;
+
+	PROPERTY(mVec)
+	std::vector<int32> mVec;
+
+	PROPERTY(mStr)
+	std::string mStr;
 };
 
 class ReflectionTestObject : public InterfaceReflector<ReflectionTestObjectBase, IInterfaceReflectionTestBase2, IInterfaceReflectionTest>
@@ -117,6 +123,15 @@ public:
 public:
 	PROPERTY(mA)
 	int mA;
+
+	PROPERTY(mUnMap)
+	std::unordered_map<int32, std::shared_ptr<Object>> mUnMap;
+
+	PROPERTY(mArrCon)
+	std::array<int32,7> mArrCon;
+
+	PROPERTY(mArr)
+	Object* mArr[2];
 };
 
 void TestReflectionCast(IInterfaceReflectionTestBase* base)
@@ -135,7 +150,7 @@ int main()
 {
 	BOOT_SYSTEM->Boot();
 
-	/*std::shared_ptr<const ReflectionTestObject> t = std::make_shared<ReflectionTestObject>();
+	std::shared_ptr<const ReflectionTestObject> t = std::make_shared<ReflectionTestObject>();
 	OnTest testDelegate;
 	auto handle = testDelegate.BindNativeMethod<IInterfaceReflectionTest>(t, &IInterfaceReflectionTest::DoInterface);
 	OnTestMulti testMultiDelegate;
@@ -174,7 +189,7 @@ int main()
 	std::shared_ptr<IInterfaceTestBase> multiDelegateTarget = std::make_shared<TestObject>();
 	testMultiDelegate.Multicast(multiDelegateTarget.get());
 	testMultiDelegate.Unbind(handleMulti);
-	testMultiDelegate.Multicast(multiDelegateTarget.get());*/
+	testMultiDelegate.Multicast(multiDelegateTarget.get());
 
 	/*std::shared_ptr<ReflectionTestObject> test = std::make_shared<ReflectionTestObject>();
 	auto cdo = test->GetDefaultObject();
@@ -209,6 +224,32 @@ int main()
 		}
 	}
 	{
+		const Property* property = typeInfo->GetProperty("mUnMap");
+		if (property != nullptr)
+		{
+			std::unordered_map<int32, std::shared_ptr<Object>> unMap;
+			unMap[2] = nullptr;
+			unMap[0] = test;
+			property->Set(test.get(), unMap);
+		}
+	}
+	{
+		const Property* property = typeInfo->GetProperty("mArrCon");
+		if (property != nullptr)
+		{
+			std::array<int32, 7> arr = { 3, };
+			property->Set(test.get(), arr);
+		}
+	}
+	{
+		const Property* property = typeInfo->GetProperty("mArr");
+		if (property != nullptr)
+		{
+			Object* arr[2] = { test.get(), nullptr };
+			property->Set(test.get(), arr);
+		}
+	}
+	{
 		const Property* property = typeInfo->GetProperty("mSP");
 		if (property != nullptr)
 		{
@@ -216,6 +257,30 @@ int main()
 			property->SetRawPtr(test.get(), &test);
 
 			property->Set<std::shared_ptr<Object>>(test.get(), test);
+		}
+	}
+	{
+		const Property* property = typeInfo->GetProperty("mVec");
+		if (property != nullptr)
+		{
+			std::vector<int> vec1{ 0, 1, 4 };
+			std::vector<int> vec2{ 3, 1, 4, 5 };
+
+			property->SetRawPtr(test.get(), &vec1);
+			const std::vector<int>& ref = *(const std::vector<int>*)(property->GetRawPtr(test.get()));
+
+			property->Set(test.get(), vec2);
+		}
+	}
+	{
+		const Property* property = typeInfo->GetProperty("mStr");
+		if (property != nullptr)
+		{
+			std::string str = "Hi";
+			property->SetRawPtr(test.get(), &str);
+			const std::string& ref = *(const std::string*)(property->GetRawPtr(test.get()));
+
+			property->Set<std::string>(test.get(), "Test");
 		}
 	}
 	{

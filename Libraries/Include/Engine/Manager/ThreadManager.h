@@ -1,17 +1,26 @@
-#pragma once
+﻿#pragma once
 
 #include <thread>
 #include <mutex>
 
-#include "Utils/Thread/Thread.h"
+#include "Utils/Thread/MainThread.h"
 #include "Utils/Thread/LockQueue.h"
 
 #define THREAD_MANAGER ThreadManager::GetInst()
 
 class Job;
+class MPSCJobQueue;
 class SequentialJobQueue;
 class ConcurrentJobQueue;
-class Thread;
+
+/**
+ * Thread Manager의 Global Queue를 처리하는 스레드
+ */
+class GlobalWorkerThread : public WorkerThread
+{
+private:
+	virtual void Work() override;
+};
 
 class ThreadManager
 {
@@ -27,15 +36,23 @@ public:
 	}
 
 public:
+	void Init();
+	void Destroy();
+
+public:
 	void Launch(std::function<void()> work, std::function<bool()> condition = nullptr);
-	void Launch(std::shared_ptr<Thread> thread);
+	void Launch(std::shared_ptr<WorkerThread> thread);
+	void LaunchMainThreads(std::array<std::shared_ptr<MainThread>, MainThreadType::Count> threads);
 	void Join();
 
 public:
-	bool IsThreadAlive() const
+	bool IsAlive() const
 	{
-		return _mIsThreadAlive.load();
+		return _mIsAlive.load();
 	}
+
+public:
+	void PushGameThreadJob(std::shared_ptr<Job> job);
 
 public:
 	void PushGlobalSequentialJobQ(std::shared_ptr<SequentialJobQueue> jobQueue);
@@ -44,35 +61,33 @@ public:
 	void PushGlobalConcurrentJobQ(std::shared_ptr<ConcurrentJobQueue> jobQueue);
 
 public:
+	void DoGameJob();
 	void DoGlobalJob();
 
 private:
-	std::shared_ptr<SequentialJobQueue> PopFromGlobalJobQ();
-
-private:
 	/**
-	 * TLS �ʱ�ȭ
+	 * TLS 초기화
 	 */
 	void InitTLS();
+	void InitTLS_Internal(uint32 threadId);
 	void DestroyTLS();
 
+	/* MPMC로 처리되는 글로벌 Job Q들 */
 private:
+	// 순차적 글로벌 Job Q
 	LockQueue<std::shared_ptr<SequentialJobQueue>> _mGlobalSequentialJobQueues;
+	// 비순차적 글로벌 Job Q
 	std::shared_ptr<ConcurrentJobQueue> _mGlobalConcurrentJobQueue;
+
+	/* 게임 Job Q */
+private:
+	std::shared_ptr<MPSCJobQueue> _mGameThreadJobQueue;
 
 private:
 	std::mutex _mLock;
-	std::vector<std::thread> _mThreads;
+	std::list<std::thread> _mThreads;
 
 private:
-	std::atomic<bool> _mIsThreadAlive;
+	std::atomic<bool> _mIsAlive;
 };
 
-/**
- * Thread Manager�� Global Queue�� ó���ϴ� ������
- */
-class GlobalWorkerThread : public Thread
-{
-private:
-	virtual void Work() override;
-};

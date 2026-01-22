@@ -1,42 +1,105 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "ThreadManager.h"
 
 #include "Utils/Thread/JobQueue.h"
+#include "Utils/Thread/MPSCJobQueue.h"
 
-#include "Utils/Thread/Thread.h"
+void GlobalWorkerThread::Work()
+{
+	THREAD_MANAGER->DoGlobalJob();
+}
 
 ThreadManager::ThreadManager() :
-	_mIsThreadAlive(true)
+	_mIsAlive(true),
+	_mGlobalConcurrentJobQueue(std::make_shared<ConcurrentJobQueue>()),
+	_mGameThreadJobQueue(std::make_shared<MPSCJobQueue>())
 {
-	InitTLS();
 }
 
 ThreadManager::~ThreadManager()
 {
-	_mIsThreadAlive.store(false);
+}
+
+void ThreadManager::Init()
+{
+	InitTLS_Internal(MainThreadType::Game);
+}
+
+void ThreadManager::Destroy()
+{
+	_mIsAlive.store(false);
 	Join();
+	DestroyTLS();
 }
 
 void ThreadManager::Launch(std::function<void()> work, std::function<bool()> condition)
 {
+	ASSERT_THREAD(MainThreadType::Game);
 	Launch(std::make_shared<CustomThread>(work, condition));
 }
 
-void ThreadManager::Launch(std::shared_ptr<Thread> thread)
+void ThreadManager::Launch(std::shared_ptr<WorkerThread> thread)
 {
+	ASSERT_THREAD(MainThreadType::Game);
 	std::lock_guard<std::mutex> guard(_mLock);
 
 	_mThreads.push_back(std::thread([this, thread]()
 		{
 			InitTLS();
+			thread->Init();
 			thread->Run();
 			DestroyTLS();
+
+			const std::thread::id id = std::this_thread::get_id();
+			PushGameThreadJob(ObjectPool<Job>::MakeShared([this, id]() {
+				for (auto iter = _mThreads.begin(); iter != _mThreads.end(); ++iter)
+				{
+					if (id == iter->get_id())
+					{
+						_mThreads.erase(iter);
+						break;
+					}
+				}
+			}));
 		}
 	));
 }
 
+void ThreadManager::LaunchMainThreads(std::array<std::shared_ptr<MainThread>, MainThreadType::Count> threads)
+{
+	ASSERT_THREAD(MainThreadType::Game);
+	for (uint32 threadId = 0; threadId < MainThreadType::Count; ++threadId)
+	{
+		std::lock_guard<std::mutex> guard(_mLock);
+
+		_mThreads.push_back(std::thread([this, threadId, thread = threads[threadId]]()
+			{
+				InitTLS_Internal(threadId);
+				thread->Init();
+				thread->Run();
+				DestroyTLS();
+
+				const std::thread::id id = std::this_thread::get_id();
+				PushGameThreadJob(ObjectPool<Job>::MakeShared([this, id]() {
+					for (auto iter = _mThreads.begin(); iter != _mThreads.end(); ++iter)
+					{
+						if (id == iter->get_id())
+						{
+							_mThreads.erase(iter);
+							break;
+						}
+					}
+				}));
+			}
+		));
+	}
+
+	// 게임 스레드 동작은 App의 Update에서 처리 중
+}
+
 void ThreadManager::Join()
 {
+	ASSERT_THREAD(MainThreadType::Game);
 	for (std::thread& t : _mThreads)
 	{
 		if (t.joinable() == true)
@@ -47,14 +110,18 @@ void ThreadManager::Join()
 	_mThreads.clear();
 }
 
+void ThreadManager::PushGameThreadJob(std::shared_ptr<Job> job)
+{
+	if (job != nullptr)
+	{
+		return;
+	}
+	_mGameThreadJobQueue->DoAsync(*job);
+}
+
 void ThreadManager::PushGlobalSequentialJobQ(std::shared_ptr<SequentialJobQueue> jobQueue)
 {
 	_mGlobalSequentialJobQueues.Push(jobQueue);
-}
-
-void ThreadManager::PushGlobalConcurrentJobQ(std::shared_ptr<ConcurrentJobQueue> jobQueue)
-{
-	_mGlobalConcurrentJobQueue->Append(jobQueue);
 }
 
 void ThreadManager::PushGlobalConcurrentJob(std::shared_ptr<Job> job, bool pushOnly)
@@ -66,54 +133,59 @@ void ThreadManager::PushGlobalConcurrentJob(std::shared_ptr<Job> job, bool pushO
 	_mGlobalConcurrentJobQueue->DoAsync(*job, pushOnly);
 }
 
+void ThreadManager::PushGlobalConcurrentJobQ(std::shared_ptr<ConcurrentJobQueue> jobQueue)
+{
+	_mGlobalConcurrentJobQueue->Append(jobQueue);
+}
+
+void ThreadManager::DoGameJob()
+{
+	ASSERT_THREAD(MainThreadType::Game);
+	_mGameThreadJobQueue->Execute();
+}
+
 void ThreadManager::DoGlobalJob()
 {
 	uint64 now;
-	while (true)
 	{
+		now = GetTickCount64();
+		if (now > LEndTickCount)
 		{
-			now = GetTickCount64();
-			if (now > LEndTickCount)
-			{
-				break;
-			}
-
-			_mGlobalConcurrentJobQueue->Execute();
+			return;
 		}
-		{
-			now = GetTickCount64();
-			if (now > LEndTickCount)
-			{
-				break;
-			}
 
-			std::shared_ptr<SequentialJobQueue> globalSequentialJobQueue = PopFromGlobalJobQ();
-			if (globalSequentialJobQueue == nullptr)
-			{
-				break;
-			}
-			globalSequentialJobQueue->Execute();
-		}
+		_mGlobalConcurrentJobQueue->Execute();
 	}
-}
+	{
+		now = GetTickCount64();
+		if (now > LEndTickCount)
+		{
+			return;
+		}
 
-std::shared_ptr<SequentialJobQueue> ThreadManager::PopFromGlobalJobQ()
-{
-	return _mGlobalSequentialJobQueues.Pop();
+		std::shared_ptr<SequentialJobQueue> globalSequentialJobQueue = _mGlobalSequentialJobQueues.Pop();
+		if (globalSequentialJobQueue == nullptr)
+		{
+			return;
+		}
+		globalSequentialJobQueue->Execute();
+	}
 }
 
 void ThreadManager::InitTLS()
 {
-	static std::atomic<uint32> threadId = 1;
-	LThreadId = threadId.fetch_add(1);
+	static std::atomic<uint32> threadId = MainThreadType::Count;
+	uint32 newId = threadId.fetch_add(1);
+	InitTLS_Internal(newId);
+}
+
+void ThreadManager::InitTLS_Internal(uint32 threadId)
+{
+	LThreadId = threadId;
 }
 
 void ThreadManager::DestroyTLS()
 {
 }
 
-void GlobalWorkerThread::Work()
-{
-	THREAD_MANAGER->DoGlobalJob();
-}
 

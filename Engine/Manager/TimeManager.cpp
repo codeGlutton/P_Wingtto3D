@@ -1,8 +1,10 @@
-#include "pch.h"
+ï»¿#include "pch.h"
 #include "TimeManager.h"
 
-#include "ThreadManager.h"
+#include "Manager/ThreadManager.h"
 #include "Utils/Thread/Job.h"
+
+#include "Utils/Memory/ObjectPool.h"
 
 TimeManager::TimeManager()
 {
@@ -12,8 +14,39 @@ TimeManager::~TimeManager()
 {
 }
 
-void TimeManager::AddTarget(std::shared_ptr<UpdateTargetContext> data)
+uint64 TimeManager::GetGameFrameNumber() const
 {
+	ASSERT_THREAD(MainThreadType::Game);
+	return _mGameFrameNumber;
+}
+
+uint32 TimeManager::GetFps() const
+{
+	ASSERT_THREAD(MainThreadType::Game);
+	return _mFps;
+}
+
+float TimeManager::GetDeltaTime() const
+{
+	ASSERT_THREAD(MainThreadType::Game);
+	return _mDeltaTime;
+}
+
+uint64 TimeManager::GetRenderFrameNumber() const
+{
+	return _mRenderFrameNumber.load();
+}
+
+void TimeManager::SetRenderFrameNumber(uint64 frameNumber)
+{
+	ASSERT_THREAD(MainThreadType::Render);
+	_mRenderFrameNumber.store(frameNumber);
+}
+
+void TimeManager::NotifyToAddTarget(std::shared_ptr<UpdateTargetContext> data)
+{
+	ASSERT_THREAD(MainThreadType::Game);
+
 	if (data == nullptr || data->mTarget == nullptr || _mTargets.insert(data).second == false)
 	{
 		return;
@@ -22,16 +55,18 @@ void TimeManager::AddTarget(std::shared_ptr<UpdateTargetContext> data)
 	uint8 phaseIndex = static_cast<uint8>(data->mPhase);
 	if (data->mIsAsync == true)
 	{
-		_mPhases[static_cast<uint8>(data->mPhase)].mAsyncTargets.insert(data);
+		_mPhases[static_cast<uint8>(data->mPhase)].mAsyncTargets.insert(std::move(data));
 	}
 	else
 	{
-		_mPhases[static_cast<uint8>(data->mPhase)].mAsyncTargets.insert(data);
+		_mPhases[static_cast<uint8>(data->mPhase)].mAsyncTargets.insert(std::move(data));
 	}
 }
 
-void TimeManager::RemoveTarget(std::shared_ptr<UpdateTargetContext> data)
+void TimeManager::NotifyToRemoveTarget(std::shared_ptr<UpdateTargetContext> data)
 {
+	ASSERT_THREAD(MainThreadType::Game);
+
 	if (_mTargets.erase(data) == 0)
 	{
 		return;
@@ -50,32 +85,43 @@ void TimeManager::RemoveTarget(std::shared_ptr<UpdateTargetContext> data)
 
 void TimeManager::Init()
 {
-	// ÁÖÆÄ¼ö ±â·Ï
+	ASSERT_THREAD(MainThreadType::Game);
+
+	// ì£¼íŒŒìˆ˜ ê¸°ë¡
 	::QueryPerformanceFrequency(reinterpret_cast<LARGE_INTEGER*>(&_mFrequency));
-	// CPU Å¬·° Ä«¿îÆ® ±â·Ï
+	// CPU í´ëŸ­ ì¹´ìš´íŠ¸ ê¸°ë¡
 	::QueryPerformanceCounter(reinterpret_cast<LARGE_INTEGER*>(&_mPrevCount));
 }
 
 void TimeManager::Update()
 {
+	ASSERT_THREAD(MainThreadType::Game);
+
 	UpdateTime();
 	UpdateTargets();
 }
 
+void TimeManager::Destroy()
+{
+}
+
 void TimeManager::UpdateTime()
 {
+	// í”„ë ˆì„ ë„˜ë²„ ì¦ê°€
+	++_mGameFrameNumber;
+
 	uint64 currentCount;
 	::QueryPerformanceCounter(reinterpret_cast<LARGE_INTEGER*>(&currentCount));
 
-	// Áö³­ ½Ã°£ = ¸î Å¬·ÏÀÌ Áö³µ´Â°¡ / ÁÖÆÄ¼ö
+	// ì§€ë‚œ ì‹œê°„ = ëª‡ í´ë¡ì´ ì§€ë‚¬ëŠ”ê°€ / ì£¼íŒŒìˆ˜
 	_mDeltaTime = (currentCount - _mPrevCount) / static_cast<float>(_mFrequency);
 	_mPrevCount = currentCount;
 
-	// °ÔÀÓ »ó¿¡¼­ ¸î ÇÁ·¹ÀÓ Áö³µ´Â°¡
+	// ê²Œì„ ìƒì—ì„œ ëª‡ í”„ë ˆì„ ì§€ë‚¬ëŠ”ê°€
 	_mFrameCount++;
 	_mFrameTime += _mDeltaTime;
 
-	// ÃÊ´ç ¸î ÇÁ·¹ÀÓÀÌ ³ª¿Ô´Â°¡ °è»ê
+	// ì´ˆë‹¹ ëª‡ í”„ë ˆì„ì´ ë‚˜ì™”ëŠ”ê°€ ê³„ì‚°
 	if (_mFrameTime > 1.f)
 	{
 		_mFps = static_cast<uint32>(_mFrameCount / _mFrameTime);
@@ -100,7 +146,7 @@ void TimeManager::UpdateTargets()
 				continue;
 			}
 			target->mState = UpdateState::Run;
-			THREAD_MANAGER->PushGlobalConcurrentJob(std::make_shared<Job>([target, deltaTime = _mDeltaTime, counter = phase.mCounter]()
+			THREAD_MANAGER->PushGlobalConcurrentJob(ObjectPool<Job>::MakeShared([target, deltaTime = _mDeltaTime, counter = phase.mCounter]()
 				{
 					target->mTarget->Update(deltaTime);
 					counter->count_down();
@@ -119,7 +165,7 @@ void TimeManager::UpdateTargets()
 
 		for (auto& target : endTarget)
 		{
-			RemoveTarget(target);
+			NotifyToRemoveTarget(target);
 		}
 
 		phase.mCounter->wait();
