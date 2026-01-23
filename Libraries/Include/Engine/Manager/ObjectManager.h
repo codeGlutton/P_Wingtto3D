@@ -53,8 +53,10 @@ public:
 	std::shared_ptr<Object> CreateObject(ObjectInitializeParameters params) const;
 
 public:
-	void NotifyToAddObject(const std::wstring& name);
-	void NotifyToRemoveObject(const std::wstring& name);
+	void RequestToRename(const std::wstring& path, OUT std::wstring& rename) const;
+
+	void NotifyToAddObject(const std::wstring& fullPath);
+	void NotifyToRemoveObject(const std::wstring& fullPath);
 
 private:
 	inline bool ShouldLoadProperties(ObjectCreateFlag::Type flags) const
@@ -63,6 +65,6 @@ private:
 	}
 
 private:
-	std::unordered_set<std::wstring> _mNameSet;
+	std::unordered_set<std::wstring> _mFullPathNameSet;
 };
 

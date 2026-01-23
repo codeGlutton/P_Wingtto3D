@@ -16,10 +16,6 @@ Game::~Game()
 {
 }
 
-void Game::PreBoot()
-{
-}
-
 void Game::Init()
 {
 	/* 싱글톤 초기화 */
@@ -110,5 +106,5 @@ void Game::End()
 
 void Game::CreateMainWindow()
 {
-	_mMainWindow = APP_WIN_MANAGER->CreateAppWindow<GameAppWindow>();
+	APP_WIN_MANAGER->CreateAppWindow<GameAppWindow>();
 }

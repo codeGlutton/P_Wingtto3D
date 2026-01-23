@@ -57,7 +57,7 @@ template<typename T> requires IsChildOfObject<T>
 inline void SoftRefTypeInfo<T>::Serialize(OUT Archive& archive, const void* inst) const
 {
 	const SoftObjectPtr<T>& instRef = *reinterpret_cast<const SoftObjectPtr<T>*>(inst);
-	TypeInfoResolver<std::wstring>::Get().Serialize(archive, &instRef.GetPath());
+	TypeInfoResolver<std::wstring>::Get().Serialize(archive, &instRef.GetFullPath());
 }
 
 template<typename T> requires IsChildOfObject<T>

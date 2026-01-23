@@ -2,7 +2,7 @@
 #include "ObjectManager.h"
 
 #include "Core/Object.h"
-#include "Core/Resource/Package.h"
+#include "Core/Resource/Package/Package.h"
 
 #include "ResourceManager.h"
 
@@ -33,34 +33,23 @@ std::shared_ptr<Object> ObjectManager::CreateObject(ObjectInitializeParameters p
 		{
 			p->BeginDestroy();
 		}
-		if (std::shared_ptr<Package> package = p->_mOuter.lock())
-		{
-			package->DownRefCount();
-		}
-		else
-		{
-			delete p;
-		}
+		delete p;
 		});
 	ASSERT_MSG(result != nullptr, "Invalid object constructor");
 
-	result->_mOuter = params.mOuter;
-	result->_mName = params.mName;
-	if (params.mOuter != nullptr)
-	{
-		result->_mPath = params.mOuter == nullptr ? params.mName : (params.mOuter->GetPath() + params.mName);
-	}
-	else
-	{
-		result->_mPath = params.mPath;
-	}
-
 	if (isCDO == false)
 	{
-		for (std::size_t i = 0; _mNameSet.find(result->_mName) != _mNameSet.end(); ++i)
+		// 기본 값 대입
+		result->_mOuter = params.mOuter;
+		if (params.mOuter != nullptr)
 		{
-			result->_mName = params.mName + std::to_wstring(i);
+			result->_mPath = params.mOuter->GetPath();
 		}
+		else
+		{
+			result->_mPath = params.mPath;
+		}
+		result->SetName(params.mName);
 
 		result->PostCreate();
 		if (ShouldLoadProperties(params.mFlags) == true)
@@ -72,15 +61,41 @@ std::shared_ptr<Object> ObjectManager::CreateObject(ObjectInitializeParameters p
 	return result;
 }
 
-void ObjectManager::NotifyToAddObject(const std::wstring& name)
+void ObjectManager::RequestToRename(const std::wstring& path, OUT std::wstring& rename) const
 {
-	ASSERT_MSG(_mNameSet.find(name) == _mNameSet.end(), "Overlapped object name");
-	_mNameSet.insert(name);
+	if (rename.empty() == true)
+	{
+		rename = L"NewObject";
+	}
+
+	const std::wstring fullPath = path + L'.' + rename;
+
+	// 중복 이름 수정
+	if (_mFullPathNameSet.find(fullPath) != _mFullPathNameSet.end())
+	{
+		std::size_t i = 0ull;
+		for (; _mFullPathNameSet.find(fullPath + std::to_wstring(i)) != _mFullPathNameSet.end(); ++i)
+		{
+		}
+		rename += std::to_wstring(i);
+	}
 }
 
-void ObjectManager::NotifyToRemoveObject(const std::wstring& name)
+void ObjectManager::NotifyToAddObject(const std::wstring& fullPath)
 {
-	ASSERT_MSG(_mNameSet.find(name) != _mNameSet.end(), "Invalid object name can't erase");
-	_mNameSet.erase(name);
+	if (fullPath.empty() == true)
+	{
+		return;
+	}
+	_mFullPathNameSet.insert(fullPath);
+}
+
+void ObjectManager::NotifyToRemoveObject(const std::wstring& fullPath)
+{
+	if (fullPath.empty() == true)
+	{
+		return;
+	}
+	_mFullPathNameSet.erase(fullPath);
 }
 

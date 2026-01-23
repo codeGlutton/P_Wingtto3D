@@ -26,3 +26,6 @@
 # Folder
 Binaries/
 Intermediates/
+
+# Build
+Engine.lib

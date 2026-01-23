@@ -200,12 +200,16 @@ void DynamicIterableContainerTypeInfo<E, C>::Deserialize(Archive& archive, OUT v
 
 	C& containerRef = *reinterpret_cast<C*>(inst);
 
-	std::size_t containerSize = std::size(containerRef);
+	std::size_t containerSize;
 	TypeInfoResolver<std::size_t>::Get().Deserialize(archive, &containerSize);
 
-	for (E& element : containerRef)
+	containerRef.clear();
+	auto inserter = std::inserter(containerRef, std::end(containerRef));
+	for (std::size_t i = 0; i < containerSize; ++i)
 	{
+		E element{};
 		typeInfo.Deserialize(archive, &element);
+		*inserter++ = std::move(element);
 	}
 }
 
@@ -230,30 +234,32 @@ inline bool PointerTypeInfo<T>::IsInstanceValueEqual(const void* lhsInst, const 
 template<typename T> requires IsChildOfObject<T>
 void PointerTypeInfo<T>::Serialize(OUT Archive& archive, const void* inst) const
 {
-	// 패키징 명 쓰기
-	const std::wstring& packagePath = GetObjectPath(reinterpret_cast<Object*>(GetInstancePackage(inst).get()));
-	TypeInfoResolver<std::wstring>::Get().Serialize(archive, &packagePath);
-
-	// 인덱스 쓰기
 	const T*& instRef = *reinterpret_cast<const T* const*>(inst);
-	std::size_t index = archive.GetObjectLinker()->mLinkDataMap[packagePath].mObjectIndexMap[instRef];
-	TypeInfoResolver<std::size_t>::Get().Serialize(archive, &index);
+
+	// 패키징 명 쓰기
+	const std::wstring* packagePath = GetObjectPath(reinterpret_cast<Object*>(GetInstancePackage(instRef).get()));
+	TypeInfoResolver<std::wstring>::Get().Serialize(archive, packagePath);
+
+	// 풀 주소 쓰기
+	const std::wstring* objectFullPath = GetObjectFullPath(reinterpret_cast<Object*>(instRef));
+	TypeInfoResolver<std::wstring>::Get().Serialize(archive, objectFullPath);
 }
 
 template<typename T> requires IsChildOfObject<T>
 void PointerTypeInfo<T>::Deserialize(Archive& archive, OUT void* inst) const
 {
+	T*& instRef = *reinterpret_cast<T**>(inst);
+
 	// 패키징 명 읽기
 	std::wstring packagePath;
 	TypeInfoResolver<std::wstring>::Get().Deserialize(archive, &packagePath);
 
-	// 인덱스 읽기
-	std::size_t index;
-	TypeInfoResolver<std::size_t>::Get().Deserialize(archive, &index);
+	// 풀 주소 읽기
+	std::wstring objectFullPath;
+	TypeInfoResolver<std::wstring>::Get().Deserialize(archive, &objectFullPath);
 
 	// 리소스에 대입
-	std::shared_ptr<Object> objectPtr = archive.GetObjectLinker()->mLinkDataMap[packagePath].mObjects[index];
-	T*& instRef = *reinterpret_cast<T**>(inst);
+	std::shared_ptr<Object> objectPtr = archive.GetObjectLinker()->mLinkDataMap[packagePath].mObjectPtrMap[objectFullPath];
 	instRef = objectPtr.get();
 }
 
@@ -282,30 +288,32 @@ inline bool SharedPointerTypeInfo<T>::IsInstanceValueEqual(const void* lhsInst, 
 template<typename T> requires IsChildOfObject<T>
 void SharedPointerTypeInfo<T>::Serialize(OUT Archive& archive, const void* inst) const
 {
-	// 패키징 명 쓰기
-	const std::wstring& packagePath = GetObjectPath(reinterpret_cast<Object*>(GetInstancePackage(inst).get()));
-	TypeInfoResolver<std::wstring>::Get().Serialize(archive, &packagePath);
-
-	// 인덱스 쓰기
 	const std::shared_ptr<T>& instRef = *reinterpret_cast<const std::shared_ptr<T>*>(inst);
-	std::size_t index = archive.GetObjectLinker()->mLinkDataMap[packagePath].mObjectIndexMap[instRef.get()];
-	TypeInfoResolver<std::size_t>::Get().Serialize(archive, &index);
+
+	// 패키징 명 쓰기
+	const std::wstring* packagePath = GetObjectPath(reinterpret_cast<Object*>(GetInstancePackage(instRef.get()).get()));
+	TypeInfoResolver<std::wstring>::Get().Serialize(archive, packagePath);
+
+	// 풀 주소 쓰기
+	const std::wstring* objectFullPath = GetObjectFullPath(reinterpret_cast<Object*>(instRef.get()));
+	TypeInfoResolver<std::wstring>::Get().Serialize(archive, objectFullPath);
 }
 
 template<typename T> requires IsChildOfObject<T>
 void SharedPointerTypeInfo<T>::Deserialize(Archive& archive, OUT void* inst) const
 {
+	std::shared_ptr<T>& instRef = *reinterpret_cast<std::shared_ptr<T>*>(inst);
+
 	// 패키징 명 읽기
 	std::wstring packagePath;
 	TypeInfoResolver<std::wstring>::Get().Deserialize(archive, &packagePath);
 
-	// 인덱스 읽기
-	std::size_t index;
-	TypeInfoResolver<std::size_t>::Get().Deserialize(archive, &index);
+	// 풀 주소 읽기
+	std::wstring objectFullPath;
+	TypeInfoResolver<std::wstring>::Get().Deserialize(archive, &objectFullPath);
 
 	// 리소스에 대입
-	std::shared_ptr<Object> objectPtr = archive.GetObjectLinker()->mLinkDataMap[packagePath].mObjects[index];
-	std::shared_ptr<T>& instRef = *reinterpret_cast<std::shared_ptr<T>*>(inst);
+	std::shared_ptr<Object> objectPtr = archive.GetObjectLinker()->mLinkDataMap[packagePath].mObjectPtrMap[objectFullPath];
 	instRef = std::reinterpret_pointer_cast<T>(objectPtr);
 }
 
@@ -334,30 +342,32 @@ inline bool WeakPointerTypeInfo<T>::IsInstanceValueEqual(const void* lhsInst, co
 template<typename T> requires IsChildOfObject<T>
 void WeakPointerTypeInfo<T>::Serialize(OUT Archive& archive, const void* inst) const
 {
-	// 패키징 명 쓰기
-	const std::wstring& packagePath = GetObjectPath(reinterpret_cast<Object*>(GetInstancePackage(inst).get()));
-	TypeInfoResolver<std::wstring>::Get().Serialize(archive, &packagePath);
-
-	// 인덱스 쓰기
 	const std::shared_ptr<T> sharedInstRef = (*reinterpret_cast<const std::weak_ptr<T>*>(inst)).lock();
-	std::size_t index = archive.GetObjectLinker()->mLinkDataMap[packagePath].mObjectIndexMap[sharedInstRef.get()];
-	TypeInfoResolver<std::size_t>::Get().Serialize(archive, &index);
+
+	// 패키징 명 쓰기
+	const std::wstring* packagePath = GetObjectPath(reinterpret_cast<Object*>(GetInstancePackage(sharedInstRef.get()).get()));
+	TypeInfoResolver<std::wstring>::Get().Serialize(archive, packagePath);
+
+	// 풀 주소 쓰기
+	const std::wstring* objectFullPath = GetObjectFullPath(reinterpret_cast<Object*>(sharedInstRef.get()));
+	TypeInfoResolver<std::wstring>::Get().Serialize(archive, objectFullPath);
 }
 
 template<typename T> requires IsChildOfObject<T>
 void WeakPointerTypeInfo<T>::Deserialize(Archive& archive, OUT void* inst) const
 {
+	std::weak_ptr<T>& instRef = *reinterpret_cast<std::weak_ptr<T>*>(inst);
+
 	// 패키징 명 읽기
 	std::wstring packagePath;
 	TypeInfoResolver<std::wstring>::Get().Deserialize(archive, &packagePath);
 
-	// 인덱스 읽기
-	std::size_t index;
-	TypeInfoResolver<std::size_t>::Get().Deserialize(archive, &index);
+	// 풀 주소 읽기
+	std::wstring objectFullPath;
+	TypeInfoResolver<std::wstring>::Get().Deserialize(archive, &objectFullPath);
 
 	// 리소스에 대입
-	std::shared_ptr<Object> objectPtr = archive.GetObjectLinker()->mLinkDataMap[packagePath].mObjects[index];
-	std::weak_ptr<T>& instRef = *reinterpret_cast<std::weak_ptr<T>*>(inst);
+	std::shared_ptr<Object> objectPtr = archive.GetObjectLinker()->mLinkDataMap[packagePath].mObjectPtrMap[objectFullPath];
 	instRef = std::reinterpret_pointer_cast<T>(objectPtr);
 }
 

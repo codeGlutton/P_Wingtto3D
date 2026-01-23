@@ -49,7 +49,7 @@ public:
 	}
 
 public:
-	std::shared_ptr<IUpdatable> mTarget;
+	std::weak_ptr<IUpdatable> mTarget;
 
 	UpdatePhase mPhase = UpdatePhase::None;
 	UpdateState mState = UpdateState::Start;

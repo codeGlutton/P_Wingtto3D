@@ -4,11 +4,13 @@
 #include "Manager/PathManager.h"
 
 #include "Core/ObjectLinker.h"
-#include "Core/Resource/Package.h"
+#include "Core/Resource/Package/Package.h"
+#include "Core/Resource/Package/PackageHeader.h"
 
-Archive::Archive(const std::filesystem::path& packagePath, ArchiveMemoryTarget memoryTarget) :
+Archive::Archive(const std::filesystem::path& packagePath, PackageBuildScope scope, ArchiveMemoryTarget memoryTarget) :
 	_mStream(),
 	_mPackagePath(packagePath),
+	_mScope(scope),
 	_mCurrentMemory(memoryTarget == ArchiveMemoryTarget::Header ? &_mHeader : &_mData),
 	_mCurrentIndex(0ull),
 	_mObjLinker(nullptr)
@@ -19,7 +21,8 @@ void Archive::LoadPackage()
 {
 	std::shared_ptr<PackageHeader> packageHeader = std::make_shared<PackageHeader>();
 
-	std::wstring filePath = (PATH_MANAGER->GetResourcePath() / _mPackagePath).replace_extension(L".pak").wstring();
+	std::filesystem::path rootPath = (_mScope == PackageBuildScope::Shared) ? PATH_MANAGER->GetResourcePath() : PATH_MANAGER->GetIsolationResourcePath();
+	std::wstring filePath = (rootPath / _mPackagePath).replace_extension(L".pak").wstring();
 	_mStream.open(filePath, std::ios::in | std::ios::binary);
 	if (_mStream.is_open() == true)
 	{
@@ -64,7 +67,9 @@ void Archive::SavePackage()
 	ChangeTarget(ArchiveMemoryTarget::Header);
 	_mObjLinker->mLinkDataMap[_mPackagePath].mPackageHeader->Serialize(*this);
 
-	std::wstring filePath = (PATH_MANAGER->GetResourcePath() / _mPackagePath).replace_extension(L".pak").wstring();
+	std::filesystem::path rootPath = (_mScope == PackageBuildScope::Shared) ? PATH_MANAGER->GetResourcePath() : PATH_MANAGER->GetIsolationResourcePath();
+	std::wstring filePath = (rootPath / _mPackagePath).replace_extension(L".pak").wstring();
+	std::filesystem::create_directories(std::filesystem::path(filePath).parent_path());
 	_mStream.open(filePath, std::ios::out | std::ios::trunc | std::ios::binary);
 	ASSERT_MSG(_mStream.is_open() == true, "Fail to save package");
 

@@ -81,12 +81,11 @@ inline WPARAM App::Run(const std::wstring& appName)
 	RegisterClassToWindow();
 	// 부팅 전 초기화
 	BOOT_SYSTEM->Init();
-	// 모드 내 부팅 전 초기화
-	_mDesc.mMode->PreBoot();
 	// 리플렉션 및 CDO 등록
 	BOOT_SYSTEM->Boot();
 	// 모드 내 초기화
 	_mDesc.mMode->Init();
+	_mDesc.mMode->CreateMainWindow();
 
 	MSG msg = { 0 };
 	while (msg.message != WM_QUIT)
@@ -116,16 +115,16 @@ template<typename T> requires std::is_base_of_v<IExecute, T>
 void App::CreateMode()
 {
 #ifdef _DEBUG
-	STATIC_ASSERT_MSG((T::BuildConstraint::mFlag | AppBuildTargetFlag::Debug) != AppBuildTargetFlag::None, "App mode can't allowed");
+	STATIC_ASSERT_MSG((T::BuildConstraint::mFlag & AppBuildTargetFlag::Debug) != AppBuildTargetFlag::None, "App mode can't allowed");
 #endif // _DEBUG
 #ifdef NDEBUG
-	STATIC_ASSERT_MSG((T::BuildConstraint::mFlag | AppBuildTargetFlag::Release) != AppBuildTargetFlag::None, "App mode can't allowed");
+	STATIC_ASSERT_MSG((T::BuildConstraint::mFlag & AppBuildTargetFlag::Release) != AppBuildTargetFlag::None, "App mode can't allowed");
 #endif // NDEBUG
 #ifdef _EDITOR
-	STATIC_ASSERT_MSG((T::BuildConstraint::mFlag | AppBuildTargetFlag::Editor) != AppBuildTargetFlag::None, "App mode can't allowed");
+	STATIC_ASSERT_MSG((T::BuildConstraint::mFlag & AppBuildTargetFlag::Editor) != AppBuildTargetFlag::None, "App mode can't allowed");
 #endif // _EDITOR
 #ifdef NEDITOR
-	STATIC_ASSERT_MSG((T::BuildConstraint::mFlag | AppBuildTargetFlag::Game) != AppBuildTargetFlag::None, "App mode can't allowed");
+	STATIC_ASSERT_MSG((T::BuildConstraint::mFlag & AppBuildTargetFlag::Game) != AppBuildTargetFlag::None, "App mode can't allowed");
 #endif // NEDITOR
 
 	_mDesc.mMode = std::make_shared<T>();

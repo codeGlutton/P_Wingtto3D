@@ -2,7 +2,7 @@
 #include "ObjectUtils.h"
 
 #include "Core/Object.h"
-#include "Core/Resource/Package.h"
+#include "Core/Resource/Package/Package.h"
 
 bool IsValid(const Object* object)
 {
@@ -11,17 +11,38 @@ bool IsValid(const Object* object)
 
 std::shared_ptr<Package> GetOuter(const Object* object)
 {
-    return object->GetOuter().lock();
+	if (object == nullptr)
+	{
+		return std::shared_ptr<Package>();
+	}
+    return object->GetOuter();
 }
 
-const std::wstring& GetObjectName(const Object* object)
+const std::wstring* GetObjectName(const Object* object)
 {
-	return object->GetName();
+	if (object == nullptr)
+	{
+		return nullptr;
+	}
+	return &object->GetName();
 }
 
-const std::wstring& GetObjectPath(const Object* object)
+const std::wstring* GetObjectPath(const Object* object)
 {
-	return object->GetPath();
+	if (object == nullptr)
+	{
+		return nullptr;
+	}
+	return &object->GetPath();
+}
+
+const std::wstring* GetObjectFullPath(const Object* object)
+{
+	if (object == nullptr)
+	{
+		return nullptr;
+	}
+	return &object->GetFullPath();
 }
 
 std::shared_ptr<Object> NewObject(std::shared_ptr<Package> outer, const ObjectTypeInfo* typeInfo, const std::wstring& name, ObjectCreateFlag::Type flags)

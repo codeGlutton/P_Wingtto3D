@@ -1,8 +1,8 @@
 ﻿#include "pch.h"
 #include "StructTypeInfo.h"
 
-#include "Core/Resource/BulkWrapper.h"
-#include "Core/Resource/Package.h"
+#include "Core/Resource/BulkData.h"
+#include "Core/Resource/Package/Package.h"
 
 bool StructTypeInfo::IsChildOf(const StructTypeInfo& other) const
 {
@@ -33,7 +33,7 @@ void StructTypeInfo::CollectHeaderDatas(const void* inst, OUT std::unordered_map
 			const HardRefTypeInfo* hardRefTypeInfo = Cast<const HardRefTypeInfo>(&propertyPair.second->GetTypeInfo());
 			if (hardRefTypeInfo != nullptr)
 			{
-				std::shared_ptr<Package> instPackage = hardRefTypeInfo->GetInstancePackage(inst);
+				std::shared_ptr<Package> instPackage = hardRefTypeInfo->GetInstancePackage(propertyPair.second->GetRawPtr(inst));
 				if (instPackage != nullptr)
 				{
 					externalPackageDatas[instPackage->GetPath()] = instPackage->GetTypeInfo().GetName();
@@ -91,7 +91,7 @@ void StructTypeInfo::Serialize(OUT Archive& archive, const void* inst) const
 	}
 
 	// 프로퍼티 갯수 저장
-	std::size_t propertyCount;
+	std::size_t propertyCount = changes.size();
 	TypeInfoResolver<std::size_t>::Get().Serialize(archive, &propertyCount);
 
 	// 각 프로퍼티 저장
@@ -102,7 +102,8 @@ void StructTypeInfo::Serialize(OUT Archive& archive, const void* inst) const
 		TypeInfoResolver<std::string>::Get().Serialize(archive, &propertyName);
 
 		// 값 저장
-		changePair->second->GetTypeInfo().Serialize(archive, inst);
+		const void* propertyPtr = changePair->second->GetRawPtr(inst);
+		changePair->second->GetTypeInfo().Serialize(archive, propertyPtr);
 	}
 }
 
@@ -126,7 +127,8 @@ void StructTypeInfo::Deserialize(Archive& archive, OUT void* inst) const
 			auto iter = propertyMap.find(propertyName);
 			if (iter != propertyMap.end())
 			{
-				iter->second->GetTypeInfo().Deserialize(archive, inst);
+				void* propertyPtr = iter->second->GetRawPtr(inst);
+				iter->second->GetTypeInfo().Deserialize(archive, propertyPtr);
 			}
 		}
 	}

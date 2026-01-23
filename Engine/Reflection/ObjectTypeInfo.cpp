@@ -87,7 +87,7 @@ void ObjectTypeInfo::Serialize(OUT Archive& archive, const void* inst) const
 	}
 
 	// 프로퍼티 갯수 저장
-	std::size_t propertyCount;
+	std::size_t propertyCount = changes.size();
 	TypeInfoResolver<std::size_t>::Get().Serialize(archive, &propertyCount);
 
 	// 각 프로퍼티 저장
@@ -98,7 +98,8 @@ void ObjectTypeInfo::Serialize(OUT Archive& archive, const void* inst) const
 		TypeInfoResolver<std::string>::Get().Serialize(archive, &propertyName);
 
 		// 값 저장
-		changePair->second->GetTypeInfo().Serialize(archive, inst);
+		const void* propertyPtr = changePair->second->GetRawPtr(inst);
+		changePair->second->GetTypeInfo().Serialize(archive, propertyPtr);
 	}
 }
 
@@ -122,7 +123,8 @@ void ObjectTypeInfo::Deserialize(Archive& archive, OUT void* inst) const
 			auto iter = propertyMap.find(propertyName);
 			if (iter != propertyMap.end())
 			{
-				iter->second->GetTypeInfo().Deserialize(archive, inst);
+				void* propertyPtr = iter->second->GetRawPtr(inst);
+				iter->second->GetTypeInfo().Deserialize(archive, propertyPtr);
 			}
 		}
 	}

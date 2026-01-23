@@ -7,8 +7,9 @@ class Package;
 
 bool IsValid(const Object* object);
 std::shared_ptr<Package> GetOuter(const Object* object);
-const std::wstring& GetObjectName(const Object* object);
-const std::wstring& GetObjectPath(const Object* object);
+const std::wstring* GetObjectName(const Object* object);
+const std::wstring* GetObjectPath(const Object* object);
+const std::wstring* GetObjectFullPath(const Object* object);
 
 template<typename T>
 inline const T* GetDefault()

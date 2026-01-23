@@ -26,7 +26,7 @@ protected:
 	virtual void BeginDestroy();
 
 public:
-	std::weak_ptr<Package> GetOuter() const
+	std::shared_ptr<Package> GetOuter() const
 	{
 		return _mOuter;
 	}
@@ -37,6 +37,10 @@ public:
 	const std::wstring& GetPath() const
 	{
 		return _mPath;
+	}
+	const std::wstring& GetFullPath() const
+	{
+		return _mFullPath;
 	}
 
 public:
@@ -53,6 +57,9 @@ public:
 	{
 		return _mIsAlive;
 	}
+
+public:
+	void SetName(const std::wstring& name);
 
 public:
 	bool IsA(const TypeInfo* typeInfo) const
@@ -76,13 +83,14 @@ protected:
 
 private:
 	// 저장 주체
-	std::weak_ptr<Package> _mOuter;
+	std::shared_ptr<Package> _mOuter;
 
 private:
 	PROPERTY(_mName)
 	std::wstring _mName;
 	PROPERTY(_mPath)
 	std::wstring _mPath;
+	std::wstring _mFullPath;
 	
 private:
 	bool _mIsAlive = true;

@@ -4,6 +4,9 @@
 #include "Manager/PathManager.h"
 #include "Manager/PackageManager.h"
 
+#include "Core/Resource/Package/Package.h"
+#include "Core/Resource/Package/PackageHeader.h"
+
 #include "Core/Resource/ResourceHeader.h"
 
 ResourceManager::ResourceManager()
@@ -26,7 +29,7 @@ void ResourceManager::Destroy()
 #ifdef _EDITOR
 	Save();
 #endif
-	_mHeaders.clear();
+	_mPackage = nullptr;
 }
 
 void ResourceManager::RegisterPackage(std::shared_ptr<Package> package)
@@ -37,21 +40,21 @@ void ResourceManager::RegisterPackage(std::shared_ptr<Package> package)
 void ResourceManager::Save()
 {
 	std::wstring packagePath = PATH_MANAGER->GetEngineResourceFolderName();
-	packagePath.append(L"/Preview");
+	packagePath.append(L"\\Preview");
 	PACKAGE_MANAGER->SavePackage(packagePath);
 }
 
 void ResourceManager::Load()
 {
 	std::wstring packagePath = PATH_MANAGER->GetEngineResourceFolderName();
-	packagePath.append(L"/Preview");
+	packagePath.append(L"\\Preview");
 	PACKAGE_MANAGER->LoadPackage<ResourcePreviewPackage>(packagePath);
 }
 
 std::shared_ptr<ResourceHeader> ResourceManager::CreateResourceHeader(std::shared_ptr<Resource> target, ObjectCreateFlag::Type flags)
 {
 	std::wstring typeName = ConvertUtf8ToWString(ResourceHeader::GetStaticTypeInfo().GetName());
-	std::shared_ptr<ResourceHeader> resourceHeader = NewObject<ResourceHeader>(_mPackage.lock(), typeName, flags);
+	std::shared_ptr<ResourceHeader> resourceHeader = NewObject<ResourceHeader>(_mPackage, typeName, flags);
 	resourceHeader->_mTarget = target;
 
 	return resourceHeader;
@@ -61,7 +64,7 @@ void ResourceManager::NotifyToAddResourceHeader(std::shared_ptr<ResourceHeader> 
 {
 	ASSERT_MSG(resourceHeader == nullptr, "Can't add nullptr resource header");
 
-	std::wstring resourcePath = resourceHeader->mResourcePath.GetPath();
+	std::wstring resourcePath = resourceHeader->mResourcePtr.GetFullPath();
 
 	// 이미 있는 리소스 헤더면 반환
 	auto headerIter = _mHeaders.find(resourcePath);

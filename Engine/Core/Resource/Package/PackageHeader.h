@@ -1,0 +1,36 @@
+﻿#pragma once
+
+struct BulkData;
+class Archive;
+
+/**
+ * 패키징 중에 비동기 직렬화 가능한 부분
+ */
+struct PackageHeader
+{
+	GEN_STRUCT_REFLECTION(PackageHeader)
+
+public:
+	void Serialize(Archive& archive) const;
+	void Deserialize(Archive& archive);
+
+	/* 로드 데이터 */
+
+public:
+	PROPERTY(mObjectClassNames)
+	std::vector<std::string> mObjectClassNames;
+	PROPERTY(mObjectFullPaths)
+	std::vector<std::wstring> mObjectFullPaths;
+
+public:
+	PROPERTY(mLinkedExternalPackageClassNames)
+	std::vector<std::string> mLinkedExternalPackageClassNames;
+	PROPERTY(mLinkedExternalPackagePaths)
+	std::vector<std::wstring> mLinkedExternalPackagePaths;
+
+public:
+	PROPERTY(mBulkClassNames)
+	std::vector<std::string> mBulkClassNames;
+	std::vector<std::shared_ptr<BulkData>> mBulkDatas;
+};
+

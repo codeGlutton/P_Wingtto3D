@@ -17,12 +17,13 @@ PathManager::PathManager()
 	_mRootPath = exePath;
 	_mRootPath = _mRootPath.parent_path().parent_path().parent_path().parent_path();
 
-#endif // NDEBUG
+#endif // defined(NDEBUG) && defined(NEDITOR)
 
 	_mConfigPath = _mRootPath / _mConfigFolderName;
 	std::filesystem::create_directories(_mConfigPath);
 
 	_mResourcePath = _mRootPath / _mResourceFolderName;
+	_mIsolationResourcePath = _mResourcePath / BUILD_CONFIG_STR_W;
 	_mEngineResourcePath = _mResourcePath / _mEngineResourceFolderName;
 	_mExternalResourcePath = _mResourcePath / _mExternalResourceFolderName;
 }
@@ -43,30 +44,34 @@ void PathManager::Init()
 
 		if (json.contains("ResourcePath") == true && json["ResourcePath"].is_string() == true)
 		{
-			_mResourcePath = _mRootPath / json["ResourcePath"].get<std::wstring>();
+			_mResourcePath = _mRootPath / ConvertUtf8ToWString(json["ResourcePath"].get<std::string>());
 		}
 		if (json.contains("EngineResourcePath") == true && json["EngineResourcePath"].is_string() == true)
 		{
-			_mEngineResourcePath = _mRootPath / json["EngineResourcePath"].get<std::wstring>();
+			_mEngineResourcePath = _mRootPath / ConvertUtf8ToWString(json["EngineResourcePath"].get<std::string>());
 		}
 		if (json.contains("ExternalResourcePath") == true && json["ExternalResourcePath"].is_string() == true)
 		{
-			_mExternalResourcePath = _mRootPath / json["ExternalResourcePath"].get<std::wstring>();
+			_mExternalResourcePath = _mRootPath / ConvertUtf8ToWString(json["ExternalResourcePath"].get<std::string>());
 		}
+		_mIsolationResourcePath = _mResourcePath / BUILD_CONFIG_STR_W;
 	}
 	else
 	{
 		std::ofstream outStream(_mConfigPath / _mPathConfigFileName);
 
+		std::filesystem::path relativePath = _mResourceFolderName;
+
 		Json json;
-		json["ResourcePath"] = _mResourcePath.wstring();
-		json["EngineResourcePath"] = _mEngineResourcePath.wstring();
-		json["ExternalResourcePath"] = _mExternalResourcePath.wstring();
+		json["ResourcePath"] =			ConvertWStringToUtf8(relativePath);
+		json["EngineResourcePath"] =	ConvertWStringToUtf8(relativePath / _mEngineResourceFolderName);
+		json["ExternalResourcePath"] =	ConvertWStringToUtf8(relativePath / _mExternalResourceFolderName);
 
 		outStream << json;
 	}
 
 	std::filesystem::create_directories(_mResourcePath);
+	std::filesystem::create_directories(_mIsolationResourcePath);
 	std::filesystem::create_directories(_mEngineResourcePath);
 	std::filesystem::create_directories(_mExternalResourcePath);
 }

@@ -5,8 +5,7 @@
 #include "Manager/PathManager.h"
 
 #include "Core/Archive.h"
-#include "Core/ObjectLinker.h"
-#include "Core/Resource/Package.h"
+#include "Core/Resource/Package/Package.h"
 
 #include "Utils/ObjectUtils.h"
 
@@ -48,16 +47,20 @@ void PackageManager::Destroy()
 std::shared_ptr<Package> PackageManager::GetLoadedPackage(const std::wstring& packagePath) const
 {
 	auto iter = _mLoadedPackages.find(packagePath);
-	if (iter != _mLoadedPackages.end() && (*iter).second->IsValid() == true)
+	if (iter != _mLoadedPackages.end())
 	{
-		return (*iter).second;
+		return (*iter).second.lock();
 	}
 	return nullptr;
 }
 
-std::shared_ptr<Package> PackageManager::LoadPackage(const std::wstring& packagePath, const ObjectTypeInfo* packageTypeinfo, std::shared_ptr<ObjectLinker> linker)
+std::shared_ptr<Package> PackageManager::LoadPackage(const std::wstring& packagePath, const ObjectTypeInfo* packageTypeinfo, PackageBuildScope scope, std::shared_ptr<ObjectLinker> linker)
 {
 	std::shared_ptr<Package> result = nullptr;
+	if (linker == nullptr)
+	{
+		linker = std::make_shared<ObjectLinker>();
+	}
 
 	// 이미 있는 리소스면 반환
 	{
@@ -91,11 +94,7 @@ std::shared_ptr<Package> PackageManager::LoadPackage(const std::wstring& package
 	}
 
 	// 파일 로드
-	Archive archive(packagePath);
-	if (linker == nullptr)
-	{
-		linker = std::make_shared<ObjectLinker>();
-	}
+	Archive archive(packagePath, scope);
 	archive.BindObjectLinker(linker);
 	archive.LoadPackage();
 
@@ -114,7 +113,7 @@ std::shared_ptr<Package> PackageManager::LoadPackage(const std::wstring& package
 		}
 
 		const ObjectTypeInfo* typeInfo = BOOT_SYSTEM->GetObjectTypeInfo(otherPackageClassNames[i].c_str());
-		LoadPackage(otherPackagePaths[i], typeInfo, linker);
+		LoadPackage(otherPackagePaths[i], typeInfo, scope, linker);
 	}
 
 	// 리소스 로드
@@ -122,7 +121,7 @@ std::shared_ptr<Package> PackageManager::LoadPackage(const std::wstring& package
 	return result;
 }
 
-void PackageManager::LoadPackageAsync(const std::wstring& packagePath, const ObjectTypeInfo* typeinfo, std::function<void(std::shared_ptr<Package>)> callback, std::shared_ptr<ObjectLinker> linker)
+void PackageManager::LoadPackageAsync(const std::wstring& packagePath, const ObjectTypeInfo* typeinfo, std::function<void(std::shared_ptr<Package>)> callback, PackageBuildScope scope, std::shared_ptr<ObjectLinker> linker)
 {
 	std::shared_ptr<Package> result = nullptr;
 
@@ -150,7 +149,7 @@ void PackageManager::LoadPackageAsync(const std::wstring& packagePath, const Obj
 	}
 
 	// 리소스 로드
-	std::shared_ptr<Archive> archive = std::make_shared<Archive>(packagePath);
+	std::shared_ptr<Archive> archive = std::make_shared<Archive>(packagePath, scope);
 	if (linker == nullptr)
 	{
 		linker = std::make_shared<ObjectLinker>();
@@ -169,7 +168,7 @@ void PackageManager::LoadPackageAsync(const std::wstring& packagePath, const Obj
 	_mAsyncStorage->DoAsync(&AsyncPackageStorage::Load, archive);
 }
 
-void PackageManager::SavePackage(const std::wstring& packagePath, std::shared_ptr<ObjectLinker> linker)
+void PackageManager::SavePackage(const std::wstring& packagePath, PackageBuildScope scope, std::shared_ptr<ObjectLinker> linker)
 {
 	std::shared_ptr<Package> package = GetLoadedPackage(packagePath);
 
@@ -211,11 +210,11 @@ void PackageManager::SavePackage(const std::wstring& packagePath, std::shared_pt
 			continue;
 		}
 
-		SavePackage(otherPackagePaths[i], linker);
+		SavePackage(otherPackagePaths[i], scope, linker);
 	}
 
 	// 리소스 저장
-	Archive archive(packagePath);
+	Archive archive(packagePath, scope);
 	archive.BindObjectLinker(linker);
 	package->Serialize(archive);
 
@@ -223,7 +222,7 @@ void PackageManager::SavePackage(const std::wstring& packagePath, std::shared_pt
 	archive.SavePackage();
 }
 
-void PackageManager::SavePackageAsync(const std::wstring& packagePath, std::function<void()> callback, std::shared_ptr<ObjectLinker> linker)
+void PackageManager::SavePackageAsync(const std::wstring& packagePath, std::function<void()> callback, PackageBuildScope scope, std::shared_ptr<ObjectLinker> linker)
 {
 	std::shared_ptr<Package> package = GetLoadedPackage(packagePath);
 
@@ -263,11 +262,11 @@ void PackageManager::SavePackageAsync(const std::wstring& packagePath, std::func
 			continue;
 		}
 
-		SavePackage(otherPackagePaths[i], linker);
+		SavePackage(otherPackagePaths[i], scope, linker);
 	}
 
 	// 리소스 저장
-	std::shared_ptr<Archive> archive = std::make_shared<Archive>(packagePath);
+	std::shared_ptr<Archive> archive = std::make_shared<Archive>(packagePath, scope);
 	archive->BindObjectLinker(linker);
 	package->Serialize(*archive);
 
@@ -290,13 +289,9 @@ void PackageManager::NotifyToAddPackage(std::shared_ptr<Package> package)
 	_mLoadedPackages[packagePath] = std::move(package);
 }
 
-void PackageManager::NotifyToRemovePackage(std::shared_ptr<Package> package)
+void PackageManager::NotifyToRemovePackage(const std::wstring& packagePath)
 {
-	std::shared_ptr<Package> oldPackage = GetLoadedPackage(package->GetPath());
-	if (oldPackage == package)
-	{
-		_mLoadedPackages.erase(package->GetPath());
-	}
+	ASSERT_MSG(_mLoadedPackages.erase(packagePath) != 0, "Can't remove same package again");
 }
 
 void PackageManager::ResponseToLoadPackageAsync(std::shared_ptr<Archive> archive)
@@ -317,6 +312,7 @@ void PackageManager::ResponseToLoadPackageAsync(std::shared_ptr<Archive> archive
 void PackageManager::CheckToLoadPackageAsync(std::shared_ptr<Package> package, std::shared_ptr<Archive> archive)
 {
 	std::wstring packagePath = archive->GetPackagePath().wstring();
+	PackageBuildScope scope = archive->GetScope();
 	auto iter = _mWaitPackages.find(packagePath);
 	ASSERT_MSG(iter != _mWaitPackages.end() && (*iter).second != nullptr, "Async package callback can't find context");
 	const std::shared_ptr<PackageAsyncContext>& context = (*iter).second;
@@ -336,14 +332,14 @@ void PackageManager::CheckToLoadPackageAsync(std::shared_ptr<Package> package, s
 		const ObjectTypeInfo* typeInfo = BOOT_SYSTEM->GetObjectTypeInfo(otherPackageClassNames[i].c_str());
 		if (context->mForcedSync == true)
 		{
-			LoadPackage(otherPackagePaths[i], typeInfo, linker);
+			LoadPackage(otherPackagePaths[i], typeInfo, scope, linker);
 		}
 		else
 		{
 			isLoadOtherPackageAsync = true;
 			LoadPackageAsync(otherPackagePaths[i], typeInfo, [package, archive](std::shared_ptr<Package> otherPackage) {
 				PACKAGE_MANAGER->CheckToLoadPackageAsync(package, archive);
-				}, linker);
+				}, scope, linker);
 		}
 	}
 

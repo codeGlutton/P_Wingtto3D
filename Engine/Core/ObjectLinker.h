@@ -8,10 +8,17 @@ struct PackageHeader;
  */
 struct PackageLinkData
 {
+	/* IO 스레드에서 수집 정보 */
+public:
 	std::shared_ptr<PackageHeader> mPackageHeader;
-	std::vector<std::shared_ptr<Object>> mObjects;
 
-	std::unordered_map<const Object*, std::size_t> mObjectIndexMap;
+	/* 외부 패키징 종속적 */
+public:
+	std::unordered_map<std::wstring, std::shared_ptr<Object>> mObjectPtrMap;
+	std::unordered_map<const Object*, std::wstring> mObjectFullPathMap;
+
+	/* 외부 패키징 독립적 */
+public:
 	std::unordered_map<const BulkData*, std::size_t> mBulkDataIndexMap;
 };
 

@@ -47,7 +47,12 @@ void TimeManager::NotifyToAddTarget(std::shared_ptr<UpdateTargetContext> data)
 {
 	ASSERT_THREAD(MainThreadType::Game);
 
-	if (data == nullptr || data->mTarget == nullptr || _mTargets.insert(data).second == false)
+	if (data == nullptr)
+	{
+		return;
+	}
+	std::shared_ptr<IUpdatable> target = data->mTarget.lock();
+	if (target == nullptr || _mTargets.insert(data).second == false)
 	{
 		return;
 	}
@@ -148,7 +153,11 @@ void TimeManager::UpdateTargets()
 			target->mState = UpdateState::Run;
 			THREAD_MANAGER->PushGlobalConcurrentJob(ObjectPool<Job>::MakeShared([target, deltaTime = _mDeltaTime, counter = phase.mCounter]()
 				{
-					target->mTarget->Update(deltaTime);
+					std::shared_ptr<IUpdatable> targetSharedPtr = target->mTarget.lock();
+					if (targetSharedPtr != nullptr)
+					{
+						targetSharedPtr->Update(deltaTime);
+					}
 					counter->count_down();
 				}), false);
 		}
@@ -160,7 +169,11 @@ void TimeManager::UpdateTargets()
 				continue;
 			}
 			target->mState = UpdateState::Run;
-			target->mTarget->Update(_mDeltaTime);
+			std::shared_ptr<IUpdatable> targetSharedPtr = target->mTarget.lock();
+			if (targetSharedPtr != nullptr)
+			{
+				targetSharedPtr->Update(_mDeltaTime);
+			}
 		}
 
 		for (auto& target : endTarget)

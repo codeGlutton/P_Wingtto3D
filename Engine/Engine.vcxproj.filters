@@ -82,6 +82,9 @@
     <Filter Include="Core\CommonType">
       <UniqueIdentifier>{51897e5a-fcdb-405e-ab91-679d987f1fc5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Core\Resource\Package">
+      <UniqueIdentifier>{813ddaf1-e0c7-405e-a348-3ea4bde4e3c6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\Object.h">
@@ -270,9 +273,6 @@
     <ClInclude Include="Manager\PathManager.h">
       <Filter>Manager\Utils</Filter>
     </ClInclude>
-    <ClInclude Include="Core\Resource\Package.h">
-      <Filter>Core\Resource</Filter>
-    </ClInclude>
     <ClInclude Include="Core\CommonType\Delegate.h">
       <Filter>Core\CommonType</Filter>
     </ClInclude>
@@ -285,10 +285,7 @@
     <ClInclude Include="Reflection\CommonTypeInfo.inl">
       <Filter>Reflection\TypeInfo</Filter>
     </ClInclude>
-    <ClInclude Include="Core\Resource\BulkWrapper.h">
-      <Filter>Core\Resource</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\Resource\PackageHeader.h">
+    <ClInclude Include="Core\Resource\BulkData.h">
       <Filter>Core\Resource</Filter>
     </ClInclude>
     <ClInclude Include="Manager\PackageManager.h">
@@ -299,6 +296,18 @@
     </ClInclude>
     <ClInclude Include="ManagerMaximum.h">
       <Filter>Headers\Minimum</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Resource\Package\Package.h">
+      <Filter>Core\Resource\Package</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Resource\Package\PackageHeader.h">
+      <Filter>Core\Resource\Package</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Resource\Package\PackageRuntimeOwner.h">
+      <Filter>Core\Resource\Package</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Resource\Package\PackageInclude.h">
+      <Filter>Core\Resource\Package</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -461,9 +470,6 @@
     <ClCompile Include="Manager\PathManager.cpp">
       <Filter>Manager\Utils</Filter>
     </ClCompile>
-    <ClCompile Include="Core\Resource\Package.cpp">
-      <Filter>Core\Resource</Filter>
-    </ClCompile>
     <ClCompile Include="Core\CommonType\Delegate.cpp">
       <Filter>Core\CommonType</Filter>
     </ClCompile>
@@ -473,10 +479,7 @@
     <ClCompile Include="Core\CommonType\SubClass.cpp">
       <Filter>Core\CommonType</Filter>
     </ClCompile>
-    <ClCompile Include="Core\Resource\BulkWrapper.cpp">
-      <Filter>Core\Resource</Filter>
-    </ClCompile>
-    <ClCompile Include="Core\Resource\PackageHeader.cpp">
+    <ClCompile Include="Core\Resource\BulkData.cpp">
       <Filter>Core\Resource</Filter>
     </ClCompile>
     <ClCompile Include="Manager\PackageManager.cpp">
@@ -484,6 +487,15 @@
     </ClCompile>
     <ClCompile Include="Core\Resource\ResourceHeader.cpp">
       <Filter>Core\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Resource\Package\Package.cpp">
+      <Filter>Core\Resource\Package</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Resource\Package\PackageHeader.cpp">
+      <Filter>Core\Resource\Package</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Resource\Package\PackageRuntimeOwner.cpp">
+      <Filter>Core\Resource\Package</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

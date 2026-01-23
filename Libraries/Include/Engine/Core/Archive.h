@@ -3,6 +3,7 @@
 #include <fstream>
 #include <filesystem>
 
+#include "Core/Resource/Package/PackageInclude.h"
 #include "Core/GUID.h"
 
 struct ObjectLinker;
@@ -18,7 +19,7 @@ enum class ArchiveMemoryTarget : uint8
 class Archive
 {
 public:
-	Archive(const std::filesystem::path& packagePath, ArchiveMemoryTarget memoryTarget = ArchiveMemoryTarget::Data);
+	Archive(const std::filesystem::path& packagePath, PackageBuildScope scope = PackageBuildScope::Shared, ArchiveMemoryTarget memoryTarget = ArchiveMemoryTarget::Data);
 
 public:
 	void LoadPackage();
@@ -62,6 +63,10 @@ public:
 	{
 		return _mPackagePath;
 	}
+	PackageBuildScope GetScope() const
+	{
+		return _mScope;
+	}
 	PackageLinkData& GetLinkData();
 	PackageLinkData& GetLinkData(const std::wstring& packagePath);
 	const PackageLinkData& GetLinkData() const;
@@ -79,6 +84,7 @@ private:
 
 private:
 	std::filesystem::path _mPackagePath;
+	PackageBuildScope _mScope;
 	std::vector<char>* _mCurrentMemory;
 	std::size_t _mCurrentIndex;
 

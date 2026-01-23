@@ -50,7 +50,7 @@ bool AppWindow::InitWindow()
 		return false;
 	}
 
-	::ShowWindow(_mDesc.mHWnd, FALSE);
+	::ShowWindow(_mDesc.mHWnd, TRUE);
 	::UpdateWindow(_mDesc.mHWnd);
 
 	return true;

@@ -1,11 +1,12 @@
 ﻿#pragma once
 
 #include "Core/Resource/Resource.h"
-#include "Core/Resource/Package.h"
+#include "Core/Resource/Package/PackageRuntimeOwner.h"
 
 #define RESOURCE_MANAGER ResourceManager::GetInst()
 
 class ResourceHeader;
+class ResourcePreviewPackage;
 
 class ResourceManager : public IPackageRuntimeOwner
 {
@@ -43,7 +44,7 @@ public:
 	void NotifyToRemoveResource(const std::wstring& resourcePath);
 
 private:
-	std::weak_ptr<ResourcePreviewPackage> _mPackage;
+	std::shared_ptr<ResourcePreviewPackage> _mPackage;
 
 	// 상시 존재할 헤더
 	std::unordered_map<std::wstring, std::shared_ptr<ResourceHeader>> _mHeaders;

@@ -11,9 +11,9 @@ struct AppWindowDesc
 
 	HWND mHWnd = 0;
 	PROPERTY(mWidth)
-	float mWidth = 800.f;
+	float mWidth = 1280.f;
 	PROPERTY(mHeight)
-	float mHeight = 600.f;
+	float mHeight = 720.f;
 	PROPERTY(mVsync)
 	bool mVsync = false;
 	PROPERTY(mWindowed)
@@ -45,6 +45,14 @@ public:
 	const AppWindowDesc& GetDesc() const 
 	{
 		return _mDesc;
+	}
+	const std::shared_ptr<AppWindow>& GetOwner() const
+	{
+		return _mOwner.lock();
+	}
+	bool IsMainAppWindow() const
+	{
+		return _mOwner.lock() == nullptr;
 	}
 
 private:

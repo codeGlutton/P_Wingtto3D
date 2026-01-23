@@ -15,14 +15,10 @@ public:
 	virtual ~Game() override;
 
 public:
-	void PreBoot() override;
 	void Init() override;
 	void Update() override;
 	void End() override;
 
 private:
-	void CreateMainWindow();
-
-private:
-	std::shared_ptr<AppWindow> _mMainWindow;
+	void CreateMainWindow() override;
 };

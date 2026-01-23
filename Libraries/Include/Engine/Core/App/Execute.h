@@ -41,9 +41,11 @@ public:
 	virtual ~IExecute() = default;
 
 public:
-	virtual void PreBoot() = 0;
 	virtual void Init() = 0;
 	virtual void Update() = 0;
 	virtual void End() = 0;
+
+public:
+	virtual void CreateMainWindow() = 0;
 };
 

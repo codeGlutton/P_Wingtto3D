@@ -6,12 +6,12 @@ class SoftObjectPtr
 public:
 	SoftObjectPtr() = default;
 	SoftObjectPtr(const std::wstring& path) :
-		_mPath(path),
+		_mFullPath(path),
 		_mObject()
 	{
 	}
 	SoftObjectPtr(std::wstring&& path) :
-		_mPath(std::move(path)),
+		_mFullPath(std::move(path)),
 		_mObject()
 	{
 	}
@@ -20,7 +20,7 @@ public:
 		std::is_convertible_v<U*, T*> == true
 		)
 	SoftObjectPtr(const SoftObjectPtr<U>& other) :
-		_mPath(other.path),
+		_mFullPath(other.path),
 		_mObject(other._mObject)
 	{
 	}
@@ -28,7 +28,7 @@ public:
 		std::is_convertible_v<U*, T*> == true
 		)
 	SoftObjectPtr(SoftObjectPtr<U>&& other) :
-		_mPath(std::move(other.path)),
+		_mFullPath(std::move(other.path)),
 		_mObject(std::move(other._mObject))
 	{
 	}
@@ -39,13 +39,13 @@ public:
 
 	SoftObjectPtr& operator=(const std::wstring& path)
 	{
-		_mPath = path;
+		_mFullPath = path;
 		_mObject.reset();
 		return *this;
 	}
 	SoftObjectPtr& operator=(std::wstring&& path)
 	{
-		_mPath = std::move(path);
+		_mFullPath = std::move(path);
 		_mObject.reset();
 		return *this;
 	}
@@ -54,8 +54,8 @@ public:
 		)
 	SoftObjectPtr& operator=(const SoftObjectPtr<U>& other)
 	{
-		_mPath = other._mPath;
-		_mObject = other._mPath;
+		_mFullPath = other._mFullPath;
+		_mObject = other._mObject;
 		return *this;
 	}
 	template <typename U> requires(
@@ -63,30 +63,30 @@ public:
 		)
 	SoftObjectPtr& operator=(SoftObjectPtr<U>&& other)
 	{
-		_mPath = std::move(other._mPath);
-		_mObject = std::move(other._mPath);
+		_mFullPath = std::move(other._mFullPath);
+		_mObject = std::move(other._mObject);
 		return *this;
 	}
 
 	explicit operator std::wstring() const noexcept
 	{
-		return _mPath;
+		return _mFullPath;
 	}
 
 public:
 	bool operator==(const SoftObjectPtr& other) const
 	{
-		return _mPath == other._mPath;
+		return _mFullPath == other._mFullPath;
 	}
 	bool operator==(SoftObjectPtr&& other) const
 	{
-		return _mPath == other._mPath;
+		return _mFullPath == other._mFullPath;
 	}
 
 public:
-	const std::wstring& GetPath() const
+	const std::wstring& GetFullPath() const
 	{
-		return _mPath;
+		return _mFullPath;
 	}
 	std::shared_ptr<T> Get() const
 	{
@@ -97,7 +97,7 @@ public:
 	void LoadASync();
 
 private:
-	std::wstring _mPath;
+	std::wstring _mFullPath;
 	std::weak_ptr<T> _mObject;
 };
 

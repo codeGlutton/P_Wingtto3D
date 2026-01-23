@@ -33,6 +33,10 @@ public:
 	{
 		return _mResourcePath;
 	}
+	const std::filesystem::path& GetIsolationResourcePath() const
+	{
+		return _mIsolationResourcePath;
+	}
 	const std::filesystem::path& GetEngineResourcePath() const
 	{
 		return _mEngineResourcePath;
@@ -66,6 +70,7 @@ private:
 
 private:
 	std::filesystem::path _mResourcePath;
+	std::filesystem::path _mIsolationResourcePath;
 	std::filesystem::path _mEngineResourcePath;
 	std::filesystem::path _mExternalResourcePath;
 
