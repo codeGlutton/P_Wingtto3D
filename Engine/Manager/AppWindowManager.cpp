@@ -24,13 +24,14 @@ void AppWindowManager::Init()
 void AppWindowManager::Destroy()
 {
 	Save();
+	_mAppWindows.clear();
 	_mPackage = nullptr;
 }
 
 std::shared_ptr<AppWindow> AppWindowManager::CreateAppWindow(std::shared_ptr<AppWindow> owner, const ObjectTypeInfo* typeInfo, ObjectCreateFlag::Type flags)
 {
 	ASSERT_MSG(typeInfo->IsChildOf<AppWindow>() == true, "CreateAppWindow func is not allowed to create non AppWindow class");
-	if (owner == nullptr && _mMainWindow.lock() != nullptr)
+	if (owner == nullptr && GetMainWindow() != nullptr)
 	{
 		// 이미 메인 윈도우가 있는 상황
 		return nullptr;
@@ -72,8 +73,50 @@ void AppWindowManager::NotifyToAddAppWindow(std::shared_ptr<AppWindow> window)
 
 	if (window->IsMainAppWindow() == true)
 	{
-		_mMainWindow = window;
+		_mMainHWnd = window->GetDesc().mHWnd;
 	}
 	mOnRegisterAppWindow.ExecuteIfBound(window);
 }
 
+void AppWindowManager::NotifyToCloseAppWindow(HWND hWnd)
+{
+	ASSERT_MSG(_mAppWindows.find(hWnd) != _mAppWindows.end(), "Trying to close empty app window");
+	if (hWnd == _mMainHWnd)
+	{
+		::PostQuitMessage(0);
+	}
+	else
+	{
+		_mAppWindows.erase(hWnd);
+	}
+}
+
+void AppWindowManager::NotifyToChangeFocus(HWND hWnd)
+{
+	if (GetFocusWindow() != nullptr)
+	{
+		GetFocusWindow()->EndFocus();
+	}
+	_mFocusHWnd = hWnd;
+	if (GetFocusWindow() != nullptr)
+	{
+		GetFocusWindow()->BeginFocus();
+	}
+	mOnChangeFocus.Multicast(GetFocusWindow());
+}
+
+void AppWindowManager::NotifyToChangeAppActivation(bool isActive)
+{
+	_mIsActiveApp = isActive;
+}
+
+void AppWindowManager::NotifyToResize(HWND hWnd, bool isWindowed, RECT clientSize)
+{
+	ASSERT_MSG(_mAppWindows.find(hWnd) != _mAppWindows.end(), "Trying to resize empty app window");
+	bool isChangedWindowMode = _mAppWindows[hWnd]->GetDesc().mWindowed != isWindowed;
+	_mAppWindows[hWnd]->OnResize(isWindowed, clientSize);
+	if (isChangedWindowMode == true)
+	{
+		mOnChangeWindowMode.Multicast(_mAppWindows[hWnd], isWindowed);
+	}
+}

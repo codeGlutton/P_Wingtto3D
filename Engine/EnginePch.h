@@ -28,22 +28,44 @@
 
 #include <windows.h>
 #include <assert.h>
+#include <wrl.h>
+using namespace Microsoft::WRL;
 
-///* Assimp */
-//
+/* DirectX */
+
+#include <d3d11.h>
+#include <d3dcompiler.h>
+#include <d3d11shader.h>
+
+#include <DirectXMath.h>
+#include "DirectXTex/DirectXTex.h"
+#include "DirectXTex/DirectXTex.inl"
+
+/* Assimp */
+
 //#include <Assimp/Importer.hpp>
 //#include <Assimp/scene.h>
 //#include <Assimp/postprocess.h>
+
+/* Simple Math */
+
 
 /* nlohmann Json */
 
 #include "nlohmann/json.hpp"
 
+
+/* lib */
+
+#pragma comment(lib, "dxguid.lib")
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "d3dcompiler.lib")
+#pragma comment(lib, "xinput.lib")
+#pragma comment(lib, "dinput8.lib")
 
 #pragma comment(lib, "DirectXTex/DirectXTex.lib")
 //#pragma comment(lib, "Assimp/assimp-vc143-mt.lib")
+
 
 /* Headers */
 
@@ -72,8 +94,10 @@
 #include "Utils/StringUtils.h"
 #include "Utils/Debugger/Logger.h"
 
-/* Others */
+/* CommonType */
 
 #include "Core/CommonType/Delegate.h"
 #include "Core/CommonType/SoftObjectPtr.h"
 #include "Core/CommonType/SubClass.h"
+
+#include "SimpleMath/SimpleMath.h"

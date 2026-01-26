@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #define DECLARE_DELEGATE_INTERNAL(name, ...) using name = NativeSingleDelegate<__VA_ARGS__>
 
@@ -25,6 +25,8 @@
 #define DECLARE_MULTICAST_DELEGATE_4_PARAMS(name, _1, _2, _3, _4)		DECLARE_MULTICAST_DELEGATE_INTERNAL(name, _1, _2, _3, _4)
 #define DECLARE_MULTICAST_DELEGATE_5_PARAMS(name, _1, _2, _3, _4, _5)	DECLARE_MULTICAST_DELEGATE_INTERNAL(name, _1, _2, _3, _4, _5)
 
+class Object;
+
 #pragma region NATIVE_DELEGATE_BASE
 
 using DelegateHandle = uint32;
@@ -50,6 +52,112 @@ private:
 
 #pragma endregion
 
+#pragma region NATIVE_DELEGATE_BINDER
+
+template<typename Ret, typename... Args> requires (!HasAnyReference<Ret, Args...>)
+class NativeSingleDelegate;
+
+template<typename... Args> requires (!HasAnyReference<Args...>)
+class NativeMulticastDelegate;
+
+template<typename Ret, typename... Args> requires (!HasAnyReference<Ret, Args...>)
+class NativeDelegateBinder
+{
+	friend class NativeSingleDelegate<Ret, Args...>;
+	friend class NativeMulticastDelegate<Args...>;
+
+private:
+	NativeDelegateBinder(std::function<Ret(const std::shared_ptr<Object>&, Args...)> callback, bool isWeakPtr, bool isStatic) :
+		_mCallback(callback),
+		_mIsWeakPtr(isWeakPtr),
+		_mIsStatic(isStatic)
+	{
+	}
+
+public:
+	static NativeDelegateBinder BindLambda(std::function<Ret(Args...)> lambda)
+	{
+		return NativeDelegateBinder(
+			[lambda](const std::shared_ptr<Object>& sp, Args... args) {
+				if constexpr (std::is_same_v<Ret, void> == true)
+				{
+					lambda(std::move(args)...);
+				}
+				else
+				{
+					return lambda(std::move(args)...);
+				}
+			}, false, true);
+	}
+	static NativeDelegateBinder BindStatic(Ret(*func)(Args...))
+	{
+		return NativeDelegateBinder(
+			[func](const std::shared_ptr<Object>& sp, Args... args) {
+				if constexpr (std::is_same_v<Ret, void> == true)
+				{
+					*func(std::move(args)...);
+				}
+				else
+				{
+					return *func(std::move(args)...);
+				}
+			}, false, true);
+	}
+
+	template<typename C>
+	static NativeDelegateBinder BindNativeMethod(Ret(C::* func)(Args...), bool isWeakPtr = false)
+	{
+		return NativeDelegateBinder(
+			[func](const std::shared_ptr<Object>& sp, Args... args) {
+				if constexpr (std::is_same_v<Ret, void> == true)
+				{
+					(static_cast<C*>(sp.get())->*func)(std::move(args)...);
+				}
+				else
+				{
+					return (static_cast<C*>(sp.get())->*func)(std::move(args)...);
+				}
+			}, isWeakPtr, false);
+	}
+	template<typename C>
+	static NativeDelegateBinder BindNativeMethod(Ret(C::* func)(Args...) const, bool isWeakPtr = false)
+	{
+		return NativeDelegateBinder(
+			[func](const std::shared_ptr<Object>& sp, Args... args) {
+				if constexpr (std::is_same_v<Ret, void> == true)
+				{
+					(static_cast<const C*>(sp.get())->*func)(std::move(args)...);
+				}
+				else
+				{
+					return (static_cast<const C*>(sp.get())->*func)(std::move(args)...);
+				}
+			}, isWeakPtr, false);
+	}
+
+	static NativeDelegateBinder BindMethod(const Method* method, bool isWeakPtr = false)
+	{
+		return NativeDelegateBinder(
+			[method](const std::shared_ptr<Object>& sp, Args... args) {
+				if constexpr (std::is_same_v<Ret, void> == true)
+				{
+					method->Invoke(sp.get(), std::move(args)...);
+				}
+				else
+				{
+					return method->Invoke(sp.get(), std::move(args)...);
+				}
+			}, isWeakPtr, false);
+	}
+
+private:
+	std::function<Ret(const std::shared_ptr<Object>&, Args...)> _mCallback;
+	bool _mIsWeakPtr = false;
+	bool _mIsStatic = false;
+};
+
+#pragma endregion
+
 
 #pragma region NATIVE_SINGLE_DELEGATE
 
@@ -57,6 +165,12 @@ template<typename Ret, typename... Args> requires (!HasAnyReference<Ret, Args...
 class NativeSingleDelegate : public NativeDelegateBase
 {
 public:
+	using Binder = NativeDelegateBinder<Ret, Args...>;
+
+public:
+	template<typename C>
+	DelegateHandle Bind(const std::shared_ptr<C>& object, const Binder& binder);
+
 	DelegateHandle BindLambda(std::function<Ret(Args...)> lambda)
 	{
 		_mCallback = lambda;
@@ -103,6 +217,67 @@ protected:
 
 template<typename Ret, typename ...Args> requires (!HasAnyReference<Ret, Args...>)
 template<typename C>
+inline DelegateHandle NativeSingleDelegate<Ret, Args...>::Bind(const std::shared_ptr<C>& object, const Binder& binder)
+{
+	if (binder._mIsWeakPtr == true)
+	{
+		if constexpr (std::is_same_v<Ret, void> == true)
+		{
+			_mCallback = [wp = std::weak_ptr<C>(object), binder, this](Args... args) {
+				std::shared_ptr<C> sp = wp.lock();
+				if (sp != nullptr || binder._mIsStatic == true)
+				{
+					binder._mCallback(sp, std::move(args)...);
+				}
+				else
+				{
+					Clear();
+				}
+				};
+		}
+		else
+		{
+			_mCallback = [wp = std::weak_ptr<C>(object), binder, this](Args... args) {
+				std::shared_ptr<C> sp = wp.lock();
+				if (sp != nullptr || binder._mIsStatic == true)
+				{
+					return binder._mCallback(sp, std::move(args)...);
+				}
+				else
+				{
+					Clear();
+					return {};
+				}
+				};
+		}
+	}
+	else
+	{
+		if constexpr (std::is_same_v<Ret, void> == true)
+		{
+			_mCallback = [sp = object, binder](Args... args) {
+				if (sp != nullptr || binder._mIsStatic == true)
+				{
+					binder._mCallback(sp, std::move(args)...);
+				}
+				};
+		}
+		else
+		{
+			_mCallback = [sp = object, binder](Args... args) {
+				if (sp != nullptr || binder._mIsStatic == true)
+				{
+					return binder._mCallback(sp, std::move(args)...);
+				}
+				return {};
+				};
+		}
+	}
+	return GetNewHandle();
+}
+
+template<typename Ret, typename ...Args> requires (!HasAnyReference<Ret, Args...>)
+template<typename C>
 inline DelegateHandle NativeSingleDelegate<Ret, Args...>::BindNativeMethod(const std::shared_ptr<C>& object, Ret(C::* func)(Args...), bool isWeakPtr)
 {
 	if (isWeakPtr == true)
@@ -113,7 +288,7 @@ inline DelegateHandle NativeSingleDelegate<Ret, Args...>::BindNativeMethod(const
 				std::shared_ptr<C> sp = wp.lock();
 				if (sp != nullptr)
 				{
-					(sp.get()->*func)(std::move(args)...);
+					(static_cast<C*>(sp.get())->*func)(std::move(args)...);
 				}
 				else
 				{
@@ -127,7 +302,7 @@ inline DelegateHandle NativeSingleDelegate<Ret, Args...>::BindNativeMethod(const
 				std::shared_ptr<C> sp = wp.lock();
 				if (sp != nullptr)
 				{
-					return (sp.get()->*func)(std::move(args)...);
+					return (static_cast<C*>(sp.get())->*func)(std::move(args)...);
 				}
 				else
 				{
@@ -144,7 +319,7 @@ inline DelegateHandle NativeSingleDelegate<Ret, Args...>::BindNativeMethod(const
 			_mCallback = [sp = object, func](Args... args) {
 				if (sp != nullptr)
 				{
-					(sp.get()->*func)(std::move(args)...);
+					(static_cast<C*>(sp.get())->*func)(std::move(args)...);
 				}
 				};
 		}
@@ -153,7 +328,7 @@ inline DelegateHandle NativeSingleDelegate<Ret, Args...>::BindNativeMethod(const
 			_mCallback = [sp = object, func](Args... args) {
 				if (sp != nullptr)
 				{
-					return (sp.get()->*func)(std::move(args)...);
+					return (static_cast<C*>(sp.get())->*func)(std::move(args)...);
 				}
 				return {};
 				};
@@ -174,7 +349,7 @@ inline DelegateHandle NativeSingleDelegate<Ret, Args...>::BindNativeMethod(const
 				std::shared_ptr<C> sp = wp.lock();
 				if (sp != nullptr)
 				{
-					(sp.get()->*func)(std::move(args)...);
+					(static_cast<const C*>(sp.get())->*func)(std::move(args)...);
 				}
 				else
 				{
@@ -188,7 +363,7 @@ inline DelegateHandle NativeSingleDelegate<Ret, Args...>::BindNativeMethod(const
 				std::shared_ptr<C> sp = wp.lock();
 				if (sp != nullptr)
 				{
-					return (sp.get()->*func)(std::move(args)...);
+					return (static_cast<const C*>(sp.get())->*func)(std::move(args)...);
 				}
 				else
 				{
@@ -205,7 +380,7 @@ inline DelegateHandle NativeSingleDelegate<Ret, Args...>::BindNativeMethod(const
 			_mCallback = [sp = object, func](Args... args) {
 				if (sp != nullptr)
 				{
-					(sp.get()->*func)(std::move(args)...);
+					(static_cast<const C*>(sp.get())->*func)(std::move(args)...);
 				}
 			};
 		}
@@ -214,7 +389,7 @@ inline DelegateHandle NativeSingleDelegate<Ret, Args...>::BindNativeMethod(const
 			_mCallback = [sp = object, func](Args... args) {
 				if (sp != nullptr)
 				{
-					return (sp.get()->*func)(std::move(args)...);
+					return (static_cast<const C*>(sp.get())->*func)(std::move(args)...);
 				}
 				return {};
 			};
@@ -235,7 +410,7 @@ inline DelegateHandle NativeSingleDelegate<Ret, Args...>::BindNativeMethod(const
 				std::shared_ptr<const C> sp = wp.lock();
 				if (sp != nullptr)
 				{
-					(sp.get()->*func)(std::move(args)...);
+					(static_cast<const C*>(sp.get())->*func)(std::move(args)...);
 				}
 				else
 				{
@@ -249,7 +424,7 @@ inline DelegateHandle NativeSingleDelegate<Ret, Args...>::BindNativeMethod(const
 				std::shared_ptr<const C> sp = wp.lock();
 				if (sp != nullptr)
 				{
-					return (sp.get()->*func)(std::move(args)...);
+					return (static_cast<const C*>(sp.get())->*func)(std::move(args)...);
 				}
 				else
 				{
@@ -266,7 +441,7 @@ inline DelegateHandle NativeSingleDelegate<Ret, Args...>::BindNativeMethod(const
 			_mCallback = [sp = object, func](Args... args) {
 				if (sp != nullptr)
 				{
-					(sp.get()->*func)(std::move(args)...);
+					(static_cast<const C*>(sp.get())->*func)(std::move(args)...);
 				}
 				};
 		}
@@ -275,7 +450,7 @@ inline DelegateHandle NativeSingleDelegate<Ret, Args...>::BindNativeMethod(const
 			_mCallback = [sp = object, func](Args... args) {
 				if (sp != nullptr)
 				{
-					return (sp.get()->*func)(std::move(args)...);
+					return (static_cast<const C*>(sp.get())->*func)(std::move(args)...);
 				}
 				return {};
 				};
@@ -417,6 +592,9 @@ template<typename... Args> requires (!HasAnyReference<Args...>)
 class NativeMulticastDelegate : public NativeDelegateBase
 {
 public:
+	using Binder = NativeDelegateBinder<void, Args...>;
+
+public:
 	struct CallbackDesc
 	{
 		DelegateHandle mHandle;
@@ -424,6 +602,9 @@ public:
 	};
 
 public:
+	template<typename C>
+	DelegateHandle Bind(const std::shared_ptr<C>& object, const Binder& binder);
+
 	DelegateHandle BindLambda(std::function<void(Args...)> lambda)
 	{
 		_mCallbackDescs.push_back(CallbackDesc{ GetNewHandle(), lambda });
@@ -469,6 +650,42 @@ protected:
 
 template<typename ...Args> requires (!HasAnyReference<Args...>)
 template<typename C>
+inline DelegateHandle NativeMulticastDelegate<Args...>::Bind(const std::shared_ptr<C>& object, const Binder& binder)
+{
+	if (binder._mIsWeakPtr == true)
+	{
+		_mCallbackDescs.push_back({
+			GetNewHandle(),
+			[wp = std::weak_ptr<C>(object), binder, this](Args... args) {
+				std::shared_ptr<C> sp = wp.lock();
+				if (sp != nullptr || binder._mIsStatic == true)
+				{
+					binder._mCallback(sp, std::move(args)...);
+				}
+				else
+				{
+					_mIsDirty = true;
+				}
+			}
+			});
+	}
+	else
+	{
+		_mCallbackDescs.push_back({
+			GetNewHandle(),
+			[sp = object, binder](Args... args) {
+				if (sp != nullptr || binder._mIsStatic == true)
+				{
+					binder._mCallback(sp, std::move(args)...);
+				}
+			}
+			});
+	}
+	return GetCurrentHandle();
+}
+
+template<typename ...Args> requires (!HasAnyReference<Args...>)
+template<typename C>
 inline DelegateHandle NativeMulticastDelegate<Args...>::BindNativeMethod(const std::shared_ptr<C>& object, void(C::* func)(Args...), bool isWeakPtr)
 {
 	if (isWeakPtr == true)
@@ -479,7 +696,7 @@ inline DelegateHandle NativeMulticastDelegate<Args...>::BindNativeMethod(const s
 				std::shared_ptr<C> sp = wp.lock();
 				if (sp != nullptr)
 				{
-					(sp.get()->*func)(std::move(args)...);
+					(static_cast<C*>(sp.get())->*func)(std::move(args)...);
 				}
 				else
 				{
@@ -495,7 +712,7 @@ inline DelegateHandle NativeMulticastDelegate<Args...>::BindNativeMethod(const s
 			[sp = object, func](Args... args) {
 				if (sp != nullptr)
 				{
-					(sp.get()->*func)(std::move(args)...);
+					(static_cast<C*>(sp.get())->*func)(std::move(args)...);
 				}
 			}
 		});
@@ -515,7 +732,7 @@ inline DelegateHandle NativeMulticastDelegate<Args...>::BindNativeMethod(const s
 				std::shared_ptr<C> sp = wp.lock();
 				if (sp != nullptr)
 				{
-					(sp.get()->*func)(std::move(args)...);
+					(static_cast<const C*>(sp.get())->*func)(std::move(args)...);
 				}
 				else
 				{
@@ -531,7 +748,7 @@ inline DelegateHandle NativeMulticastDelegate<Args...>::BindNativeMethod(const s
 			[sp = object, func](Args... args) {
 				if (sp != nullptr)
 				{
-					(sp.get()->*func)(std::move(args)...);
+					(static_cast<const C*>(sp.get())->*func)(std::move(args)...);
 				}
 			}
 		});
@@ -551,7 +768,7 @@ inline DelegateHandle NativeMulticastDelegate<Args...>::BindNativeMethod(const s
 				std::shared_ptr<const C> sp = wp.lock();
 				if (sp != nullptr)
 				{
-					(sp.get()->*func)(std::move(args)...);
+					(static_cast<const C*>(sp.get())->*func)(std::move(args)...);
 				}
 				else
 				{
@@ -567,7 +784,7 @@ inline DelegateHandle NativeMulticastDelegate<Args...>::BindNativeMethod(const s
 			[sp = object, func](Args... args) {
 				if (sp != nullptr)
 				{
-					(sp.get()->*func)(std::move(args)...);
+					(static_cast<const C*>(sp.get())->*func)(std::move(args)...);
 				}
 			}
 			});

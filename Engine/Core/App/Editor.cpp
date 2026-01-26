@@ -21,6 +21,3 @@ void Editor::End()
 {
 }
 
-void Editor::CreateMainWindow()
-{
-}

@@ -15,6 +15,9 @@ protected:
 	virtual void BeginDestroy() override;
 
 private:
+	void MakeHeader();
+
+private:
 	std::shared_ptr<ResourceHeader> _mHeader;
 };
 

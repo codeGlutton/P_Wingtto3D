@@ -15,3 +15,8 @@ void Resource::BeginDestroy()
 	RESOURCE_MANAGER->NotifyToRemoveResource(GetPath());
 	Super::BeginDestroy();
 }
+
+void Resource::MakeHeader()
+{
+	//_mHeader = 
+}

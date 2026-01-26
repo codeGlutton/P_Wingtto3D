@@ -8,4 +8,5 @@
 #include "Manager/ResourceManager.h"
 #include "Manager/PathManager.h"
 #include "Manager/TimeManager.h"
+#include "Manager/InputManager.h"
 

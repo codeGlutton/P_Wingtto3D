@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include "SimpleMath/SimpleMath.h"
+
 using int8 = __int8;
 using int16 = __int16;
 using int32 = __int32;
@@ -10,15 +12,13 @@ using uint16 = unsigned __int16;
 using uint32 = unsigned __int32;
 using uint64 = unsigned __int64;
 
-//using Vec2 = DirectX::SimpleMath::Vector2;
-//using Vec3 = DirectX::SimpleMath::Vector3;
-//using Vec4 = DirectX::SimpleMath::Vector4;
-//
-//using Color = DirectX::XMFLOAT4;
-//
-//using Matrix = DirectX::SimpleMath::Matrix;
-//using Quat = DirectX::SimpleMath::Quaternion;
-//using Ray = DirectX::SimpleMath::Ray;
+using Vec2 = DirectX::SimpleMath::Vector2;
+using Vec3 = DirectX::SimpleMath::Vector3;
+using Vec4 = DirectX::SimpleMath::Vector4;
 
-//using InstancedId = std::pair<uint64, uint64>;
+using Color = DirectX::SimpleMath::Vector4;
+
+using Matrix = DirectX::SimpleMath::Matrix;
+using Quat = DirectX::SimpleMath::Quaternion;
+using Ray = DirectX::SimpleMath::Ray;
 

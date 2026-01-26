@@ -11,6 +11,8 @@
 class AppWindowPackage;
 
 DECLARE_DELEGATE_1_PARAM(OnRegisterAppWindow, std::shared_ptr<AppWindow>);
+DECLARE_MULTICAST_DELEGATE_1_PARAM(OnChangeFocus, std::shared_ptr<AppWindow>);
+DECLARE_MULTICAST_DELEGATE_2_PARAMS(OnChangeWindowMode, std::shared_ptr<AppWindow>, bool);
 
 class AppWindowManager : public IPackageRuntimeOwner
 {
@@ -30,9 +32,26 @@ public:
 	void Destroy();
 
 public:
+	std::shared_ptr<AppWindow> GetAppWindow(HWND hWnd) const
+	{
+		auto iter = _mAppWindows.find(hWnd);
+		if (iter == _mAppWindows.end())
+		{
+			return nullptr;
+		}
+		return (*iter).second;
+	}
 	std::shared_ptr<AppWindow> GetMainWindow() const
 	{
-		return _mMainWindow.lock();
+		return GetAppWindow(_mMainHWnd);
+	}
+	std::shared_ptr<AppWindow> GetFocusWindow() const
+	{
+		return GetAppWindow(_mFocusHWnd);
+	}
+	bool IsActiveApp() const
+	{
+		return _mIsActiveApp;
 	}
 
 public:
@@ -47,14 +66,28 @@ public:
 
 public:
 	void NotifyToAddAppWindow(std::shared_ptr<AppWindow> window);
+	void NotifyToCloseAppWindow(HWND hWnd);
+
+public:
+	void NotifyToChangeFocus(HWND hWnd);
+	void NotifyToChangeAppActivation(bool isActive);
+
+public:
+	void NotifyToResize(HWND hWnd, bool isWindowed, RECT clientSize);
 
 public:
 	OnRegisterAppWindow mOnRegisterAppWindow;
+	OnChangeFocus mOnChangeFocus;
+	OnChangeWindowMode mOnChangeWindowMode;
 
 private:
 	std::shared_ptr<AppWindowPackage> _mPackage;
-	std::weak_ptr<AppWindow> _mMainWindow;
+	HWND _mMainHWnd = NULL;
 	std::unordered_map<HWND, std::shared_ptr<AppWindow>> _mAppWindows;
+
+private:
+	HWND _mFocusHWnd = NULL;
+	bool _mIsActiveApp = true;
 };
 
 template<typename T> requires std::is_base_of_v<AppWindow, T>

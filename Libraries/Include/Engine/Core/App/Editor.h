@@ -18,8 +18,5 @@ public:
 	void Init() override;
 	void Update() override;
 	void End() override;
-
-private:
-	void CreateMainWindow() override;
 };
 

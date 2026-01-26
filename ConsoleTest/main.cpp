@@ -148,6 +148,8 @@ DECLARE_MULTICAST_DELEGATE_1_PARAM(OnTestMulti, IInterfaceTestBase*);
 
 int main()
 {
+	Vec2 testVec = Vec2::Zero;
+
 	BOOT_SYSTEM->Boot();
 
 	std::shared_ptr<const ReflectionTestObject> t = std::make_shared<ReflectionTestObject>();

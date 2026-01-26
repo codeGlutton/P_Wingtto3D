@@ -71,7 +71,7 @@ const PairTypeInfo<K, D> PairTypeInfo< K, D>::mStatic;
 template<typename K, typename D> requires (IsChildOfObject<K> == false && IsChildOfObject<D> == false)
 inline void PairTypeInfo<K, D>::Serialize(OUT Archive& archive, const void* inst) const
 {
-	const TypeInfo& keyTypeInfo = TypeInfoResolver<K>::Get();
+	const TypeInfo& keyTypeInfo = TypeInfoResolver<std::remove_const_t<K>>::Get();
 	const TypeInfo& dataTypeInfo = TypeInfoResolver<D>::Get();
 
 	const C* instPtr = reinterpret_cast<const C*>(inst);
@@ -82,11 +82,11 @@ inline void PairTypeInfo<K, D>::Serialize(OUT Archive& archive, const void* inst
 template<typename K, typename D> requires (IsChildOfObject<K> == false && IsChildOfObject<D> == false)
 inline void PairTypeInfo<K, D>::Deserialize(Archive& archive, OUT void* inst) const
 {
-	const TypeInfo& keyTypeInfo = TypeInfoResolver<K>::Get();
+	const TypeInfo& keyTypeInfo = TypeInfoResolver<std::remove_const_t<K>>::Get();
 	const TypeInfo& dataTypeInfo = TypeInfoResolver<D>::Get();
 
 	C* instPtr = reinterpret_cast<C*>(inst);
-	keyTypeInfo.Deserialize(archive, &instPtr->first);
+	keyTypeInfo.Deserialize(archive, const_cast<std::remove_const_t<K>*>(&instPtr->first));
 	dataTypeInfo.Deserialize(archive, &instPtr->second);
 }
 
@@ -234,14 +234,14 @@ inline bool PointerTypeInfo<T>::IsInstanceValueEqual(const void* lhsInst, const 
 template<typename T> requires IsChildOfObject<T>
 void PointerTypeInfo<T>::Serialize(OUT Archive& archive, const void* inst) const
 {
-	const T*& instRef = *reinterpret_cast<const T* const*>(inst);
+	const T* const& instRef = *reinterpret_cast<const T* const*>(inst);
 
 	// 패키징 명 쓰기
 	const std::wstring* packagePath = GetObjectPath(reinterpret_cast<Object*>(GetInstancePackage(instRef).get()));
 	TypeInfoResolver<std::wstring>::Get().Serialize(archive, packagePath);
 
 	// 풀 주소 쓰기
-	const std::wstring* objectFullPath = GetObjectFullPath(reinterpret_cast<Object*>(instRef));
+	const std::wstring* objectFullPath = GetObjectFullPath(reinterpret_cast<const Object*>(instRef));
 	TypeInfoResolver<std::wstring>::Get().Serialize(archive, objectFullPath);
 }
 
@@ -266,7 +266,7 @@ void PointerTypeInfo<T>::Deserialize(Archive& archive, OUT void* inst) const
 template<typename T> requires IsChildOfObject<T>
 inline std::shared_ptr<Package> PointerTypeInfo<T>::GetInstancePackage(const void* inst) const
 {
-	const Object*& instRef = *reinterpret_cast<const T* const*>(inst);
+	const Object* const& instRef = *reinterpret_cast<const T* const*>(inst);
 	if (instRef == nullptr)
 	{
 		return std::shared_ptr<Package>();

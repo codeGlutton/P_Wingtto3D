@@ -18,9 +18,9 @@ enum class UpdatePhase : uint8
 	PreRender,			// 모든 처리 결정 후 
 	Render,				// 렌더 스레드 넘겨주기
 	
-	Last
+	Count
 };
-constexpr size_t UpdatePhaseCount = static_cast<size_t>(UpdatePhase::Last);
+constexpr size_t UpdatePhaseCount = static_cast<size_t>(UpdatePhase::Count);
 
 enum class UpdateState : uint8
 {

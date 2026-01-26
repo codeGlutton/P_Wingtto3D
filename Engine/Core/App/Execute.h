@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include "Core/App/AppWindow/AppWindow.h"
+
 enum class AppBuildTargetFlag : uint8
 {
 	None = 0,
@@ -36,6 +38,7 @@ class IExecute abstract
 {
 public:
 	using BuildConstraint = AppBuildConstraint<AppBuildTargetFlag::ALL>;
+	using DefaultWindow = AppWindow;
 
 public:
 	virtual ~IExecute() = default;
@@ -44,8 +47,5 @@ public:
 	virtual void Init() = 0;
 	virtual void Update() = 0;
 	virtual void End() = 0;
-
-public:
-	virtual void CreateMainWindow() = 0;
 };
 

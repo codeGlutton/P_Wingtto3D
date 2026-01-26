@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Core/App/Execute.h"
+#include "Manager/AppWindowManager.h"
 
 #define APP App::GetInst()
 
@@ -34,7 +35,7 @@ public:
 
 public:
 	template<typename T> requires std::is_base_of_v<IExecute, T>
-	WPARAM Run(const std::wstring& appName = L"Wingtto");
+	WPARAM Run(HINSTANCE hInst, const std::wstring& appName = L"Wingtto");
 
 public:
 	const AppDesc& GetDesc() const { return _mDesc; }
@@ -42,13 +43,13 @@ public:
 public:
 	/**
 	 * 윈도우 입력 메세지를 받는 콜백 함수
-	 * \param hwnd 핸들
+	 * \param hWnd 핸들
 	 * \param message 메세지 식별자
 	 * \param wParam 추가 데이터 1
 	 * \param lParam 추가 데이터 2
 	 * \return 처리 결과
 	 */
-	static LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
+	static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 private:
 	template<typename T> requires std::is_base_of_v<IExecute, T>
@@ -66,11 +67,12 @@ private:
 };
 
 template<typename T> requires std::is_base_of_v<IExecute, T>
-inline WPARAM App::Run(const std::wstring& appName)
+inline WPARAM App::Run(HINSTANCE hInst, const std::wstring& appName)
 {
 	ASSERT_MSG(isRun == false, "Multiple run app");
 	isRun = true;
 
+	_mDesc.mHInstance = hInst;
 	_mDesc.mName = appName;
 	if (_mDesc.mMode == nullptr)
 	{
@@ -85,7 +87,7 @@ inline WPARAM App::Run(const std::wstring& appName)
 	BOOT_SYSTEM->Boot();
 	// 모드 내 초기화
 	_mDesc.mMode->Init();
-	_mDesc.mMode->CreateMainWindow();
+	APP_WIN_MANAGER->CreateAppWindow<typename T::DefaultWindow>();
 
 	MSG msg = { 0 };
 	while (msg.message != WM_QUIT)

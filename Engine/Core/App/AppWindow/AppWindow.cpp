@@ -18,6 +18,28 @@ void AppWindow::PostLoad()
 	Super::PostLoad();
 	ASSERT_MSG(InitWindow() == true, "Fail to create window");
 	APP_WIN_MANAGER->NotifyToAddAppWindow(std::static_pointer_cast<AppWindow>(shared_from_this()));
+	ShowWindow();
+}
+
+void AppWindow::BeginFocus()
+{
+}
+
+void AppWindow::EndFocus()
+{
+}
+
+void AppWindow::OnResize(bool isWindowed, const RECT& clientSize)
+{
+	_mDesc.mWindowed = isWindowed;
+
+	_mDesc.mClientWidth = static_cast<float>(clientSize.right - clientSize.left);
+	_mDesc.mClientHeight = static_cast<float>(clientSize.bottom - clientSize.top);
+
+	RECT windowSize;
+	GetWindowRect(_mDesc.mHWnd, &windowSize);
+	_mDesc.mWidth = static_cast<float>(windowSize.right - windowSize.left);
+	_mDesc.mHeight = static_cast<float>(windowSize.bottom - windowSize.top);
 }
 
 bool AppWindow::InitWindow()
@@ -50,8 +72,16 @@ bool AppWindow::InitWindow()
 		return false;
 	}
 
-	::ShowWindow(_mDesc.mHWnd, TRUE);
-	::UpdateWindow(_mDesc.mHWnd);
+	::GetClientRect(_mDesc.mHWnd, &winRect);
+	_mDesc.mClientWidth = static_cast<float>(winRect.right - winRect.left);
+	_mDesc.mClientHeight = static_cast<float>(winRect.bottom - winRect.top);
 
 	return true;
+}
+
+void AppWindow::ShowWindow()
+{
+	::ShowWindow(_mDesc.mHWnd, SW_SHOW);
+	::SetFocus(_mDesc.mHWnd);
+	::UpdateWindow(_mDesc.mHWnd);
 }

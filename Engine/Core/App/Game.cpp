@@ -6,8 +6,6 @@
 #include "Utils/Thread/Thread.h"
 #include "Utils/Thread/MainThread.h"
 
-#include "Core/App/AppWindow/GameAppWindow.h"
-
 Game::Game()
 {
 }
@@ -24,6 +22,7 @@ void Game::Init()
 		// 순서 무관계
 
 		PATH_MANAGER->Init();
+		INPUT_MANAGER->Init();
 	}
 
 	{
@@ -69,6 +68,7 @@ void Game::Init()
 
 void Game::Update()
 {
+	INPUT_MANAGER->Update();
 	TIME_MANAGER->Update();
 	THREAD_MANAGER->DoGameJob();
 }
@@ -100,11 +100,8 @@ void Game::End()
 	{
 		// 순서 무관계
 
+		INPUT_MANAGER->Destroy();
 		PATH_MANAGER->Destroy();
 	}
 }
 
-void Game::CreateMainWindow()
-{
-	APP_WIN_MANAGER->CreateAppWindow<GameAppWindow>();
-}

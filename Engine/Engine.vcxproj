@@ -69,8 +69,14 @@
     <ClInclude Include="Graphics\Viewport\SceneViewport.h" />
     <ClInclude Include="Graphics\Viewport\ViewportComposite.h" />
     <ClInclude Include="Graphics\Viewport\Viewport.h" />
+    <ClInclude Include="Input\InputAction.h" />
+    <ClInclude Include="Input\InputBinding.h" />
+    <ClInclude Include="Input\InputInclude.h" />
+    <ClInclude Include="Input\InputMapping.h" />
+    <ClInclude Include="Input\InputValue.h" />
     <ClInclude Include="ManagerMaximum.h" />
     <ClInclude Include="Manager\BootSystem.h" />
+    <ClInclude Include="Manager\InputManager.h" />
     <ClInclude Include="Manager\ObjectManager.h" />
     <ClInclude Include="Manager\PackageManager.h" />
     <ClInclude Include="Manager\PathManager.h" />
@@ -93,6 +99,7 @@
     <ClInclude Include="TLS.h" />
     <ClInclude Include="Types.h" />
     <ClInclude Include="Utils\Debugger\Logger.h" />
+    <ClInclude Include="Utils\InputUtils.h" />
     <ClInclude Include="Utils\Memory\MemoryPool.h" />
     <ClInclude Include="Utils\Memory\ObjectPool.h" />
     <ClInclude Include="Utils\ObjectUtils.h" />
@@ -137,7 +144,12 @@
     <ClCompile Include="Graphics\Viewport\SceneViewport.cpp" />
     <ClCompile Include="Graphics\Viewport\ViewportComposite.cpp" />
     <ClCompile Include="Graphics\Viewport\Viewport.cpp" />
+    <ClCompile Include="Input\InputAction.cpp" />
+    <ClCompile Include="Input\InputBinding.cpp" />
+    <ClCompile Include="Input\InputMapping.cpp" />
+    <ClCompile Include="Input\InputValue.cpp" />
     <ClCompile Include="Manager\BootSystem.cpp" />
+    <ClCompile Include="Manager\InputManager.cpp" />
     <ClCompile Include="Manager\ObjectManager.cpp" />
     <ClCompile Include="Manager\PackageManager.cpp" />
     <ClCompile Include="Manager\PathManager.cpp" />
@@ -166,9 +178,14 @@
     <ClCompile Include="Reflection\TypeInfo.cpp" />
     <ClCompile Include="TLS.cpp" />
     <ClCompile Include="Utils\Debugger\Logger.cpp" />
+    <ClCompile Include="Utils\InputUtils.cpp" />
     <ClCompile Include="Utils\Memory\MemoryPool.cpp" />
     <ClCompile Include="Utils\Memory\ObjectPool.cpp" />
     <ClCompile Include="Utils\ObjectUtils.cpp" />
+    <ClCompile Include="Utils\SimpleMath.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="Utils\StringUtils.cpp" />
     <ClCompile Include="Utils\Thread\Job.cpp" />
     <ClCompile Include="Utils\Thread\JobQueue.cpp" />

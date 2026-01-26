@@ -20,6 +20,8 @@ struct AppWindowDesc
 	bool mWindowed = true;
 
 	std::wstring mName = L"";
+	float mClientWidth;
+	float mClientHeight;
 };
 
 /**
@@ -39,7 +41,13 @@ protected:
 	virtual void PostLoad() override;
 
 protected:
+	virtual void BeginFocus();
+	virtual void EndFocus();
+	virtual void OnResize(bool isWindowed, const RECT& clientSize);
+
+protected:
 	virtual bool InitWindow();
+	virtual void ShowWindow();
 
 public:
 	const AppWindowDesc& GetDesc() const 

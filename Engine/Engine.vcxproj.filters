@@ -85,6 +85,12 @@
     <Filter Include="Core\Resource\Package">
       <UniqueIdentifier>{813ddaf1-e0c7-405e-a348-3ea4bde4e3c6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Headers\Maximum">
+      <UniqueIdentifier>{be07c835-ac03-4450-b53a-117f8d0ea598}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Input">
+      <UniqueIdentifier>{adf82c6c-45a8-4905-ba5d-b480201dc9e5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\Object.h">
@@ -294,9 +300,6 @@
     <ClInclude Include="Core\Resource\ResourceHeader.h">
       <Filter>Core\Resource</Filter>
     </ClInclude>
-    <ClInclude Include="ManagerMaximum.h">
-      <Filter>Headers\Minimum</Filter>
-    </ClInclude>
     <ClInclude Include="Core\Resource\Package\Package.h">
       <Filter>Core\Resource\Package</Filter>
     </ClInclude>
@@ -308,6 +311,30 @@
     </ClInclude>
     <ClInclude Include="Core\Resource\Package\PackageInclude.h">
       <Filter>Core\Resource\Package</Filter>
+    </ClInclude>
+    <ClInclude Include="Manager\InputManager.h">
+      <Filter>Manager\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="ManagerMaximum.h">
+      <Filter>Headers\Maximum</Filter>
+    </ClInclude>
+    <ClInclude Include="Input\InputAction.h">
+      <Filter>Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Input\InputMapping.h">
+      <Filter>Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Input\InputInclude.h">
+      <Filter>Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\InputUtils.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Input\InputBinding.h">
+      <Filter>Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Input\InputValue.h">
+      <Filter>Input</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -496,6 +523,27 @@
     </ClCompile>
     <ClCompile Include="Core\Resource\Package\PackageRuntimeOwner.cpp">
       <Filter>Core\Resource\Package</Filter>
+    </ClCompile>
+    <ClCompile Include="Manager\InputManager.cpp">
+      <Filter>Manager\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Input\InputAction.cpp">
+      <Filter>Input</Filter>
+    </ClCompile>
+    <ClCompile Include="Input\InputMapping.cpp">
+      <Filter>Input</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\InputUtils.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Input\InputBinding.cpp">
+      <Filter>Input</Filter>
+    </ClCompile>
+    <ClCompile Include="Input\InputValue.cpp">
+      <Filter>Input</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\SimpleMath.cpp">
+      <Filter>Utils</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

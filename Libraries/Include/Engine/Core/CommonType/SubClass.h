@@ -122,6 +122,12 @@ public:
 		return **this;
 	}
 
+public:
+	bool IsValid() const
+	{
+		return _mTypeInfo != nullptr;
+	}
+
 private:
 	const ObjectTypeInfo* _mTypeInfo = nullptr;
 };
