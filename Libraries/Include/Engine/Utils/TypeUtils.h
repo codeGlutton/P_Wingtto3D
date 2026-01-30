@@ -43,19 +43,19 @@ struct TypeInfoResolver<T, std::enable_if_t<std::is_class_v<T> && HasSuper<T>>>;
 /**
  * 포인터
  */
-template<typename T> requires IsChildOfObject<T>
+template<typename T>
 struct TypeInfoResolver<T*, void>;
 
-template<typename T> requires IsChildOfObject<T>
+template<typename T> requires (!IsBulk<T>)
 struct TypeInfoResolver<std::shared_ptr<T>, void>;
 
-template<typename T> requires IsChildOfObject<T>
+template<typename T>
 struct TypeInfoResolver<std::weak_ptr<T>, void>;
 
-template<typename T> requires IsChildOfObject<T>
+template<typename T>
 struct TypeInfoResolver<SubClass<T>, void>;
 
-template<typename T> requires IsChildOfObject<T>
+template<typename T>
 struct TypeInfoResolver<SoftObjectPtr<T>, void>;
 
 template<typename T> requires IsBulk<T>

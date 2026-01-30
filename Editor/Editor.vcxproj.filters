@@ -1,0 +1,66 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Headers">
+      <UniqueIdentifier>{ff33d294-813a-4676-9159-a88b6e539173}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Global">
+      <UniqueIdentifier>{8e1f67d2-53d7-438a-a1c2-7c1689437dda}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Input">
+      <UniqueIdentifier>{ae417c10-8516-46db-9f90-b217ce2d1c79}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="App">
+      <UniqueIdentifier>{f95dfcb9-f0d7-4668-be08-e78e2c913090}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="App\AppWindow">
+      <UniqueIdentifier>{e381594b-a989-40d6-99ce-1743614321c0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Convertor">
+      <UniqueIdentifier>{4809919a-dc08-4192-9912-ae0a909bd20c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tool">
+      <UniqueIdentifier>{55056716-a561-49cc-bf3e-c59c77c0f0bb}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="pch.cpp">
+      <Filter>Headers\Global</Filter>
+    </ClCompile>
+    <ClCompile Include="Input\DefaultEditorAction.cpp">
+      <Filter>Input</Filter>
+    </ClCompile>
+    <ClCompile Include="Input\DefaultEditorInputMappingContext.cpp">
+      <Filter>Input</Filter>
+    </ClCompile>
+    <ClCompile Include="App\Editor.cpp">
+      <Filter>App</Filter>
+    </ClCompile>
+    <ClCompile Include="Convertor\Convertor.cpp">
+      <Filter>Convertor</Filter>
+    </ClCompile>
+    <ClCompile Include="Tool\LODGenerator.cpp">
+      <Filter>Tool</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="pch.h">
+      <Filter>Headers\Global</Filter>
+    </ClInclude>
+    <ClInclude Include="Input\DefaultEditorAction.h">
+      <Filter>Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Input\DefaultEditorInputMappingContext.h">
+      <Filter>Input</Filter>
+    </ClInclude>
+    <ClInclude Include="App\Editor.h">
+      <Filter>App</Filter>
+    </ClInclude>
+    <ClInclude Include="Convertor\Convertor.h">
+      <Filter>Convertor</Filter>
+    </ClInclude>
+    <ClInclude Include="Tool\LODGenerator.h">
+      <Filter>Tool</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

@@ -150,47 +150,43 @@ struct TypeInfoResolver<T, std::enable_if_t<std::is_class_v<T> && HasSuper<T>>>
 /**
  * 포인터
  */
-template<typename T> requires IsChildOfObject<T>
+template<typename T>
 struct TypeInfoResolver<T*, void>
 {
 	static const PointerTypeInfo<T>& Get()
 	{
-		STATIC_ASSERT_MSG(IsChildOfObject<T> == true, "Allow only object pointer");
 		return PointerTypeInfo<T>::mStatic;
 	}
 };
 
-template<typename T> requires IsChildOfObject<T>
+template<typename T> requires (!IsBulk<T>)
 struct TypeInfoResolver<std::shared_ptr<T>, void>
 {
 	static const SharedPointerTypeInfo<T>& Get()
 	{
-		STATIC_ASSERT_MSG(IsChildOfObject<T> == true, "Allow only object pointer");
 		return SharedPointerTypeInfo<T>::mStatic;
 	}
 };
 
-template<typename T> requires IsChildOfObject<T>
+template<typename T>
 struct TypeInfoResolver<std::weak_ptr<T>, void>
 {
 	static const WeakPointerTypeInfo<T>& Get()
 	{
-		STATIC_ASSERT_MSG(IsChildOfObject<T> == true, "Allow only object pointer");
 		return WeakPointerTypeInfo<T>::mStatic;
 	}
 };
 
-template<typename T> requires IsChildOfObject<T>
+template<typename T>
 struct TypeInfoResolver<SubClass<T>, void>
 {
 	static const SubClassTypeInfo<T>& Get()
 	{
-		STATIC_ASSERT_MSG(IsChildOfObject<T> == true, "Allow only object pointer");
 		return SubClassTypeInfo<T>::mStatic;
 	}
 };
 
-template<typename T> requires IsChildOfObject<T>
+template<typename T>
 struct TypeInfoResolver<SoftObjectPtr<T>, void>
 {
 	static const SoftRefTypeInfo<T>& Get()

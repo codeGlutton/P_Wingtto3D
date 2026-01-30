@@ -88,7 +88,7 @@ std::shared_ptr<const InputBinding> InputManager::Bind(KeyType::Type bindKey, bo
     binding->mShift = withShift;
     binding->mOnCallInputBinding.Bind(object, binder);
 
-    _mBindingMap[bindKey][binding.get()] = binding;
+    _mBindingMap[bindKey].push_back(binding);
 
 	return binding;
 }
@@ -108,10 +108,18 @@ DelegateHandle InputManager::BindAction(SubClass<InputAction> action, KeyState::
 
 bool InputManager::Unbind(std::shared_ptr<const InputBinding> target)
 {
-    for (auto& bindingPair : _mBindingMap)
+    BindingVector& bindings = _mBindingMap[target->mKeyType];
+    for (std::size_t i = 0; i < bindings.size(); ++i)
     {
-        if (bindingPair.second.erase(target.get()) != 0)
+        std::shared_ptr<InputBinding>& binding = bindings[i];
+        if (binding == target)
         {
+            bindings[i] = std::move(bindings.back());
+            bindings.pop_back();
+            if (bindings.empty() == true)
+            {
+                _mBindingMap.erase(target->mKeyType);
+            }
             return true;
         }
     }
@@ -137,7 +145,7 @@ void InputManager::AddMappingContext(SubClass<InputMappingContext> context, uint
     std::shared_ptr<const InputMappingContext> contextCdo = std::static_pointer_cast<const InputMappingContext>(context->GetDefaultObject());
     
     auto iter = _mMappingContexts.find(priority);
-    if (iter != _mMappingContexts.end() || iter->second.find(contextCdo.get()) != iter->second.end())
+    if (iter == _mMappingContexts.end() || iter->second.find(contextCdo.get()) != iter->second.end())
     {
         return;
     }
@@ -329,7 +337,7 @@ void InputManager::UpdateWinInputState()
     
     POINT mousePos;
     ::GetCursorPos(&mousePos);
-    ::ScreenToClient(focusWindow->GetDesc().mHWnd, &mousePos);
+    ::ScreenToClient(focusWindow->GetDesc().mHWndRef->mData, &mousePos);
     
     Vec2 offset(static_cast<float>(mousePos.x - _mPreMousePos.x), static_cast<float>(mousePos.y - _mPreMousePos.y));
     if (offset.LengthSquared() > std::numeric_limits<float>::epsilon())
@@ -467,7 +475,7 @@ void InputManager::UpdateDInputState()
 
     POINT mousePos;
     ::GetCursorPos(&mousePos);
-    ::ScreenToClient(focusWindow->GetDesc().mHWnd, &mousePos);
+    ::ScreenToClient(focusWindow->GetDesc().mHWndRef->mData, &mousePos);
 
     Vec2 offset(static_cast<float>(mousePos.x - _mPreMousePos.x), static_cast<float>(mousePos.y - _mPreMousePos.y));
     if (offset.LengthSquared() > std::numeric_limits<float>::epsilon())
@@ -567,18 +575,11 @@ void InputManager::UpdateKeyBindingCallbacks()
 {
     for (const auto& bindingPair : _mBindingMap)
     {
-        if (bindingPair.second.empty() == true)
-        {
-            continue;
-        }
-
         const KeyType::Type& keyType = bindingPair.first;
 
         uint32 maxPriority = 0;
-        for (const auto bindingDataPair : bindingPair.second)
+        for (const std::shared_ptr<InputBinding>& binding : bindingPair.second)
         {
-            const InputBinding* binding = bindingDataPair.first;
-
             // 가장 우선 순위 높은 바인딩만 호출 
             // (ex. "컨트롤 + I" 입력 시, "컨트롤 + I" 바인딩 > "I" 바인딩)
             uint8 priority = binding->GetPriority(_mUseCtrl, _mUseAlt, _mUseShift);
@@ -588,9 +589,8 @@ void InputManager::UpdateKeyBindingCallbacks()
             }
         }
 
-        for (const auto bindingDataPair : bindingPair.second)
+        for (const std::shared_ptr<InputBinding>& binding : bindingPair.second)
         {
-            const InputBinding* binding = bindingDataPair.first;
             uint8 priority = binding->GetPriority(_mUseCtrl, _mUseAlt, _mUseShift);
 
             if (maxPriority == priority)
@@ -612,25 +612,10 @@ void InputManager::UpdateKeyBindingCallbacks()
 void InputManager::ChangeTopMappingContextBindings(uint8 prePriority, uint8 curPriority)
 {
     RemoveTopMappingContextBindings(prePriority);
-    RemoveTopMappingContextBindings(curPriority);
+    AddTopMappingContextBindings(curPriority);
 }
 
 void InputManager::AddTopMappingContextBindings(uint8 priority)
-{
-    // 상위 컨텍스트 바인딩 제거
-    if (_mMappingContexts.find(priority) != _mMappingContexts.end())
-    {
-        for (auto& contextPair : _mMappingContexts[priority])
-        {
-            for (const std::shared_ptr<InputBinding>& binding : contextPair.second)
-            {
-                _mBindingMap[binding->mKeyType].erase(binding.get());
-            }
-        }
-    }
-}
-
-void InputManager::RemoveTopMappingContextBindings(uint8 priority)
 {
     // 상위 컨텍스트 바인딩 적용
     if (_mMappingContexts.find(priority) != _mMappingContexts.end())
@@ -639,7 +624,39 @@ void InputManager::RemoveTopMappingContextBindings(uint8 priority)
         {
             for (const std::shared_ptr<InputBinding>& binding : contextPair.second)
             {
-                _mBindingMap[binding->mKeyType][binding.get()] = binding;
+                _mBindingMap[binding->mKeyType].push_back(binding);
+            }
+        }
+    }
+}
+
+void InputManager::RemoveTopMappingContextBindings(uint8 priority)
+{
+    // 상위 컨텍스트 바인딩 제거
+    if (_mMappingContexts.find(priority) != _mMappingContexts.end())
+    {
+        // 상위 맵핑 컨텍스트마다
+        for (auto& contextPair : _mMappingContexts[priority])
+        {
+            // 컨텍스트 내 키 바인딩마다
+            for (const std::shared_ptr<InputBinding>& target : contextPair.second)
+            {
+                // 후보 탐색
+                BindingVector& bindings = _mBindingMap[target->mKeyType];
+                for (std::size_t i = 0; i < bindings.size(); ++i)
+                {
+                    if (target == bindings[i])
+                    {
+                        bindings[i] = std::move(bindings.back());
+                        bindings.pop_back();
+                        if (bindings.empty() == true)
+                        {
+                            _mBindingMap.erase(target->mKeyType);
+                        }
+
+                        break;
+                    }
+                }
             }
         }
     }
@@ -673,12 +690,12 @@ void InputManager::NotifyToChangeInputTargetHWnd(std::shared_ptr<AppWindow> wind
             // 창 모드
 
             _mDInputKeyboard->SetCooperativeLevel(
-                window->GetDesc().mHWnd,                // 윈도우 핸들
+                window->GetDesc().mHWndRef->mData,                // 윈도우 핸들
                 DISCL_NONEXCLUSIVE | DISCL_FOREGROUND   // 타 윈도우와 입력 공유 방식 설정
             );
 
             _mDInputMouse->SetCooperativeLevel(
-                window->GetDesc().mHWnd,                // 윈도우 핸들
+                window->GetDesc().mHWndRef->mData,                // 윈도우 핸들
                 DISCL_NONEXCLUSIVE | DISCL_FOREGROUND   // 타 윈도우와 입력 공유 방식 설정
             );
         }
@@ -687,12 +704,12 @@ void InputManager::NotifyToChangeInputTargetHWnd(std::shared_ptr<AppWindow> wind
             // 전체화면 모드
 
             _mDInputKeyboard->SetCooperativeLevel(
-                window->GetDesc().mHWnd,                // 윈도우 핸들
+                window->GetDesc().mHWndRef->mData,                // 윈도우 핸들
                 DISCL_EXCLUSIVE | DISCL_FOREGROUND      // 입력 독점 방식 설정
             );
 
             _mDInputMouse->SetCooperativeLevel(
-                window->GetDesc().mHWnd,                // 윈도우 핸들
+                window->GetDesc().mHWndRef->mData,                // 윈도우 핸들
                 DISCL_EXCLUSIVE | DISCL_FOREGROUND      // 타 윈도우와 입력 공유 방식 설정
             );
         }

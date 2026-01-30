@@ -13,7 +13,7 @@ class InputAction : public Object
 
 	friend class InputManager;
 
-private:
+protected:
 	PROPERTY(_mValueType)
 	KeyValueType _mValueType;
 };

@@ -1,15 +1,17 @@
 ﻿#pragma once
 
 #include "Core/Object.h"
+#include "Graphics/Viewport/Viewport.h"
 #include "GraphicMinimum.h"
 
-class Viewport;
+#include "Manager/TimeManager.h"
+#include "Utils/Thread/RefCounting.h"
 
 struct AppWindowDesc
 {
 	GEN_STRUCT_REFLECTION(AppWindowDesc)
 
-	HWND mHWnd = 0;
+	RefCounting<HWND> mHWndRef = nullptr;
 	PROPERTY(mWidth)
 	float mWidth = 1280.f;
 	PROPERTY(mHeight)
@@ -27,9 +29,9 @@ struct AppWindowDesc
 /**
  * 윈도우 창 객체. 내부 viewport는 렌더 스레드가 관리
  */
-class AppWindow : public Object
+class AppWindow abstract : public InterfaceReflector<Object, IUpdatable>
 {
-	GEN_REFLECTION(AppWindow)
+	GEN_ABSTRACT_REFLECTION(AppWindow)
 
 	friend class AppWindowManager;
 
@@ -41,13 +43,18 @@ protected:
 	virtual void PostLoad() override;
 
 protected:
-	virtual void BeginFocus();
-	virtual void EndFocus();
-	virtual void OnResize(bool isWindowed, const RECT& clientSize);
+	bool InitWindow();
+	virtual void CreateRootViewport() = 0;
+	void ShowWindow();
 
 protected:
-	virtual bool InitWindow();
-	virtual void ShowWindow();
+	virtual void Update(float deltaTime) override;
+	virtual void FixedUpdate() override;
+
+protected:
+	void BeginFocus();
+	void EndFocus();
+	virtual void OnResize(bool isWindowed, const RECT& clientSize);
 
 public:
 	const AppWindowDesc& GetDesc() const 
@@ -63,6 +70,9 @@ public:
 		return _mOwner.lock() == nullptr;
 	}
 
+public:
+	//void Picking();
+
 private:
 	PROPERTY(_mDesc)
 	AppWindowDesc _mDesc;
@@ -72,7 +82,12 @@ private:
 	PROPERTY(_mOwner)
 	std::weak_ptr<AppWindow> _mOwner;
 
-private:
+protected:
+	PROPERTY(_mRootViewport)
 	std::shared_ptr<Viewport> _mRootViewport;
+
+private:
+	std::shared_ptr<UpdateTargetContext> _mUpdateContext;
+	bool _mNeedSizeUpdate = false;
 };
 

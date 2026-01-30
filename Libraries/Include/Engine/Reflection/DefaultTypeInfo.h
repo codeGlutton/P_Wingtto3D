@@ -118,7 +118,7 @@ public:
 /**
  * Pair
  */
-template<typename K, typename D> requires (IsChildOfObject<K> == false && IsChildOfObject<D> == false)
+template<typename K, typename D>
 class PairTypeInfo : public ComparableDefaultTypeInfo<std::pair<K, D>>
 {
 	GEN_STRUCT_REFLECTION(PairTypeInfo<K, D>)
@@ -137,7 +137,7 @@ public:
 /**
  * 배열
  */
-template<typename E, size_t N> requires (IsChildOfObject<E> == false)
+template<typename E, size_t N>
 class ArrayTypeInfo : public DefaultTypeInfo<E[N]>
 {
 	GEN_STRUCT_REFLECTION(ArrayTypeInfo<E, N>)
@@ -155,7 +155,7 @@ public:
 	static const ArrayTypeInfo<E, N> mStatic;
 };
 
-template<typename E, size_t N> requires (IsChildOfObject<E> == false)
+template<typename E, size_t N>
 class ArrayContanierTypeInfo : public ComparableDefaultTypeInfo<std::array<E, N>>
 {
 	GEN_STRUCT_REFLECTION(ArrayContanierTypeInfo<E, N>)
@@ -180,7 +180,7 @@ public:
 /**
  * 동적 크기 타입
  */
-template<typename E, typename C> requires (IsChildOfObject<E> == false)
+template<typename E, typename C>
 class DynamicIterableContainerTypeInfo : public ComparableDefaultTypeInfo<C>
 {
 	GEN_STRUCT_REFLECTION(DynamicIterableContainerTypeInfo<E, C>)
@@ -216,7 +216,7 @@ public:
 /**
  * 포인터
  */
-template<typename T> requires IsChildOfObject<T>
+template<typename T>
 class PointerTypeInfo : public HardRefTypeInfo
 {
 	GEN_STRUCT_REFLECTION(PointerTypeInfo<T>)
@@ -239,7 +239,7 @@ public:
 	static const PointerTypeInfo<T> mStatic;
 };
 
-template<typename T> requires IsChildOfObject<T>
+template<typename T>
 class SharedPointerTypeInfo : public HardRefTypeInfo
 {
 	GEN_STRUCT_REFLECTION(SharedPointerTypeInfo<T>)
@@ -262,7 +262,7 @@ public:
 	static const SharedPointerTypeInfo<T> mStatic;
 };
 
-template<typename T> requires IsChildOfObject<T>
+template<typename T>
 class WeakPointerTypeInfo : public HardRefTypeInfo
 {
 	GEN_STRUCT_REFLECTION(WeakPointerTypeInfo<T>)

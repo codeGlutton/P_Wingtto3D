@@ -3,10 +3,10 @@
 #include "Utils/TypeUtils.h"
 #include "CommonTypeInfo.h"
 
-template<typename T> requires IsChildOfObject<T>
+template<typename T>
 const SubClassTypeInfo<T> SubClassTypeInfo<T>::mStatic;
 
-template<typename T> requires IsChildOfObject<T>
+template<typename T>
 inline bool SubClassTypeInfo<T>::IsInstanceValueEqual(const void* lhsInst, const void* rhsInst) const
 {
 	const SubClass<T>& lhsInstRef = *reinterpret_cast<const SubClass<T>*>(lhsInst);
@@ -14,7 +14,7 @@ inline bool SubClassTypeInfo<T>::IsInstanceValueEqual(const void* lhsInst, const
 	return lhsInstRef == rhsInstRef;
 }
 
-template<typename T> requires IsChildOfObject<T>
+template<typename T>
 inline void SubClassTypeInfo<T>::Serialize(OUT Archive& archive, const void* inst) const
 {
 	// 클래스 이름 저장
@@ -28,7 +28,7 @@ inline void SubClassTypeInfo<T>::Serialize(OUT Archive& archive, const void* ins
 	TypeInfoResolver<std::string>::Get().Serialize(archive, &objectTypeName);
 }
 
-template<typename T> requires IsChildOfObject<T>
+template<typename T>
 inline void SubClassTypeInfo<T>::Deserialize(Archive& archive, OUT void* inst) const
 {
 	// 클래스 이름 로드해 대입
@@ -42,10 +42,10 @@ inline void SubClassTypeInfo<T>::Deserialize(Archive& archive, OUT void* inst) c
 	}
 }
 
-template<typename T> requires IsChildOfObject<T>
+template<typename T>
 const SoftRefTypeInfo<T> SoftRefTypeInfo<T>::mStatic;
 
-template<typename T> requires IsChildOfObject<T>
+template<typename T>
 inline bool SoftRefTypeInfo<T>::IsInstanceValueEqual(const void* lhsInst, const void* rhsInst) const
 {
 	const SoftObjectPtr<T>& lhsInstRef = *reinterpret_cast<const SoftObjectPtr<T>*>(lhsInst);
@@ -53,14 +53,14 @@ inline bool SoftRefTypeInfo<T>::IsInstanceValueEqual(const void* lhsInst, const 
 	return lhsInstRef == rhsInstRef;
 }
 
-template<typename T> requires IsChildOfObject<T>
+template<typename T>
 inline void SoftRefTypeInfo<T>::Serialize(OUT Archive& archive, const void* inst) const
 {
 	const SoftObjectPtr<T>& instRef = *reinterpret_cast<const SoftObjectPtr<T>*>(inst);
 	TypeInfoResolver<std::wstring>::Get().Serialize(archive, &instRef.GetFullPath());
 }
 
-template<typename T> requires IsChildOfObject<T>
+template<typename T>
 inline void SoftRefTypeInfo<T>::Deserialize(Archive& archive, OUT void* inst) const
 {
 	std::wstring objectPath;
@@ -74,7 +74,7 @@ template<typename T> requires IsBulk<T>
 const BulkTypeInfo<T> BulkTypeInfo<T>::mStatic;
 
 template<typename T> requires IsBulk<T>
-inline bool BulkTypeInfo<T>::SerializeBulkData(OUT Archive& archive, const void* inst) const
+inline void BulkTypeInfo<T>::SerializeBulkData(OUT Archive& archive, const void* inst) const
 {
 	const std::shared_ptr<T>& instRef = *reinterpret_cast<const std::shared_ptr<T>*>(inst);
 	return T::GetStaticTypeInfo().Serialize(archive, instRef.get());
@@ -117,7 +117,7 @@ inline void BulkTypeInfo<T>::Deserialize(Archive& archive, OUT void* inst) const
 	TypeInfoResolver<std::size_t>::Get().Deserialize(archive, &index);
 
 	// 리소스에 대입
-	std::shared_ptr<BulkData> bulkData = archive.GetBulkDatas(packagePath)[index];
+	std::shared_ptr<BulkData> bulkData = archive.GetBulkDatas()[index];
 	std::shared_ptr<BulkData>& instRef = *reinterpret_cast<std::shared_ptr<BulkData>*>(inst);
 	instRef = bulkData;
 }

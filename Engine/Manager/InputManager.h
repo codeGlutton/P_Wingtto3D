@@ -17,6 +17,8 @@ enum class InputSystemType : uint8
 
 class InputManager
 {
+	using BindingVector = std::vector<std::shared_ptr<InputBinding>>;
+
 private:
 	InputManager();
 	~InputManager();
@@ -84,7 +86,7 @@ private:
 private:
 	std::map<uint8, std::unordered_map<const InputMappingContext*, std::vector<std::shared_ptr<InputBinding>>>, std::greater<uint8>> _mMappingContexts;
 	std::unordered_map<const InputAction*, std::array<OnTiggerInputAction, KeyState::Count>> _mActionMap;
-	std::unordered_map<KeyType::Type, std::unordered_map<const InputBinding*, std::shared_ptr<InputBinding>>> _mBindingMap;
+	std::unordered_map<KeyType::Type, BindingVector> _mBindingMap;
 
 	/* 키 상태 결과 값 */
 private:

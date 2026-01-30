@@ -5,6 +5,7 @@ VisualStudioVersion = 17.14.36414.22
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Client", "Client\Client.vcxproj", "{DAC1E1B0-BF1C-4930-8180-8108BA9A469F}"
 	ProjectSection(ProjectDependencies) = postProject
+		{6E73DABD-1507-4114-8011-6CC9AAD66063} = {6E73DABD-1507-4114-8011-6CC9AAD66063}
 		{9229E71B-20B4-4964-A796-30674DD8D8ED} = {9229E71B-20B4-4964-A796-30674DD8D8ED}
 	EndProjectSection
 EndProject
@@ -12,7 +13,18 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Engine", "Engine\Engine.vcx
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ConsoleTest", "ConsoleTest\ConsoleTest.vcxproj", "{16D7B781-451D-4EF4-A36C-60B88789C514}"
 	ProjectSection(ProjectDependencies) = postProject
+		{6E73DABD-1507-4114-8011-6CC9AAD66063} = {6E73DABD-1507-4114-8011-6CC9AAD66063}
 		{9229E71B-20B4-4964-A796-30674DD8D8ED} = {9229E71B-20B4-4964-A796-30674DD8D8ED}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Editor", "Editor\Editor.vcxproj", "{6E73DABD-1507-4114-8011-6CC9AAD66063}"
+	ProjectSection(ProjectDependencies) = postProject
+		{9229E71B-20B4-4964-A796-30674DD8D8ED} = {9229E71B-20B4-4964-A796-30674DD8D8ED}
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "솔루션 항목", "솔루션 항목", "{2A3A057F-5D22-31FD-628C-DF5EF75AEF1E}"
+	ProjectSection(SolutionItems) = preProject
+		IncludeCopy.bat = IncludeCopy.bat
 	EndProjectSection
 EndProject
 Global
@@ -75,6 +87,16 @@ Global
 		{16D7B781-451D-4EF4-A36C-60B88789C514}.Release|x64.Build.0 = Release|x64
 		{16D7B781-451D-4EF4-A36C-60B88789C514}.Release|x86.ActiveCfg = Release|Win32
 		{16D7B781-451D-4EF4-A36C-60B88789C514}.Release|x86.Build.0 = Release|Win32
+		{6E73DABD-1507-4114-8011-6CC9AAD66063}.Debug|x64.ActiveCfg = EditorDebug|x64
+		{6E73DABD-1507-4114-8011-6CC9AAD66063}.Debug|x86.ActiveCfg = EditorRelease|Win32
+		{6E73DABD-1507-4114-8011-6CC9AAD66063}.EditorDebug|x64.ActiveCfg = EditorDebug|x64
+		{6E73DABD-1507-4114-8011-6CC9AAD66063}.EditorDebug|x64.Build.0 = EditorDebug|x64
+		{6E73DABD-1507-4114-8011-6CC9AAD66063}.EditorDebug|x86.ActiveCfg = EditorDebug|Win32
+		{6E73DABD-1507-4114-8011-6CC9AAD66063}.EditorRelease|x64.ActiveCfg = EditorRelease|x64
+		{6E73DABD-1507-4114-8011-6CC9AAD66063}.EditorRelease|x64.Build.0 = EditorRelease|x64
+		{6E73DABD-1507-4114-8011-6CC9AAD66063}.EditorRelease|x86.ActiveCfg = EditorRelease|Win32
+		{6E73DABD-1507-4114-8011-6CC9AAD66063}.Release|x64.ActiveCfg = EditorRelease|x64
+		{6E73DABD-1507-4114-8011-6CC9AAD66063}.Release|x86.ActiveCfg = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

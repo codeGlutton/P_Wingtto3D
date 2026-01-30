@@ -91,6 +91,18 @@
     <Filter Include="Input">
       <UniqueIdentifier>{adf82c6c-45a8-4905-ba5d-b480201dc9e5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Utils\Wrapper">
+      <UniqueIdentifier>{96477a0f-ada8-4e35-9435-e37ce2489da2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Graphics\Buffer">
+      <UniqueIdentifier>{d14c6408-4539-4f28-836e-190eb22aaed7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Graphics\Resource">
+      <UniqueIdentifier>{6c975edd-f614-4a10-a40e-41ed1d60e76a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core\Collision">
+      <UniqueIdentifier>{8ff7f20f-ac60-4fd7-8e43-5b1769fd181a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\Object.h">
@@ -237,9 +249,6 @@
     <ClInclude Include="Reflection\CommonTypeInfo.h">
       <Filter>Reflection\TypeInfo</Filter>
     </ClInclude>
-    <ClInclude Include="Core\App\Editor.h">
-      <Filter>Core\App</Filter>
-    </ClInclude>
     <ClInclude Include="Core\ObjectLinker.h">
       <Filter>Core</Filter>
     </ClInclude>
@@ -247,6 +256,9 @@
       <Filter>Utils</Filter>
     </ClInclude>
     <ClInclude Include="Graphics\Viewport\LogViewport.h">
+      <Filter>Graphics\Viewport</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\Viewport\DXViewport.h">
       <Filter>Graphics\Viewport</Filter>
     </ClInclude>
     <ClInclude Include="Manager\RenderManager.h">
@@ -335,6 +347,69 @@
     </ClInclude>
     <ClInclude Include="Input\InputValue.h">
       <Filter>Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\App\AppModeBase.h">
+      <Filter>Core\App</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\Wrapper\SimpleMathWrapper.h">
+      <Filter>Utils\Wrapper</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\Thread\RefCounting.h">
+      <Filter>Utils\Thread</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\DXSwapChain.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\Buffer\DXIndexBuffer.h">
+      <Filter>Graphics\Buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\Buffer\DXVertexBuffer.h">
+      <Filter>Graphics\Buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="Manager\DXGraphicSystem.h">
+      <Filter>Manager\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\DXDefaultVertexData.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\Buffer\DXInstancingBuffer.h">
+      <Filter>Graphics\Buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\MathUtils.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\Buffer\DXConstantBuffer.h">
+      <Filter>Graphics\Buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\Buffer\DXStructureBuffer.h">
+      <Filter>Graphics\Buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\Buffer\DXComputeTextureBuffer.h">
+      <Filter>Graphics\Buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\Resource\DXTexture.h">
+      <Filter>Graphics\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Resource\Texture.h">
+      <Filter>Core\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\Resource\DXStaticMesh.h">
+      <Filter>Graphics\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\Resource\DXResourceInclude.h">
+      <Filter>Graphics\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Component\SceneComponent.h">
+      <Filter>Core\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Component\PrimitiveComponent.h">
+      <Filter>Core\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Transform.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Collision\CollisionInclude.h">
+      <Filter>Core\Collision</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -455,9 +530,6 @@
     <ClCompile Include="Reflection\CommonTypeInfo.cpp">
       <Filter>Reflection\TypeInfo</Filter>
     </ClCompile>
-    <ClCompile Include="Core\App\Editor.cpp">
-      <Filter>Core\App</Filter>
-    </ClCompile>
     <ClCompile Include="Core\ObjectLinker.cpp">
       <Filter>Core</Filter>
     </ClCompile>
@@ -545,8 +617,65 @@
     <ClCompile Include="Utils\SimpleMath.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="IncludeCopy.bat" />
+    <ClCompile Include="Utils\MathUtils.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\App\AppModeBase.cpp">
+      <Filter>Core\App</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\Wrapper\SimpleMathWrapper.cpp">
+      <Filter>Utils\Wrapper</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\Thread\RefCounting.cpp">
+      <Filter>Utils\Thread</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\DXSwapChain.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\Buffer\DXVertexBuffer.cpp">
+      <Filter>Graphics\Buffer</Filter>
+    </ClCompile>
+    <ClCompile Include="Manager\DXGraphicSystem.cpp">
+      <Filter>Manager\Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\DXDefaultVertexData.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\Buffer\DXInstancingBuffer.cpp">
+      <Filter>Graphics\Buffer</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\Buffer\DXIndexBuffer.cpp">
+      <Filter>Graphics\Buffer</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\Viewport\DXViewport.cpp">
+      <Filter>Graphics\Viewport</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\Buffer\DXConstantBuffer.cpp">
+      <Filter>Graphics\Buffer</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\Buffer\DXStructureBuffer.cpp">
+      <Filter>Graphics\Buffer</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\Buffer\DXComputeTextureBuffer.cpp">
+      <Filter>Graphics\Buffer</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\Resource\DXTexture.cpp">
+      <Filter>Graphics\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Resource\Texture.cpp">
+      <Filter>Core\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\Resource\DXStaticMesh.cpp">
+      <Filter>Graphics\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Component\PrimitiveComponent.cpp">
+      <Filter>Core\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Component\SceneComponent.cpp">
+      <Filter>Core\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Transform.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

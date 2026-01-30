@@ -18,6 +18,7 @@ protected:
 	virtual void PostLoad() override;
 	virtual void BeginPlay();
 	virtual void Update(float deltaTime) override;
+	virtual void FixedUpdate() override;
 	virtual void EndPlay();
 	virtual void BeginDestroy() override;
 
@@ -36,7 +37,9 @@ private:
 	std::weak_ptr<Actor> _mOwner;
 
 private:
+	PROPERTY(_mRootComp)
 	std::shared_ptr<ActorComponent> _mRootComp;
+	PROPERTY(_mOwnedComps)
 	std::unordered_set<std::shared_ptr<ActorComponent>> _mOwnedComps;
 
 private:

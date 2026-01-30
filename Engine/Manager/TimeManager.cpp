@@ -32,6 +32,11 @@ float TimeManager::GetDeltaTime() const
 	return _mDeltaTime;
 }
 
+float TimeManager::GetFixedDeltaTime() const
+{
+	return _mFixedDeltaTime;
+}
+
 uint64 TimeManager::GetRenderFrameNumber() const
 {
 	return _mRenderFrameNumber.load();
@@ -123,64 +128,127 @@ void TimeManager::UpdateTime()
 	_mPrevCount = currentCount;
 
 	// 게임 상에서 몇 프레임 지났는가
-	_mFrameCount++;
-	_mFrameTime += _mDeltaTime;
+	++_mFrameCount;
+	_mFrameTimeAcc += _mDeltaTime;
+	_mFixedTimeAcc += _mDeltaTime;
 
 	// 초당 몇 프레임이 나왔는가 계산
-	if (_mFrameTime > 1.f)
+	if (_mFrameTimeAcc > 1.f)
 	{
-		_mFps = static_cast<uint32>(_mFrameCount / _mFrameTime);
+		_mFps = static_cast<uint32>(_mFrameCount / _mFrameTimeAcc);
 
-		_mFrameTime = 0.f;
+		_mFrameTimeAcc -= 1.f;
 		_mFrameCount = 0;
+	}
+
+	// 시간 고정 업데이트 필요 여부 계산
+	if (_mFixedTimeAcc > _mFixedDeltaTime)
+	{
+		_mFrameTimeAcc -= _mFixedDeltaTime;
+		_mUseFixedUpdate = true;
 	}
 }
 
 void TimeManager::UpdateTargets()
 {
-	for (auto& phase : _mPhases)
+	if (_mUseFixedUpdate == true)
 	{
-		phase.mCounter = std::make_shared<std::latch>(phase.mAsyncTargets.size());
-		std::vector<std::shared_ptr<UpdateTargetContext>> endTarget;
-		for (auto& target : phase.mAsyncTargets)
+		_mUseFixedUpdate = false;
+		for (auto& phase : _mPhases)
 		{
-			if (target->mState == UpdateState::Stop)
+			phase.mCounter = std::make_shared<std::latch>(phase.mAsyncTargets.size());
+			std::vector<std::shared_ptr<UpdateTargetContext>> endTarget;
+			for (auto& target : phase.mAsyncTargets)
 			{
-				endTarget.push_back(target);
-				phase.mCounter->count_down();
-				continue;
-			}
-			target->mState = UpdateState::Run;
-			THREAD_MANAGER->PushGlobalConcurrentJob(ObjectPool<Job>::MakeShared([target, deltaTime = _mDeltaTime, counter = phase.mCounter]()
+				if (target->mState == UpdateState::Stop)
 				{
-					std::shared_ptr<IUpdatable> targetSharedPtr = target->mTarget.lock();
-					if (targetSharedPtr != nullptr)
+					endTarget.push_back(target);
+					phase.mCounter->count_down();
+					continue;
+				}
+				target->mState = UpdateState::Run;
+				THREAD_MANAGER->PushGlobalConcurrentJob(ObjectPool<Job>::MakeShared([target, deltaTime = _mDeltaTime, counter = phase.mCounter]()
 					{
-						targetSharedPtr->Update(deltaTime);
-					}
-					counter->count_down();
-				}), false);
-		}
-		for (auto& target : phase.mSyncTargets)
-		{
-			if (target->mState == UpdateState::Stop)
-			{
-				endTarget.push_back(target);
-				continue;
+						std::shared_ptr<IUpdatable> targetSharedPtr = target->mTarget.lock();
+						if (targetSharedPtr != nullptr)
+						{
+							targetSharedPtr->Update(deltaTime);
+							targetSharedPtr->FixedUpdate();
+						}
+						counter->count_down();
+					}), false);
 			}
-			target->mState = UpdateState::Run;
-			std::shared_ptr<IUpdatable> targetSharedPtr = target->mTarget.lock();
-			if (targetSharedPtr != nullptr)
+			for (auto& target : phase.mSyncTargets)
 			{
-				targetSharedPtr->Update(_mDeltaTime);
+				if (target->mState == UpdateState::Stop)
+				{
+					endTarget.push_back(target);
+					continue;
+				}
+				target->mState = UpdateState::Run;
+				std::shared_ptr<IUpdatable> targetSharedPtr = target->mTarget.lock();
+				if (targetSharedPtr != nullptr)
+				{
+					targetSharedPtr->Update(_mDeltaTime);
+					targetSharedPtr->FixedUpdate();
+				}
 			}
-		}
 
-		for (auto& target : endTarget)
+			for (auto& target : endTarget)
+			{
+				NotifyToRemoveTarget(target);
+			}
+
+			phase.mCounter->wait();
+		}
+	}
+	else
+	{
+		for (auto& phase : _mPhases)
 		{
-			NotifyToRemoveTarget(target);
-		}
+			phase.mCounter = std::make_shared<std::latch>(phase.mAsyncTargets.size());
+			std::vector<std::shared_ptr<UpdateTargetContext>> endTarget;
+			for (auto& target : phase.mAsyncTargets)
+			{
+				if (target->mState == UpdateState::Stop)
+				{
+					endTarget.push_back(target);
+					phase.mCounter->count_down();
+					continue;
+				}
+				target->mState = UpdateState::Run;
+				THREAD_MANAGER->PushGlobalConcurrentJob(ObjectPool<Job>::MakeShared([target, deltaTime = _mDeltaTime, counter = phase.mCounter]()
+					{
+						std::shared_ptr<IUpdatable> targetSharedPtr = target->mTarget.lock();
+						if (targetSharedPtr != nullptr)
+						{
+							targetSharedPtr->Update(deltaTime);
+						}
+						counter->count_down();
+					}), false);
+			}
+			for (auto& target : phase.mSyncTargets)
+			{
+				if (target->mState == UpdateState::Stop)
+				{
+					endTarget.push_back(target);
+					continue;
+				}
+				target->mState = UpdateState::Run;
+				std::shared_ptr<IUpdatable> targetSharedPtr = target->mTarget.lock();
+				if (targetSharedPtr != nullptr)
+				{
+					targetSharedPtr->Update(_mDeltaTime);
+				}
+			}
 
-		phase.mCounter->wait();
+			for (auto& target : endTarget)
+			{
+				NotifyToRemoveTarget(target);
+			}
+
+			phase.mCounter->wait();
+		}
 	}
 }
+

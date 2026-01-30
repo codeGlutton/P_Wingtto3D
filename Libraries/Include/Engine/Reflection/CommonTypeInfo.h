@@ -16,7 +16,7 @@
 /**
  * 클래스 타입 정보 데이터
  */
-template<typename T> requires IsChildOfObject<T>
+template<typename T>
 class SubClassTypeInfo : public TypeInfo
 {
 	GEN_STRUCT_REFLECTION(SubClassTypeInfo<T>)
@@ -39,7 +39,7 @@ public:
 /**
  * 약한 참조
  */
-template<typename T> requires IsChildOfObject<T>
+template<typename T>
 class SoftRefTypeInfo : public TypeInfo
 {
 	GEN_STRUCT_REFLECTION(SoftRefTypeInfo<T>)
@@ -74,7 +74,7 @@ protected:
 	}
 
 public:
-	virtual bool SerializeBulkData(OUT Archive& archive, const void* inst) const = 0;
+	virtual void SerializeBulkData(OUT Archive& archive, const void* inst) const = 0;
 };
 
 template<typename T> requires IsBulk<T>
@@ -89,7 +89,7 @@ protected:
 	}
 
 public:
-	virtual bool SerializeBulkData(OUT Archive& archive, const void* inst) const override;
+	virtual void SerializeBulkData(OUT Archive& archive, const void* inst) const override;
 
 public:
 	virtual bool IsInstanceValueEqual(const void* lhsInst, const void* rhsInst) const override;

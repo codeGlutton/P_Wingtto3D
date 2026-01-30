@@ -129,6 +129,11 @@ using InterfaceType = InterfaceTypeFinder<T>::Type;
 template<typename T>
 constexpr bool IsChildOfObject = std::is_base_of_v<Object, T>;
 
+//template <typename T, typename = void>
+//constexpr bool IsChildOfObject = false;
+//template <typename T>
+//constexpr bool IsChildOfObject<T, std::void_t<typename T::ObjectMarker>> = true;
+
 
 /* Bulk */
 

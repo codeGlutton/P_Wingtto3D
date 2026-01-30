@@ -19,13 +19,20 @@ class Viewport abstract : public Object
 {
 	GEN_ABSTRACT_REFLECTION(Viewport)
 
+	friend class AppWindow;
+
 public:
 	Viewport();
 	~Viewport();
 
 public:
-	void SetSize();
-	void GetSize();
+	const ViewportDesc& GetDesc() const
+	{
+		return _mDesc;
+	}
+
+protected:
+	virtual void OnResize(const RECT& windowSize);
 
 private:
 	virtual void Render() = 0;

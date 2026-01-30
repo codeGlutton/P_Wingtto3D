@@ -40,6 +40,7 @@
 /* Window */
 
 #define CHECK_WIN(hr)					assert(SUCCEEDED(hr))
+#define CHECK_WIN_MSG(hr, msg)			assert(SUCCEEDED(hr) && (msg))
 
 /* Thread */
 

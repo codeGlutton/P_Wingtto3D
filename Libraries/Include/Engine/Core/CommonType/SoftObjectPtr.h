@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-template<typename T> requires std::is_base_of_v<Object, T>
+template<typename T>
 class SoftObjectPtr
 {
 public:
@@ -101,12 +101,12 @@ private:
 	std::weak_ptr<T> _mObject;
 };
 
-template<typename T> requires std::is_base_of_v<Object, T>
+template<typename T>
 void SoftObjectPtr<T>::LoadSync()
 {
 }
 
-template<typename T> requires std::is_base_of_v<Object, T>
+template<typename T>
 void SoftObjectPtr<T>::LoadASync()
 {
 }

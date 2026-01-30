@@ -41,14 +41,9 @@ using namespace Microsoft::WRL;
 #include "DirectXTex/DirectXTex.h"
 #include "DirectXTex/DirectXTex.inl"
 
-/* Assimp */
-
-//#include <Assimp/Importer.hpp>
-//#include <Assimp/scene.h>
-//#include <Assimp/postprocess.h>
-
 /* Simple Math */
 
+#include "SimpleMath/SimpleMath.h"
 
 /* nlohmann Json */
 
@@ -64,7 +59,7 @@ using namespace Microsoft::WRL;
 #pragma comment(lib, "dinput8.lib")
 
 #pragma comment(lib, "DirectXTex/DirectXTex.lib")
-//#pragma comment(lib, "Assimp/assimp-vc143-mt.lib")
+#pragma comment(lib, "Assimp/assimp-vc143-mt.lib")
 
 
 /* Headers */
@@ -91,6 +86,7 @@ using namespace Microsoft::WRL;
 /* Utils */
 
 #include "Utils/TypeUtils.h"
+#include "Utils/Wrapper/SimpleMathWrapper.h"
 #include "Utils/StringUtils.h"
 #include "Utils/Debugger/Logger.h"
 
@@ -100,4 +96,3 @@ using namespace Microsoft::WRL;
 #include "Core/CommonType/SoftObjectPtr.h"
 #include "Core/CommonType/SubClass.h"
 
-#include "SimpleMath/SimpleMath.h"

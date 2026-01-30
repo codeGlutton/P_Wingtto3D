@@ -5,7 +5,11 @@
 class Thread
 {
 public:
-	virtual void Init() {}
+	virtual void Init()
+	{
+		srand(static_cast<uint32>(time(NULL)));
+		rand();
+	}
 	virtual void Run() = 0;
 };
 

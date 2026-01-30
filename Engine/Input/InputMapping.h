@@ -27,7 +27,7 @@ class InputMappingContext : public Object
 
 	friend class InputManager;
 
-private:
+protected:
 	PROPERTY(_mMappings)
 	std::vector<InputMapping> _mMappings;
 };

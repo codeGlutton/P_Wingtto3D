@@ -4,7 +4,9 @@
 
 class GameAppWindow : public AppWindow
 {
-	GEN_REFLECTION(AppWindow)
+	GEN_REFLECTION(GameAppWindow)
 
+protected:
+	void CreateRootViewport() override;
 };
 

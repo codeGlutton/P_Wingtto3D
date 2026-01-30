@@ -11,7 +11,8 @@ enum class UpdatePhase : uint8
 {
 	None = 255,
 
-	PrePhysics = 0,		// 입력 값 누적
+	System = 0,			// 시스템 처리
+	PrePhysics,			// 입력 값 누적
 	Physics,			// 물리 처리, 애님
 	PostPhysics,		// 애님 후 처리
 	View,				// 카메라 업데이트
@@ -37,6 +38,7 @@ class IUpdatable abstract
 
 protected:
 	virtual void Update(float deltaTime) = 0;
+	virtual void FixedUpdate() = 0;
 };
 
 struct UpdateTargetContext
@@ -54,6 +56,7 @@ public:
 	UpdatePhase mPhase = UpdatePhase::None;
 	UpdateState mState = UpdateState::Start;
 	bool mIsAsync = false;
+	bool mCanEverTick = true;
 };
 
 struct UpdatePhaseContext
@@ -86,6 +89,7 @@ public:
 	uint64 GetGameFrameNumber() const;
 	uint32 GetFps() const;
 	float GetDeltaTime() const;
+	float GetFixedDeltaTime() const;
 
 public:
 	uint64 GetRenderFrameNumber() const;
@@ -120,8 +124,13 @@ private:
 	// 누적 프레임 카운트
 	uint32 _mFrameCount = 0ul;
 	// 초당 프레임을 연산하기 위한 누적 값
-	float _mFrameTime = 0.f;
+	float _mFrameTimeAcc = 0.f;
 	uint32 _mFps = 0ul;
+
+	const float _mFixedDeltaTime = 1.f / 60.f;
+	// 고정 틱을 처리하기 위한 누적 값
+	float _mFixedTimeAcc = _mFixedDeltaTime;
+	bool _mUseFixedUpdate = false;
 
 private:
 	uint64 _mGameFrameNumber = 0ull;

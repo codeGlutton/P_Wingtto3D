@@ -19,6 +19,7 @@ void Actor::PostCreate()
 void Actor::PostLoad()
 {
 	Super::PostLoad();
+	
 }
 
 void Actor::BeginPlay()
@@ -27,6 +28,10 @@ void Actor::BeginPlay()
 }
 
 void Actor::Update(float deltaTime)
+{
+}
+
+void Actor::FixedUpdate()
 {
 }
 

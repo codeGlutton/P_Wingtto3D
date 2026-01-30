@@ -68,12 +68,12 @@ void AppWindowManager::Load()
 
 void AppWindowManager::NotifyToAddAppWindow(std::shared_ptr<AppWindow> window)
 {
-	ASSERT_MSG(_mAppWindows.find(window->GetDesc().mHWnd) == _mAppWindows.end(), "Trying to register same app window");
-	_mAppWindows[window->GetDesc().mHWnd] = window;
+	ASSERT_MSG(_mAppWindows.find(window->GetDesc().mHWndRef->mData) == _mAppWindows.end(), "Trying to register same app window");
+	_mAppWindows[window->GetDesc().mHWndRef->mData] = window;
 
 	if (window->IsMainAppWindow() == true)
 	{
-		_mMainHWnd = window->GetDesc().mHWnd;
+		_mMainHWnd = window->GetDesc().mHWndRef->mData;
 	}
 	mOnRegisterAppWindow.ExecuteIfBound(window);
 }

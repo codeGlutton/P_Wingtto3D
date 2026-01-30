@@ -25,9 +25,9 @@ struct InputBinding
 public:
 	bool operator==(const InputBinding& other) const
 	{
-		return mKeyType == other.mKeyType && 
-			mCtrl == other.mCtrl && 
-			mAlt == other.mAlt && 
+		return mKeyType == other.mKeyType &&
+			mCtrl == other.mCtrl &&
+			mAlt == other.mAlt &&
 			mShift == other.mShift;
 	}
 

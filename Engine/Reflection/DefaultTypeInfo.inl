@@ -65,10 +65,10 @@ void EnumTypeInfo<T>::Deserialize(Archive& archive, OUT void* inst) const
 /**
  * Pair
  */
-template<typename K, typename D> requires (IsChildOfObject<K> == false && IsChildOfObject<D> == false)
+template<typename K, typename D>
 const PairTypeInfo<K, D> PairTypeInfo< K, D>::mStatic;
 
-template<typename K, typename D> requires (IsChildOfObject<K> == false && IsChildOfObject<D> == false)
+template<typename K, typename D>
 inline void PairTypeInfo<K, D>::Serialize(OUT Archive& archive, const void* inst) const
 {
 	const TypeInfo& keyTypeInfo = TypeInfoResolver<std::remove_const_t<K>>::Get();
@@ -79,7 +79,7 @@ inline void PairTypeInfo<K, D>::Serialize(OUT Archive& archive, const void* inst
 	dataTypeInfo.Serialize(archive, &instPtr->second);
 }
 
-template<typename K, typename D> requires (IsChildOfObject<K> == false && IsChildOfObject<D> == false)
+template<typename K, typename D>
 inline void PairTypeInfo<K, D>::Deserialize(Archive& archive, OUT void* inst) const
 {
 	const TypeInfo& keyTypeInfo = TypeInfoResolver<std::remove_const_t<K>>::Get();
@@ -93,10 +93,10 @@ inline void PairTypeInfo<K, D>::Deserialize(Archive& archive, OUT void* inst) co
 /**
  * 배열
  */
-template<typename E, size_t N> requires (IsChildOfObject<E> == false)
+template<typename E, size_t N>
 const ArrayTypeInfo<E, N> ArrayTypeInfo<E, N>::mStatic;
 
-template<typename E, size_t N> requires (IsChildOfObject<E> == false)
+template<typename E, size_t N>
 bool ArrayTypeInfo<E, N>::IsInstanceValueEqual(const void* lhsInst, const void* rhsInst) const
 {
 	const E* lhsInstPtr = reinterpret_cast<const E*>(lhsInst);
@@ -113,7 +113,7 @@ bool ArrayTypeInfo<E, N>::IsInstanceValueEqual(const void* lhsInst, const void* 
 	return true;
 }
 
-template<typename E, size_t N> requires (IsChildOfObject<E> == false)
+template<typename E, size_t N>
 void ArrayTypeInfo<E, N>::Serialize(OUT Archive& archive, const void* inst) const
 {
 	const TypeInfo& typeInfo = TypeInfoResolver<E>::Get();
@@ -126,7 +126,7 @@ void ArrayTypeInfo<E, N>::Serialize(OUT Archive& archive, const void* inst) cons
 	}
 }
 
-template<typename E, size_t N> requires (IsChildOfObject<E> == false)
+template<typename E, size_t N>
 void ArrayTypeInfo<E, N>::Deserialize(Archive& archive, OUT void* inst) const
 {
 	const TypeInfo& typeInfo = TypeInfoResolver<E>::Get();
@@ -139,10 +139,10 @@ void ArrayTypeInfo<E, N>::Deserialize(Archive& archive, OUT void* inst) const
 	}
 }
 
-template<typename E, size_t N> requires (IsChildOfObject<E> == false)
+template<typename E, size_t N>
 const ArrayContanierTypeInfo<E, N> ArrayContanierTypeInfo<E, N>::mStatic;
 
-template<typename E, size_t N> requires (IsChildOfObject<E> == false)
+template<typename E, size_t N>
 inline void ArrayContanierTypeInfo<E, N>::Serialize(OUT Archive& archive, const void* inst) const
 {
 	const TypeInfo& typeInfo = TypeInfoResolver<E>::Get();
@@ -154,7 +154,7 @@ inline void ArrayContanierTypeInfo<E, N>::Serialize(OUT Archive& archive, const 
 	}
 }
 
-template<typename E, size_t N> requires (IsChildOfObject<E> == false)
+template<typename E, size_t N>
 inline void ArrayContanierTypeInfo<E, N>::Deserialize(Archive& archive, OUT void* inst) const
 {
 	const TypeInfo& typeInfo = TypeInfoResolver<E>::Get();
@@ -174,10 +174,10 @@ inline void ArrayContanierTypeInfo<E, N>::Deserialize(Archive& archive, OUT void
 /**
  * 동적 크기 타입
  */
-template<typename E, typename C> requires (IsChildOfObject<E> == false)
+template<typename E, typename C>
 const DynamicIterableContainerTypeInfo<E, C> DynamicIterableContainerTypeInfo<E, C>::mStatic;
 
-template<typename E, typename C> requires (IsChildOfObject<E> == false)
+template<typename E, typename C>
 void DynamicIterableContainerTypeInfo<E, C>::Serialize(OUT Archive& archive, const void* inst) const
 {
 	const TypeInfo& typeInfo = TypeInfoResolver<E>::Get();
@@ -193,7 +193,7 @@ void DynamicIterableContainerTypeInfo<E, C>::Serialize(OUT Archive& archive, con
 	}
 }
 
-template<typename E, typename C> requires (IsChildOfObject<E> == false)
+template<typename E, typename C>
 void DynamicIterableContainerTypeInfo<E, C>::Deserialize(Archive& archive, OUT void* inst) const
 {
 	const TypeInfo& typeInfo = TypeInfoResolver<E>::Get();
@@ -222,16 +222,16 @@ void DynamicIterableContainerTypeInfo<E, C>::Deserialize(Archive& archive, OUT v
  * 포인터
  */
 
-template<typename T> requires IsChildOfObject<T>
+template<typename T>
 const PointerTypeInfo<T> PointerTypeInfo<T>::mStatic;
 
-template<typename T> requires IsChildOfObject<T>
+template<typename T>
 inline bool PointerTypeInfo<T>::IsInstanceValueEqual(const void* lhsInst, const void* rhsInst) const
 {
 	return *reinterpret_cast<const T* const*>(lhsInst) == *reinterpret_cast<const T* const*>(rhsInst);
 }
 
-template<typename T> requires IsChildOfObject<T>
+template<typename T>
 void PointerTypeInfo<T>::Serialize(OUT Archive& archive, const void* inst) const
 {
 	const T* const& instRef = *reinterpret_cast<const T* const*>(inst);
@@ -245,7 +245,7 @@ void PointerTypeInfo<T>::Serialize(OUT Archive& archive, const void* inst) const
 	TypeInfoResolver<std::wstring>::Get().Serialize(archive, objectFullPath);
 }
 
-template<typename T> requires IsChildOfObject<T>
+template<typename T>
 void PointerTypeInfo<T>::Deserialize(Archive& archive, OUT void* inst) const
 {
 	T*& instRef = *reinterpret_cast<T**>(inst);
@@ -263,7 +263,7 @@ void PointerTypeInfo<T>::Deserialize(Archive& archive, OUT void* inst) const
 	instRef = objectPtr.get();
 }
 
-template<typename T> requires IsChildOfObject<T>
+template<typename T>
 inline std::shared_ptr<Package> PointerTypeInfo<T>::GetInstancePackage(const void* inst) const
 {
 	const Object* const& instRef = *reinterpret_cast<const T* const*>(inst);
@@ -274,10 +274,10 @@ inline std::shared_ptr<Package> PointerTypeInfo<T>::GetInstancePackage(const voi
 	return GetOuter(instRef);
 }
 
-template<typename T> requires IsChildOfObject<T>
+template<typename T>
 const SharedPointerTypeInfo<T> SharedPointerTypeInfo<T>::mStatic;
 
-template<typename T> requires IsChildOfObject<T>
+template<typename T>
 inline bool SharedPointerTypeInfo<T>::IsInstanceValueEqual(const void* lhsInst, const void* rhsInst) const
 {
 	const std::shared_ptr<T>& lhsInstRef = *reinterpret_cast<const std::shared_ptr<T>*>(lhsInst);
@@ -285,7 +285,7 @@ inline bool SharedPointerTypeInfo<T>::IsInstanceValueEqual(const void* lhsInst, 
 	return lhsInstRef == rhsInstRef;
 }
 
-template<typename T> requires IsChildOfObject<T>
+template<typename T>
 void SharedPointerTypeInfo<T>::Serialize(OUT Archive& archive, const void* inst) const
 {
 	const std::shared_ptr<T>& instRef = *reinterpret_cast<const std::shared_ptr<T>*>(inst);
@@ -299,7 +299,7 @@ void SharedPointerTypeInfo<T>::Serialize(OUT Archive& archive, const void* inst)
 	TypeInfoResolver<std::wstring>::Get().Serialize(archive, objectFullPath);
 }
 
-template<typename T> requires IsChildOfObject<T>
+template<typename T>
 void SharedPointerTypeInfo<T>::Deserialize(Archive& archive, OUT void* inst) const
 {
 	std::shared_ptr<T>& instRef = *reinterpret_cast<std::shared_ptr<T>*>(inst);
@@ -317,21 +317,21 @@ void SharedPointerTypeInfo<T>::Deserialize(Archive& archive, OUT void* inst) con
 	instRef = std::reinterpret_pointer_cast<T>(objectPtr);
 }
 
-template<typename T> requires IsChildOfObject<T>
+template<typename T>
 inline std::shared_ptr<Package> SharedPointerTypeInfo<T>::GetInstancePackage(const void* inst) const
 {
-	const std::shared_ptr<Object> instRef = *reinterpret_cast<const std::shared_ptr<T>*>(inst);
+	const std::shared_ptr<T> instRef = *reinterpret_cast<const std::shared_ptr<T>*>(inst);
 	if (instRef == nullptr)
 	{
 		return std::shared_ptr<Package>();
 	}
-	return GetOuter(instRef.get());
+	return GetOuter(reinterpret_cast<const Object*>(instRef.get()));
 }
 
-template<typename T> requires IsChildOfObject<T>
+template<typename T>
 const WeakPointerTypeInfo<T> WeakPointerTypeInfo<T>::mStatic;
 
-template<typename T> requires IsChildOfObject<T>
+template<typename T>
 inline bool WeakPointerTypeInfo<T>::IsInstanceValueEqual(const void* lhsInst, const void* rhsInst) const
 {
 	const std::weak_ptr<T>& lhsInstRef = *reinterpret_cast<const std::weak_ptr<T>*>(lhsInst);
@@ -339,7 +339,7 @@ inline bool WeakPointerTypeInfo<T>::IsInstanceValueEqual(const void* lhsInst, co
 	return lhsInstRef.lock() == rhsInstRef.lock();
 }
 
-template<typename T> requires IsChildOfObject<T>
+template<typename T>
 void WeakPointerTypeInfo<T>::Serialize(OUT Archive& archive, const void* inst) const
 {
 	const std::shared_ptr<T> sharedInstRef = (*reinterpret_cast<const std::weak_ptr<T>*>(inst)).lock();
@@ -353,7 +353,7 @@ void WeakPointerTypeInfo<T>::Serialize(OUT Archive& archive, const void* inst) c
 	TypeInfoResolver<std::wstring>::Get().Serialize(archive, objectFullPath);
 }
 
-template<typename T> requires IsChildOfObject<T>
+template<typename T>
 void WeakPointerTypeInfo<T>::Deserialize(Archive& archive, OUT void* inst) const
 {
 	std::weak_ptr<T>& instRef = *reinterpret_cast<std::weak_ptr<T>*>(inst);
@@ -371,15 +371,15 @@ void WeakPointerTypeInfo<T>::Deserialize(Archive& archive, OUT void* inst) const
 	instRef = std::reinterpret_pointer_cast<T>(objectPtr);
 }
 
-template<typename T> requires IsChildOfObject<T>
+template<typename T>
 inline std::shared_ptr<Package> WeakPointerTypeInfo<T>::GetInstancePackage(const void* inst) const
 {
-	const std::shared_ptr<Object> instRef = (*reinterpret_cast<const std::weak_ptr<T>*>(inst)).lock();
+	const std::shared_ptr<T> instRef = (*reinterpret_cast<const std::weak_ptr<T>*>(inst)).lock();
 	if (instRef == nullptr)
 	{
 		return std::shared_ptr<Package>();
 	}
-	return GetOuter(instRef.get());
+	return GetOuter(reinterpret_cast<const Object*>(instRef.get()));
 }
 
 #pragma endregion
