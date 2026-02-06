@@ -96,5 +96,7 @@ private:
 	bool _mIsAlive = true;
 	PROPERTY(_mIsReplicated)
 	bool _mIsReplicated = false;
+
+	
 };
 

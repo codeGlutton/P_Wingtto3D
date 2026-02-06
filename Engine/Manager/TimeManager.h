@@ -11,8 +11,7 @@ enum class UpdatePhase : uint8
 {
 	None = 255,
 
-	System = 0,			// 시스템 처리
-	PrePhysics,			// 입력 값 누적
+	PrePhysics = 0,		// 입력 값 누적
 	Physics,			// 물리 처리, 애님
 	PostPhysics,		// 애님 후 처리
 	View,				// 카메라 업데이트
@@ -90,6 +89,7 @@ public:
 	uint32 GetFps() const;
 	float GetDeltaTime() const;
 	float GetFixedDeltaTime() const;
+	double GetPlayTime() const;
 
 public:
 	uint64 GetRenderFrameNumber() const;
@@ -131,6 +131,8 @@ private:
 	// 고정 틱을 처리하기 위한 누적 값
 	float _mFixedTimeAcc = _mFixedDeltaTime;
 	bool _mUseFixedUpdate = false;
+
+	double _mPlayTimeAcc = 0.;
 
 private:
 	uint64 _mGameFrameNumber = 0ull;

@@ -3,19 +3,6 @@
 #include "Input/InputInclude.h"
 #include "Input/InputValue.h"
 
-namespace KeyState
-{
-	enum Type : uint8
-	{
-		None = 0xFF,
-		Press = 0,
-		Hold,
-		Release,
-		Trigger,
-		Count
-	};
-}
-
 DECLARE_DELEGATE_2_PARAMS(OnCallInputBinding, const InputValue*, KeyState::Type);
 
 struct InputBinding

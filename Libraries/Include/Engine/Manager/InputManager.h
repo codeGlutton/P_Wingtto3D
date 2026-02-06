@@ -1,13 +1,16 @@
 ﻿#pragma once
 
 #include "Input/InputInclude.h"
-#include "Input/InputBinding.h"
-#include "Input/InputAction.h"
-#include "Input/InputMapping.h"
+#include "Input/InputState.h"
+
+#include "Core/App/InputMessageData.h"
+
+#include "Graphics/Widget/Type/WidgetPath.h"
 
 #define INPUT_MANAGER InputManager::GetInst()
 
 class AppWindow;
+struct InputBinding;
 
 enum class InputSystemType : uint8
 {
@@ -36,27 +39,28 @@ public:
 	void Destroy();
 
 public:
-	KeyState::Type GetKeyState(KeyType::Type key) const;
+	KeyState::Type GetKeyState(KeyType::Type key) const
+	{
+		return _mState->mKeyStates[key];
+	}
 	const POINT& GetMousePos() const
 	{
-		return _mCurrentMousePos;
+		return _mState->mCurrentMouseScreenPos;
 	}
 	template<typename T>
 	const T& GetKeyScale(KeyType::Type key) const
 	{
-		ASSERT_MSG(_mScaleValues.find(key) == _mScaleValues.end(), "None scale key");
-		return _mScaleValues[key].Get<T>();
+		ASSERT_MSG(_mState->mScaleValues.find(key) == _mState->mScaleValues.end(), "None scale key");
+		return _mState->mScaleValues[key].Get<T>();
 	}
 
 public:
-	std::shared_ptr<const InputBinding> Bind(KeyType::Type bindKey, bool withCtrl, bool withAlt, bool withShift, std::shared_ptr<Object> object, OnCallInputBinding::Binder binder);
-	DelegateHandle BindAction(SubClass<InputAction> action, KeyState::Type eventState, std::shared_ptr<Object> object, OnTiggerInputAction::Binder binder);
-	bool Unbind(std::shared_ptr<const InputBinding> target);
-	bool UnbindAction(SubClass<InputAction> action, KeyState::Type eventState, DelegateHandle handle);
+	void PushWinKeyMessage(const WindowMessageData& data);
+	void PushRawWinKeyMessage(WindowMessageData data);
 
-public:
-	void AddMappingContext(SubClass<InputMappingContext> context, uint8 priority = 0);
-	void RemoveMappingContext(SubClass<InputMappingContext> context);
+private:
+	void ProcessWinKeyMessagesForWinInput();
+	void ProcessWinKeyMessagesForDInput();
 
 private:
 	void InitWinInputDevices();
@@ -64,46 +68,34 @@ private:
 	void InitXInputDevices();
 
 private:
-	void UpdateInputState();
-	void UpdateWinInputState();
+	//void UpdateWinInputState();
 	void UpdateDInputState();
 	void UpdateXInputState();
-
-	void UpdateKeyBindingCallbacks();
-
-private:
-	void ChangeTopMappingContextBindings(uint8 prePriority, uint8 curPriority);
-	void AddTopMappingContextBindings(uint8 priority);
-	void RemoveTopMappingContextBindings(uint8 priority);
+	void UpdateAdditionalMouseState();
 
 private:	
 	void NotifyToChangeInputTargetHWnd(std::shared_ptr<AppWindow> window);
 
 private:
-	InputSystemType _mSystemType = InputSystemType::DInput;
-
-	/* 키 상태에 따른 함수 바인딩 */
-private:
-	std::map<uint8, std::unordered_map<const InputMappingContext*, std::vector<std::shared_ptr<InputBinding>>>, std::greater<uint8>> _mMappingContexts;
-	std::unordered_map<const InputAction*, std::array<OnTiggerInputAction, KeyState::Count>> _mActionMap;
-	std::unordered_map<KeyType::Type, BindingVector> _mBindingMap;
+	InputSystemType _mSystemType = InputSystemType::Window;
 
 	/* 키 상태 결과 값 */
 private:
-	std::array<KeyState::Type, KEY_COUNT> _mKeyStates = {};
-	std::unordered_map<KeyType::Type, InputValue> _mScaleValues;
-	POINT _mPreMousePos;
-	POINT _mCurrentMousePos;
-	bool _mUseCtrl = false;
-	bool _mUseAlt = false;
-	bool _mUseShift = false;
+	std::shared_ptr<InputState> _mState;
 
 	/* 키 상태 계산용 데이터 */
 private:
-	std::array<KeyType::WinInputType, WIN_INPUT_COUNT> _mWinInputKeyStates = {};
+	//std::array<KeyType::WinInputType, WIN_INPUT_COUNT> _mWinInputKeyStates = {};
 	std::array<KeyType::DInputType, DINPUT_COUNT> _mDInputKeyStates = {};
 	DIMOUSESTATE _mDInputMouseState = {};
 	XINPUT_STATE _mXInputState = {};
+
+	const double _mDoubleClickThreshold = 0.25;
+	double _mLClickPreReleaseTime = -1.f;
+	double _mRClickPreReleaseTime = -1.f;
+
+	// 윈도우 키 변경 누적 메세지
+	std::vector<WindowMessageData> _mWinKeyMessages;
 
 	/* DInput Device 객체들 */
 private:
@@ -115,5 +107,8 @@ private:
 private:
 	DelegateHandle _mChangeFocusDelegateHandle;
 	DelegateHandle _mChangeWindowModeDelegateHandle;
+
+private:
+	WidgetPath _mFocusWidgetPath;
 };
 

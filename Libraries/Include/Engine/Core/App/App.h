@@ -38,7 +38,44 @@ public:
 	WPARAM Run(HINSTANCE hInst, const std::wstring& appName = L"Wingtto");
 
 public:
-	const AppDesc& GetDesc() const { return _mDesc; }
+	void OnPressKey(std::shared_ptr<KeyEvent>& event)
+	{
+		_mDesc.mMode->OnPressKey(event);
+	}
+	void OnReleaseKey(std::shared_ptr<KeyEvent>& event)
+	{
+		_mDesc.mMode->OnReleaseKey(event);
+	}
+	void OnChangeAnalogValue(std::shared_ptr<AnalogInputEvent>& event)
+	{
+		_mDesc.mMode->OnChangeAnalogValue(event);
+	}
+	void OnPressChar(std::shared_ptr<CharEvent>& event)
+	{
+		_mDesc.mMode->OnPressChar(event);
+	}
+	void OnPressMouse(std::shared_ptr<AppWindow> target, std::shared_ptr<PointEvent>& event)
+	{
+		_mDesc.mMode->OnPressMouse(std::move(target), event);
+	}
+	void OnReleaseMouse(std::shared_ptr<PointEvent>& event)
+	{
+		_mDesc.mMode->OnReleaseMouse(event);
+	}
+	void OnDoubleClickMouse(std::shared_ptr<AppWindow> target, std::shared_ptr<PointEvent>& event)
+	{
+		_mDesc.mMode->OnDoubleClickMouse(std::move(target), event);
+	}
+	void OnMoveMouse(std::shared_ptr<PointEvent>& event)
+	{
+		_mDesc.mMode->OnMoveMouse(event);
+	}
+
+public:
+	const AppDesc& GetDesc() const 
+	{ 
+		return _mDesc; 
+	}
 
 public:
 	/**
@@ -87,7 +124,7 @@ inline WPARAM App::Run(HINSTANCE hInst, const std::wstring& appName)
 	BOOT_SYSTEM->Boot();
 	// 모드 내 초기화
 	_mDesc.mMode->Init();
-	APP_WIN_MANAGER->CreateAppWindow<typename T::DefaultWindow>();
+	APP_WIN_MANAGER->CreateDefaultMainAppWindow<typename T::DefaultWindow>();
 
 	MSG msg = { 0 };
 	while (msg.message != WM_QUIT)

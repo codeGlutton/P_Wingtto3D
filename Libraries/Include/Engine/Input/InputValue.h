@@ -3,13 +3,6 @@
 #include <variant>
 #include "Input/InputInclude.h"
 
-enum class KeyValueType
-{
-	Bool,
-	Float,
-	Vec2,
-};
-
 struct InputValue
 {
 	friend class InputManager;

@@ -18,6 +18,7 @@ private:
 	void MakeHeader();
 
 private:
+	PROPERTY(_mHeader)
 	std::shared_ptr<ResourceHeader> _mHeader;
 };
 

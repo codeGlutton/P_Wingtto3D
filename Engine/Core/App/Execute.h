@@ -1,6 +1,9 @@
 ﻿#pragma once
 
 #include "Core/App/AppWindow/AppWindow.h"
+#include "Input/InputEvent.h"
+
+class WidgetPath;
 
 enum class AppBuildTargetFlag : uint8
 {
@@ -47,5 +50,18 @@ public:
 	virtual void Init() = 0;
 	virtual void Update() = 0;
 	virtual void End() = 0;
+
+public:
+	virtual void OnPressKey(std::shared_ptr<KeyEvent>& event) = 0;
+	virtual void OnReleaseKey(std::shared_ptr<KeyEvent>& event) = 0;
+	virtual void OnChangeAnalogValue(std::shared_ptr<AnalogInputEvent>& event) = 0;
+
+	virtual void OnPressChar(std::shared_ptr<CharEvent>& event) = 0;
+
+	virtual void OnPressMouse(std::shared_ptr<AppWindow> target, std::shared_ptr<PointEvent>& event) = 0;
+	virtual void OnReleaseMouse(std::shared_ptr<PointEvent>& event) = 0;
+	virtual void OnDoubleClickMouse(std::shared_ptr<AppWindow> target, std::shared_ptr<PointEvent>& event) = 0;
+
+	virtual void OnMoveMouse(std::shared_ptr<PointEvent>& event) = 0;
 };
 

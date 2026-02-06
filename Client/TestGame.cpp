@@ -1,12 +1,12 @@
 ﻿#include "pch.h"
 #include "TestGame.h"
 
-#include "Manager/InputManager.h"
+#include "Manager/WorldGameInputManager.h"
 
 void TestGame::Init()
 {
 	Game::Init();
-	INPUT_MANAGER->Bind(KeyType::Pos, false, false, false, nullptr, OnCallInputBinding::Binder::BindLambda([](const InputValue* value, KeyState::Type state) {
+	WORLD_INPUT_MANAGER->Bind(KeyType::Pos, false, false, false, nullptr, OnCallInputBinding::Binder::BindLambda([](const InputValue* value, KeyState::Type state) {
 		if (state == KeyState::Trigger)
 		{
 			OutputDebugStringW(L"마우스 이동 중\n");

@@ -4,6 +4,8 @@
 #include "Manager/ThreadManager.h"
 #include "Manager/RenderManager.h"
 
+#include "Manager/AppWindowManager.h"
+
 void MainThread::Run()
 {
 	while (THREAD_MANAGER->IsAlive() == true)
@@ -15,5 +17,4 @@ void MainThread::Run()
 
 void RenderThread::Work()
 {
-
 }

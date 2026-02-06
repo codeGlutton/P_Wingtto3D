@@ -1,6 +1,10 @@
 ﻿#include "pch.h"
 #include "App.h"
 
+#include <windowsx.h>
+
+#include "Manager/InputManager.h"
+
 App::App()
 {
 }
@@ -13,6 +17,37 @@ LRESULT App::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	switch (message)
 	{
+		/* 입력 관련 */
+	case WM_CHAR:
+	case WM_KEYDOWN:
+	case WM_SYSKEYDOWN:
+	case WM_KEYUP:
+	case WM_SYSKEYUP:
+	case WM_LBUTTONDOWN:
+	case WM_MBUTTONDOWN:
+	case WM_RBUTTONDOWN:
+	case WM_XBUTTONDOWN:
+	case WM_LBUTTONUP:
+	case WM_MBUTTONUP:
+	case WM_RBUTTONUP:
+	case WM_XBUTTONUP:
+	case WM_LBUTTONDBLCLK:
+	case WM_MBUTTONDBLCLK:
+	case WM_RBUTTONDBLCLK:
+	case WM_XBUTTONDBLCLK:
+	case WM_MOUSEWHEEL:
+	case WM_NCMOUSEMOVE:
+	case WM_MOUSEMOVE:
+	{
+		INPUT_MANAGER->PushWinKeyMessage(WindowMessageData(hWnd, message, wParam, lParam));
+		break;
+	}
+	case WM_INPUT:
+	{
+		INPUT_MANAGER->PushRawWinKeyMessage(WindowMessageData(hWnd, message, wParam, lParam));
+		break;
+	}
+
 		/* 포커스 관련 */
 	case WM_ACTIVATEAPP:
 	{
@@ -27,6 +62,13 @@ LRESULT App::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	case WM_KILLFOCUS:
 	{
 		APP_WIN_MANAGER->NotifyToChangeFocus(NULL);
+		break;
+	}
+
+		/* 창 이동 관련 */
+	case WM_MOVE:
+	{
+		APP_WIN_MANAGER->NotifyToMove(hWnd);
 		break;
 	}
 

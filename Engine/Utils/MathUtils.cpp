@@ -64,6 +64,26 @@ bool IsNearlyZero(const Color& target)
     return IsNearlyZero(target.x) && IsNearlyZero(target.y) && IsNearlyZero(target.z) && IsNearlyZero(target.w);
 }
 
+float ConvertRotationToRadian(float rotation)
+{
+    return rotation / 180.f * DirectX::XM_PI;
+}
+
+Vec3 ConvertRotationToRadian(Vec3 rotations)
+{
+    return rotations / 180.f * DirectX::XM_PI;
+}
+
+float ConvertRadianToRotation(float radian)
+{
+    return radian / DirectX::XM_PI * 180.f;
+}
+
+Vec3 ConvertRadianToRotation(Vec3 radians)
+{
+    return radians / DirectX::XM_PI * 180.f;
+}
+
 
 /* 기하 */
 

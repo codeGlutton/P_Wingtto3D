@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Core/Object.h"
+#include "Graphics/Widget/CompoundWidget.h"
 
 struct ViewportDesc
 {
@@ -13,9 +14,9 @@ struct ViewportDesc
 };
 
 /**
- * 창을 표기할 viewport 베이스 클래스 (렌더 스레드에서 드로우콜)
+ * 특정 랜더 타겟 창을 표기할 viewport 베이스 클래스 (렌더 스레드에서 드로우콜)
  */
-class Viewport abstract : public Object
+class Viewport abstract : public CompoundWidget
 {
 	GEN_ABSTRACT_REFLECTION(Viewport)
 

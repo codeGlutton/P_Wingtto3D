@@ -11,7 +11,7 @@ class InputAction : public Object
 {
 	GEN_REFLECTION(InputAction)
 
-	friend class InputManager;
+	friend class WorldGameInputManager;
 
 protected:
 	PROPERTY(_mValueType)

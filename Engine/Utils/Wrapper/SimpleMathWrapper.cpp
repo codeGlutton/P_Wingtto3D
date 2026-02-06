@@ -27,12 +27,536 @@ const Vec4 Vec4::UnitY = { 0.f, 1.f, 0.f, 0.f };
 const Vec4 Vec4::UnitZ = { 0.f, 0.f, 1.f, 0.f };
 const Vec4 Vec4::UnitW = { 0.f, 0.f, 0.f, 1.f };
 
+const Matrix2D Matrix2D::Identity = { 1.f, 0.f, 0.f,
+                                      0.f, 1.f, 0.f,
+                                      0.f, 0.f, 1.f };
 const Matrix Matrix::Identity = { 1.f, 0.f, 0.f, 0.f,
                                   0.f, 1.f, 0.f, 0.f,
                                   0.f, 0.f, 1.f, 0.f,
                                   0.f, 0.f, 0.f, 1.f };
 
 const Quat Quat::Identity = { 0.f, 0.f, 0.f, 1.f };
+
+const Color Color::White = { 1.f, 1.f, 1.f, 1.f };
+const Color Color::Black = { 0.f, 0.f, 0.f, 1.f };
+const Color Color::Red = { 1.f, 0.f, 0.f, 1.f };
+const Color Color::Green = { 0.f, 1.f, 0.f, 1.f };
+const Color Color::Blue = { 0.f, 0.f, 1.f, 1.f };
+
+inline bool Matrix2D::operator== (const Matrix2D& M) const noexcept
+{
+    using namespace DirectX;
+    XMVECTOR x1 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&_11));
+    XMVECTOR x2 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&_21));
+    XMVECTOR x3 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&_31));
+
+    XMVECTOR y1 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&M._11));
+    XMVECTOR y2 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&M._21));
+    XMVECTOR y3 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&M._31));
+
+    return (XMVector3Equal(x1, y1)
+        && XMVector3Equal(x2, y2)
+        && XMVector3Equal(x3, y3)) != 0;
+}
+
+inline bool Matrix2D::operator != (const Matrix2D& M) const noexcept
+{
+    using namespace DirectX;
+    XMVECTOR x1 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&_11));
+    XMVECTOR x2 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&_21));
+    XMVECTOR x3 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&_31));
+
+    XMVECTOR y1 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&M._11));
+    XMVECTOR y2 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&M._21));
+    XMVECTOR y3 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&M._31));
+
+    return (XMVector3NotEqual(x1, y1)
+        || XMVector3NotEqual(x2, y2)
+        || XMVector3NotEqual(x3, y3)) != 0;
+}
+
+inline Matrix2D& Matrix2D::operator= (const DirectX::XMFLOAT3X3& M) noexcept
+{
+    _11 = M._11; _12 = M._12; _13 = M._13;
+    _21 = M._21; _22 = M._22; _23 = M._23;
+    _31 = M._31; _32 = M._32; _33 = M._33;
+    return *this;
+}
+
+inline Matrix2D& Matrix2D::operator+= (const Matrix2D& M) noexcept
+{
+    using namespace DirectX;
+    XMVECTOR x1 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&_11));
+    XMVECTOR x2 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&_21));
+    XMVECTOR x3 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&_31));
+
+    XMVECTOR y1 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&M._11));
+    XMVECTOR y2 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&M._21));
+    XMVECTOR y3 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&M._31));
+
+    x1 = XMVectorAdd(x1, y1);
+    x2 = XMVectorAdd(x2, y2);
+    x3 = XMVectorAdd(x3, y3);
+
+    XMStoreFloat3(reinterpret_cast<XMFLOAT3*>(&_11), x1);
+    XMStoreFloat3(reinterpret_cast<XMFLOAT3*>(&_21), x2);
+    XMStoreFloat3(reinterpret_cast<XMFLOAT3*>(&_31), x3);
+    return *this;
+}
+
+inline Matrix2D& Matrix2D::operator-= (const Matrix2D& M) noexcept
+{
+    using namespace DirectX;
+    XMVECTOR x1 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&_11));
+    XMVECTOR x2 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&_21));
+    XMVECTOR x3 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&_31));
+
+    XMVECTOR y1 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&M._11));
+    XMVECTOR y2 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&M._21));
+    XMVECTOR y3 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&M._31));
+
+    x1 = XMVectorSubtract(x1, y1);
+    x2 = XMVectorSubtract(x2, y2);
+    x3 = XMVectorSubtract(x3, y3);
+
+    XMStoreFloat3(reinterpret_cast<XMFLOAT3*>(&_11), x1);
+    XMStoreFloat3(reinterpret_cast<XMFLOAT3*>(&_21), x2);
+    XMStoreFloat3(reinterpret_cast<XMFLOAT3*>(&_31), x3);
+    return *this;
+}
+
+inline Matrix2D& Matrix2D::operator*= (const Matrix2D& M) noexcept
+{
+    using namespace DirectX;
+    XMMATRIX M1 = XMLoadFloat3x3(this);
+    XMMATRIX M2 = XMLoadFloat3x3(&M);
+    XMMATRIX X = XMMatrixMultiply(M1, M2);
+    XMStoreFloat3x3(this, X);
+    return *this;
+}
+
+inline Matrix2D& Matrix2D::operator*= (float S) noexcept
+{
+    using namespace DirectX;
+    XMVECTOR x1 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&_11));
+    XMVECTOR x2 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&_21));
+    XMVECTOR x3 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&_31));
+
+    x1 = XMVectorScale(x1, S);
+    x2 = XMVectorScale(x2, S);
+    x3 = XMVectorScale(x3, S);
+
+    XMStoreFloat3(reinterpret_cast<XMFLOAT3*>(&_11), x1);
+    XMStoreFloat3(reinterpret_cast<XMFLOAT3*>(&_21), x2);
+    XMStoreFloat3(reinterpret_cast<XMFLOAT3*>(&_31), x3);
+    return *this;
+}
+
+inline Matrix2D& Matrix2D::operator/= (float S) noexcept
+{
+    using namespace DirectX;
+    assert(S != 0.f);
+    XMVECTOR x1 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&_11));
+    XMVECTOR x2 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&_21));
+    XMVECTOR x3 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&_31));
+
+    float rs = 1.f / S;
+
+    x1 = XMVectorScale(x1, rs);
+    x2 = XMVectorScale(x2, rs);
+    x3 = XMVectorScale(x3, rs);
+
+    XMStoreFloat3(reinterpret_cast<XMFLOAT3*>(&_11), x1);
+    XMStoreFloat3(reinterpret_cast<XMFLOAT3*>(&_21), x2);
+    XMStoreFloat3(reinterpret_cast<XMFLOAT3*>(&_31), x3);
+    return *this;
+}
+
+inline Matrix2D& Matrix2D::operator/= (const Matrix2D& M) noexcept
+{
+    using namespace DirectX;
+    XMVECTOR x1 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&_11));
+    XMVECTOR x2 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&_21));
+    XMVECTOR x3 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&_31));
+
+    XMVECTOR y1 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&M._11));
+    XMVECTOR y2 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&M._21));
+    XMVECTOR y3 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&M._31));
+
+    x1 = XMVectorDivide(x1, y1);
+    x2 = XMVectorDivide(x2, y2);
+    x3 = XMVectorDivide(x3, y3);
+
+    XMStoreFloat3(reinterpret_cast<XMFLOAT3*>(&_11), x1);
+    XMStoreFloat3(reinterpret_cast<XMFLOAT3*>(&_21), x2);
+    XMStoreFloat3(reinterpret_cast<XMFLOAT3*>(&_31), x3);
+    return *this;
+}
+
+inline Matrix2D Matrix2D::operator- () const noexcept
+{
+    using namespace DirectX;
+    XMVECTOR v1 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&_11));
+    XMVECTOR v2 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&_21));
+    XMVECTOR v3 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&_31));
+
+    v1 = XMVectorNegate(v1);
+    v2 = XMVectorNegate(v2);
+    v3 = XMVectorNegate(v3);
+
+    Matrix2D R;
+    XMStoreFloat3(reinterpret_cast<XMFLOAT3*>(&R._11), v1);
+    XMStoreFloat3(reinterpret_cast<XMFLOAT3*>(&R._21), v2);
+    XMStoreFloat3(reinterpret_cast<XMFLOAT3*>(&R._31), v3);
+    return R;
+}
+
+inline Matrix2D operator+ (const Matrix2D& M1, const Matrix2D& M2) noexcept
+{
+    using namespace DirectX;
+    XMVECTOR x1 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&M1._11));
+    XMVECTOR x2 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&M1._21));
+    XMVECTOR x3 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&M1._31));
+
+    XMVECTOR y1 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&M2._11));
+    XMVECTOR y2 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&M2._21));
+    XMVECTOR y3 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&M2._31));
+
+    x1 = XMVectorAdd(x1, y1);
+    x2 = XMVectorAdd(x2, y2);
+    x3 = XMVectorAdd(x3, y3);
+
+    Matrix2D R;
+    XMStoreFloat3(reinterpret_cast<XMFLOAT3*>(&R._11), x1);
+    XMStoreFloat3(reinterpret_cast<XMFLOAT3*>(&R._21), x2);
+    XMStoreFloat3(reinterpret_cast<XMFLOAT3*>(&R._31), x3);
+    return R;
+}
+
+inline Matrix2D operator- (const Matrix2D& M1, const Matrix2D& M2) noexcept
+{
+    using namespace DirectX;
+    XMVECTOR x1 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&M1._11));
+    XMVECTOR x2 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&M1._21));
+    XMVECTOR x3 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&M1._31));
+
+    XMVECTOR y1 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&M2._11));
+    XMVECTOR y2 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&M2._21));
+    XMVECTOR y3 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&M2._31));
+
+    x1 = XMVectorSubtract(x1, y1);
+    x2 = XMVectorSubtract(x2, y2);
+    x3 = XMVectorSubtract(x3, y3);
+
+    Matrix2D R;
+    XMStoreFloat3(reinterpret_cast<XMFLOAT3*>(&R._11), x1);
+    XMStoreFloat3(reinterpret_cast<XMFLOAT3*>(&R._21), x2);
+    XMStoreFloat3(reinterpret_cast<XMFLOAT3*>(&R._31), x3);
+    return R;
+}
+
+inline Matrix2D operator* (const Matrix2D& M1, const Matrix2D& M2) noexcept
+{
+    using namespace DirectX;
+    XMMATRIX m1 = XMLoadFloat3x3(&M1);
+    XMMATRIX m2 = XMLoadFloat3x3(&M2);
+    XMMATRIX X = XMMatrixMultiply(m1, m2);
+
+    Matrix2D R;
+    XMStoreFloat3x3(&R, X);
+    return R;
+}
+
+inline Matrix2D operator* (const Matrix2D& M, float S) noexcept
+{
+    using namespace DirectX;
+    XMVECTOR x1 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&M._11));
+    XMVECTOR x2 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&M._21));
+    XMVECTOR x3 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&M._31));
+
+    x1 = XMVectorScale(x1, S);
+    x2 = XMVectorScale(x2, S);
+    x3 = XMVectorScale(x3, S);
+
+    Matrix2D R;
+    XMStoreFloat3(reinterpret_cast<XMFLOAT3*>(&R._11), x1);
+    XMStoreFloat3(reinterpret_cast<XMFLOAT3*>(&R._21), x2);
+    XMStoreFloat3(reinterpret_cast<XMFLOAT3*>(&R._31), x3);
+    return R;
+}
+
+inline Matrix2D operator/ (const Matrix2D& M, float S) noexcept
+{
+    using namespace DirectX;
+    assert(S != 0.f);
+
+    XMVECTOR x1 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&M._11));
+    XMVECTOR x2 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&M._21));
+    XMVECTOR x3 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&M._31));
+
+    float rs = 1.f / S;
+
+    x1 = XMVectorScale(x1, rs);
+    x2 = XMVectorScale(x2, rs);
+    x3 = XMVectorScale(x3, rs);
+
+    Matrix2D R;
+    XMStoreFloat3(reinterpret_cast<XMFLOAT3*>(&R._11), x1);
+    XMStoreFloat3(reinterpret_cast<XMFLOAT3*>(&R._21), x2);
+    XMStoreFloat3(reinterpret_cast<XMFLOAT3*>(&R._31), x3);
+    return R;
+}
+
+inline Matrix2D operator/ (const Matrix2D& M1, const Matrix2D& M2) noexcept
+{
+    using namespace DirectX;
+    XMVECTOR x1 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&M1._11));
+    XMVECTOR x2 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&M1._21));
+    XMVECTOR x3 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&M1._31));
+
+    XMVECTOR y1 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&M2._11));
+    XMVECTOR y2 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&M2._21));
+    XMVECTOR y3 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&M2._31));
+
+    x1 = XMVectorDivide(x1, y1);
+    x2 = XMVectorDivide(x2, y2);
+    x3 = XMVectorDivide(x3, y3);
+
+    Matrix2D R;
+    XMStoreFloat3(reinterpret_cast<XMFLOAT3*>(&R._11), x1);
+    XMStoreFloat3(reinterpret_cast<XMFLOAT3*>(&R._21), x2);
+    XMStoreFloat3(reinterpret_cast<XMFLOAT3*>(&R._31), x3);
+    return R;
+}
+
+inline Matrix2D operator* (float S, const Matrix2D& M) noexcept
+{
+    using namespace DirectX;
+
+    XMVECTOR x1 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&M._11));
+    XMVECTOR x2 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&M._21));
+    XMVECTOR x3 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&M._31));
+
+    x1 = XMVectorScale(x1, S);
+    x2 = XMVectorScale(x2, S);
+    x3 = XMVectorScale(x3, S);
+
+    Matrix2D R;
+    XMStoreFloat3(reinterpret_cast<XMFLOAT3*>(&R._11), x1);
+    XMStoreFloat3(reinterpret_cast<XMFLOAT3*>(&R._21), x2);
+    XMStoreFloat3(reinterpret_cast<XMFLOAT3*>(&R._31), x3);
+    return R;
+}
+
+bool Matrix2D::Decompose(Vec2& scale, Vec2& translation) const noexcept
+{
+    translation.x = _31;
+    translation.y = _32;
+
+    scale.x = sqrtf(_11 * _11 + _12 * _12);
+    scale.y = sqrtf(_21 * _21 + _22 * _22);
+
+    return scale.x >= FLT_EPSILON && scale.y >= FLT_EPSILON;
+}
+
+inline bool Matrix2D::Decompose(Vec2& scale, float& radians, Vec2& translation) const noexcept
+{
+    translation.x = _31;
+    translation.y = _32;
+
+    scale.x = sqrtf(_11 * _11 + _12 * _12);
+    scale.y = sqrtf(_21 * _21 + _22 * _22);
+
+    if (scale.x < FLT_EPSILON || scale.y < FLT_EPSILON)
+    {
+        return false;
+    }
+
+    radians = atan2f(_12 / scale.x, _11 / scale.x);
+    return true;
+}
+
+inline Matrix2D Matrix2D::Transpose() const noexcept
+{
+    Matrix2D result;
+    Transpose(result);
+    return result;
+}
+
+inline void Matrix2D::Transpose(Matrix2D& result) const noexcept
+{
+    using namespace DirectX;
+    XMMATRIX M = XMLoadFloat3x3(this);
+    XMStoreFloat3x3(&result, XMMatrixTranspose(M));
+}
+
+inline Matrix2D Matrix2D::Invert() const noexcept
+{
+    Matrix2D result;
+    Invert(result);
+    return result;
+}
+
+inline void Matrix2D::Invert(Matrix2D& result) const noexcept
+{
+    float det = Determinant();
+    assert(fabsf(det) > FLT_EPSILON);
+
+    float invDet = 1.0f / det;
+
+    result._11 = (_22 * _33 - _23 * _32) * invDet;
+    result._12 = (_13 * _32 - _12 * _33) * invDet;
+    result._13 = (_12 * _23 - _13 * _22) * invDet;
+
+    result._21 = (_23 * _31 - _21 * _33) * invDet;
+    result._22 = (_11 * _33 - _13 * _31) * invDet;
+    result._23 = (_13 * _21 - _11 * _23) * invDet;
+
+    result._31 = (_21 * _32 - _22 * _31) * invDet;
+    result._32 = (_12 * _31 - _11 * _32) * invDet;
+    result._33 = (_11 * _22 - _12 * _21) * invDet;
+}
+
+inline float Matrix2D::Determinant() const noexcept
+{
+    return
+        _11 * (_22 * _33 - _23 * _32) -
+        _12 * (_21 * _33 - _23 * _31) +
+        _13 * (_21 * _32 - _22 * _31);
+}
+
+Matrix2D Matrix2D::CreateTranslation(const Vec2& position) noexcept
+{
+    return Matrix2D{
+         1.f, 0.f, 0.f,
+         0.f, 1.f, 0.f,
+         position.x, position.y, 1.f,
+    };
+}
+
+Matrix2D Matrix2D::CreateTranslation(float x, float y) noexcept
+{
+    return Matrix2D{
+        1.f, 0.f, 0.f,
+        0.f, 1.f, 0.f,
+        x, y, 1.f,
+    };
+}
+
+Matrix2D Matrix2D::CreateScale(const Vec2& scales) noexcept
+{
+    return Matrix2D{
+        scales.x, 0.f, 0.f,
+        0.f, scales.y, 0.f,
+        0.f, 0.f, 1.f,
+    };
+}
+
+Matrix2D Matrix2D::CreateScale(float xs, float ys) noexcept
+{
+    return Matrix2D{
+        xs, 0.f, 0.f,
+        0.f, ys, 0.f,
+        0.f, 0.f, 1.f,
+    };
+}
+
+Matrix2D Matrix2D::CreateScale(float scale) noexcept
+{
+    return Matrix2D{
+        scale, 0.f, 0.f,
+        0.f, scale, 0.f,
+        0.f, 0.f, 1.f,
+    };
+}
+
+Matrix2D Matrix2D::CreateRotation(float radians) noexcept
+{
+    float cosAngle = std::cosf(radians);
+    float sinAngle = std::sinf(radians);
+
+    return Matrix2D{
+        cosAngle, sinAngle, 0.f,
+        -sinAngle, cosAngle, 0.f,
+        0.f, 0.f, 1.f,
+    };
+}
+
+void Matrix2D::Lerp(const Matrix2D& M1, const Matrix2D& M2, float t, Matrix2D& result) noexcept
+{
+    using namespace DirectX;
+    XMVECTOR x1 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&M1._11));
+    XMVECTOR x2 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&M1._21));
+    XMVECTOR x3 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&M1._31));
+
+    XMVECTOR y1 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&M2._11));
+    XMVECTOR y2 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&M2._21));
+    XMVECTOR y3 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&M2._31));
+
+    x1 = XMVectorLerp(x1, y1, t);
+    x2 = XMVectorLerp(x2, y2, t);
+    x3 = XMVectorLerp(x3, y3, t);
+
+    XMStoreFloat3(reinterpret_cast<XMFLOAT3*>(&result._11), x1);
+    XMStoreFloat3(reinterpret_cast<XMFLOAT3*>(&result._21), x2);
+    XMStoreFloat3(reinterpret_cast<XMFLOAT3*>(&result._31), x3);
+}
+
+Matrix2D Matrix2D::Lerp(const Matrix2D& M1, const Matrix2D& M2, float t) noexcept
+{
+    using namespace DirectX;
+    XMVECTOR x1 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&M1._11));
+    XMVECTOR x2 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&M1._21));
+    XMVECTOR x3 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&M1._31));
+
+    XMVECTOR y1 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&M2._11));
+    XMVECTOR y2 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&M2._21));
+    XMVECTOR y3 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&M2._31));
+
+    x1 = XMVectorLerp(x1, y1, t);
+    x2 = XMVectorLerp(x2, y2, t);
+    x3 = XMVectorLerp(x3, y3, t);
+
+    Matrix2D result;
+    XMStoreFloat3(reinterpret_cast<XMFLOAT3*>(&result._11), x1);
+    XMStoreFloat3(reinterpret_cast<XMFLOAT3*>(&result._21), x2);
+    XMStoreFloat3(reinterpret_cast<XMFLOAT3*>(&result._31), x3);
+    return result;
+}
+
+void Matrix2D::Transform(const Matrix2D& M, float radians, Matrix2D& result) noexcept
+{
+    result = M * CreateRotation(radians);
+}
+
+Matrix2D Matrix2D::Transform(const Matrix2D& M, float radians) noexcept
+{
+    Matrix2D result;
+    Transform(M, radians, result);
+    return result;
+}
+
+Vec3 Quat::ToYawPitchRoll()
+{
+    Vec3 angles;
+
+    // roll
+    double sinr_cosp = 2 * (w * x + y * z);
+    double cosr_cosp = 1 - 2 * (x * x + y * y);
+    angles.x = static_cast<float>(std::atan2(sinr_cosp, cosr_cosp));
+
+    // pitch
+    double sinp = std::sqrt(1 + 2 * (w * y - x * z));
+    double cosp = std::sqrt(1 - 2 * (w * y - x * z));
+    angles.y = static_cast<float>(2 * std::atan2(sinp, cosp) - DirectX::XM_PI / 2);
+
+    // yaw
+    double siny_cosp = 2 * (w * z + x * y);
+    double cosy_cosp = 1 - 2 * (y * y + z * z);
+    angles.z = static_cast<float>(std::atan2(siny_cosp, cosy_cosp));
+
+    return angles;
+}
 
 inline bool Plane::Contains(const Vec3& point) const noexcept
 {
@@ -92,7 +616,7 @@ bool Line::Contains(const Vec3& point) const noexcept
 
 bool Line::Intersects(const Plane& plane) const noexcept
 {
-    plane.Intersects(*this);
+    return plane.Intersects(*this);
 }
 
 bool Triangle::Contains(const Vec3& point) const noexcept
@@ -154,7 +678,7 @@ inline bool BoundingAABB2D::Intersects(const BoundingOBB2D& obb) const noexcept
     return false;
 }
 
-void BoundingAABB2D::GetConners(OUT Vec2* c) const
+void BoundingAABB2D::GetCorners(OUT Vec2* c) const
 {
     c[0].x = (float)x;
     c[0].y = (float)y;
@@ -169,9 +693,9 @@ void BoundingAABB2D::GetConners(OUT Vec2* c) const
     c[3].y = (float)y + (float)height;
 }
 
-void BoundingAABB2D::GetConners(OUT std::vector<Vec2>& c) const
+void BoundingAABB2D::GetCorners(OUT std::vector<Vec2>& c) const
 {
-    GetConners(c.data());
+    GetCorners(c.data());
 }
 
 inline Vec2 BoundingOBB2D::Location() const noexcept
@@ -187,7 +711,7 @@ inline Vec2 BoundingOBB2D::Center() const noexcept
     return Vec2((float)centerX, (float)centerY);
 }
 
-void BoundingOBB2D::GetConners(OUT Vec2* c) const
+void BoundingOBB2D::GetCorners(OUT Vec2* c) const
 {
     Vec2 hx = axisX * (float)halfWidth;
     Vec2 hy = axisY * (float)halfHeight;
@@ -199,9 +723,9 @@ void BoundingOBB2D::GetConners(OUT Vec2* c) const
     c[3] = center - hx + hy;
 }
 
-void BoundingOBB2D::GetConners(OUT std::vector<Vec2>& c) const
+void BoundingOBB2D::GetCorners(OUT std::vector<Vec2>& c) const
 {
-    GetConners(c.data());
+    GetCorners(c.data());
 }
 
 inline bool BoundingOBB2D::Contains(const Vec2& point) const noexcept
@@ -215,7 +739,7 @@ inline bool BoundingOBB2D::Contains(const Vec2& point) const noexcept
 bool BoundingOBB2D::Contains(const BoundingAABB2D& r) const noexcept
 {
     Vec2 otherCorners[4];
-    r.GetConners(otherCorners);
+    r.GetCorners(otherCorners);
 
     for (int i = 0; i < 4; ++i)
     {
@@ -249,7 +773,7 @@ bool BoundingOBB2D::Contains(const RECT& rct) const noexcept
 bool BoundingOBB2D::Contains(const BoundingOBB2D& obb) const noexcept
 {
     Vec2 otherCorners[4];
-    obb.GetConners(otherCorners);
+    obb.GetCorners(otherCorners);
 
     for (int i = 0; i < 4; ++i)
     {
@@ -324,3 +848,22 @@ bool BoundingOBB2D::Intersects(const BoundingOBB2D& obb) const noexcept
 
     return true;
 }
+
+BoundingAABB2D BoundingOBB2D::ToBoundingAABB2D() const
+{
+    Vec2 corners[4];
+    GetCorners(corners);
+
+    Interval<Vec2> aabbSize;
+    for (int32 i = 1; i < 4; ++i)
+    {
+        aabbSize.mMin.x = std::min<float>(aabbSize.mMin.x, corners[i].x);
+        aabbSize.mMin.y = std::min<float>(aabbSize.mMin.y, corners[i].y);
+        aabbSize.mMax.x = std::max<float>(aabbSize.mMax.x, corners[i].x);
+        aabbSize.mMax.y = std::max<float>(aabbSize.mMax.y, corners[i].y);
+    }
+
+    return BoundingAABB2D(static_cast<long>(aabbSize.mMin.x), static_cast<long>(aabbSize.mMin.y), static_cast<long>(aabbSize.mMax.x - aabbSize.mMin.x), static_cast<long>(aabbSize.mMax.y - aabbSize.mMin.y));
+}
+
+

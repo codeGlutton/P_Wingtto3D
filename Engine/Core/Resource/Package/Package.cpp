@@ -184,6 +184,12 @@ void Package::CreateEmptyObjects(std::shared_ptr<ObjectLinker> linker)
 	}
 }
 
+std::shared_ptr<Object> Package::RequestToCreateObject(const ObjectTypeInfo* typeInfo, ObjectCreateFlag::Type flags)
+{
+	std::wstring typeName = ConvertUtf8ToWString(typeInfo->GetName());
+	return NewObject(std::static_pointer_cast<Package>(shared_from_this()), typeInfo, typeName, flags);
+}
+
 void AppWindowPackage::RegisterPackage()
 {
 	Super::RegisterPackage();
@@ -192,7 +198,15 @@ void AppWindowPackage::RegisterPackage()
 
 std::shared_ptr<Object> AppWindowPackage::RequestToCreateObject(const ObjectTypeInfo* typeInfo, ObjectCreateFlag::Type flags)
 {
-	return APP_WIN_MANAGER->CreateAppWindow(nullptr, typeInfo, flags);
+	if (typeInfo->IsChildOf<AppWindow>() == true)
+	{
+		return APP_WIN_MANAGER->CreateAppWindow(nullptr, typeInfo, flags);
+	}
+	else if (typeInfo->IsChildOf<Widget>() == true)
+	{
+		return APP_WIN_MANAGER->CreateAppWindowWidget(nullptr, typeInfo, flags);
+	}
+	return Super::RequestToCreateObject(typeInfo, flags);
 }
 
 void ResourcePreviewPackage::RegisterPackage()

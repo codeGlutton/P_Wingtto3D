@@ -4,6 +4,8 @@
 
 #include "Manager/PathManager.h"
 #include "Manager/PackageManager.h"
+#include "Manager/RenderManager.h"
+#include "Manager/TimeManager.h"
 
 #include "Core/Archive.h"
 #include "Core/ObjectLinker.h"
@@ -21,6 +23,19 @@ void AppWindowManager::Init()
 	Load();
 }
 
+void AppWindowManager::Update()
+{
+	std::shared_ptr<AppWindow> focusedWindow = GetFocusWindow();
+	if (focusedWindow != nullptr && focusedWindow->IsValid() == true)
+	{
+		focusedWindow->PrepassWindow();
+		std::shared_ptr<WindowRenderElementContainer> container = RENDER_MANAGER->GetWidgetBuffer().GetContainer(focusedWindow);
+		focusedWindow->PaintWindow(OUT container, TIME_MANAGER->GetDeltaTime());
+
+		RENDER_MANAGER->DrawWindow();
+	}
+}
+
 void AppWindowManager::Destroy()
 {
 	Save();
@@ -31,20 +46,28 @@ void AppWindowManager::Destroy()
 std::shared_ptr<AppWindow> AppWindowManager::CreateAppWindow(std::shared_ptr<AppWindow> owner, const ObjectTypeInfo* typeInfo, ObjectCreateFlag::Type flags)
 {
 	ASSERT_MSG(typeInfo->IsChildOf<AppWindow>() == true, "CreateAppWindow func is not allowed to create non AppWindow class");
-	if (owner == nullptr && GetMainWindow() != nullptr)
-	{
-		// 이미 메인 윈도우가 있는 상황
-		return nullptr;
-	}
 
-	std::wstring typeName = ConvertUtf8ToWString(typeInfo->GetName());
-	std::shared_ptr<AppWindow> appWindow = std::static_pointer_cast<AppWindow>(NewObject(_mPackage, typeInfo, typeName, flags));
+	std::shared_ptr<AppWindow> appWindow = std::static_pointer_cast<AppWindow>(CreateAppWindowWidget(nullptr, typeInfo, flags));
 	if (appWindow == nullptr)
 	{
 		return nullptr;
 	}
 	appWindow->_mOwner = owner;
 	return appWindow;
+}
+
+std::shared_ptr<Widget> AppWindowManager::CreateAppWindowWidget(std::shared_ptr<Widget> parent, const ObjectTypeInfo* typeInfo, ObjectCreateFlag::Type flags)
+{
+	ASSERT_MSG(typeInfo->IsChildOf<Widget>() == true, "CreateAppWindowWidget func is not allowed to create non Widget class");
+
+	std::wstring typeName = ConvertUtf8ToWString(typeInfo->GetName());
+	std::shared_ptr<Widget> widget = std::static_pointer_cast<Widget>(NewObject(_mPackage, typeInfo, typeName, flags));
+	if (widget == nullptr)
+	{
+		return nullptr;
+	}
+	widget->_mParent = parent;
+	return widget;
 }
 
 void AppWindowManager::RegisterPackage(std::shared_ptr<Package> package)
@@ -93,21 +116,55 @@ void AppWindowManager::NotifyToCloseAppWindow(HWND hWnd)
 
 void AppWindowManager::NotifyToChangeFocus(HWND hWnd)
 {
+	if (_mFocusHWnd == hWnd)
+	{
+		return;
+	}
+
 	if (GetFocusWindow() != nullptr)
 	{
-		GetFocusWindow()->EndFocus();
+		GetFocusWindow()->OnEndFocus();
 	}
 	_mFocusHWnd = hWnd;
 	if (GetFocusWindow() != nullptr)
 	{
-		GetFocusWindow()->BeginFocus();
+		GetFocusWindow()->OnBeginFocus();
 	}
 	mOnChangeFocus.Multicast(GetFocusWindow());
+}
+
+void AppWindowManager::NotifyToChangeFocus(std::shared_ptr<Widget> widget)
+{
+	std::shared_ptr<AppWindow> preFocusedWindow = GetFocusWindow();
+	std::shared_ptr<AppWindow> nextFocusedWindow = widget->GetRootWindow();
+
+	if (preFocusedWindow == nextFocusedWindow)
+	{
+		if (nextFocusedWindow != nullptr)
+		{
+			nextFocusedWindow->ChangeFocusWidget(widget);
+		}
+	}
+	else if (nextFocusedWindow != nullptr)
+	{
+		FLASHWINFO flashWin = {};
+		flashWin.cbSize = sizeof(FLASHWINFO);
+		flashWin.hwnd = nextFocusedWindow->GetDesc().mHWndRef->mData;
+		flashWin.dwFlags = FLASHW_TRAY;
+		flashWin.uCount = 3;
+		::FlashWindowEx(&flashWin);
+	}
 }
 
 void AppWindowManager::NotifyToChangeAppActivation(bool isActive)
 {
 	_mIsActiveApp = isActive;
+}
+
+void AppWindowManager::NotifyToMove(HWND hWnd)
+{
+	ASSERT_MSG(_mAppWindows.find(hWnd) != _mAppWindows.end(), "Trying to move empty app window");
+	_mAppWindows[hWnd]->OnMove();
 }
 
 void AppWindowManager::NotifyToResize(HWND hWnd, bool isWindowed, RECT clientSize)

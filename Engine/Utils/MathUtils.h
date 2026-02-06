@@ -6,6 +6,15 @@ float GetRandomFloat(float min, float max);
 Vec2 GetRandomVec2(float min, float max);
 Vec3 GetRandomVec3(float min, float max);
 
+/* 배열 */
+
+template<typename T>
+void SwapAndRemove(std::vector<T>& vector, std::size_t index)
+{
+	std::swap(vector[index], vector.back());
+	vector.pop_back();
+}
+
 /* 단위 */
 
 bool IsNearlyZero(float target);
@@ -15,6 +24,11 @@ bool IsNearlyZero(const Vec4& target);
 bool IsNearlyZero(const Quat& target);
 bool IsNearlyZero(const Color& target);
 
+float ConvertRotationToRadian(float rotation);
+Vec3 ConvertRotationToRadian(Vec3 rotations);
+float ConvertRadianToRotation(float radian);
+Vec3 ConvertRadianToRotation(Vec3 radians);
+
 /* 기하 */
 
 template<typename T>
@@ -22,6 +36,130 @@ struct Interval
 {
 	T mMin;
 	T mMax;
+};
+
+template<typename T> requires std::is_integral_v<T>
+struct IntPoint
+{
+	using IntType = T;
+
+public:
+	IntPoint() = default;
+	IntPoint(T value) :
+		mX(value),
+		mY(value)
+	{
+	}
+	IntPoint(T x, T y) : 
+		mX(x),
+		mY(y)
+	{
+	}
+	template <typename U>
+	explicit IntPoint(IntPoint<U> other) :
+		mX(static_cast<IntType>(other.mX)),
+		mY(static_cast<IntType>(other.mY))
+	{
+	}
+
+	IntPoint(IntPoint&&) = default;
+	IntPoint(const IntPoint&) = default;
+
+public:
+	IntPoint& operator=(IntPoint&&) = default;
+	IntPoint& operator=(const IntPoint&) = default;
+
+	bool operator==(const IntPoint& other) const
+	{
+		return mX == other.mX && mY == other.mY;
+	}
+	bool operator!=(const IntPoint& other) const
+	{
+		return (mX != other.mX) || (mY != other.mY);
+	}
+
+	IntPoint operator*(IntType value) const
+	{
+		return IntPoint(*this) *= value;
+	}
+	IntPoint operator/(IntType value) const
+	{
+		return IntPoint(*this) /= value;
+	}
+	IntPoint operator+(const IntPoint& other) const
+	{
+		return IntPoint(*this) += other;
+	}
+	IntPoint operator-(const IntPoint& other) const
+	{
+		return IntPoint(*this) -= other;
+	}
+	IntPoint operator*(const IntPoint& other) const
+	{
+		return IntPoint(*this) *= other;
+	}
+	IntPoint operator/(const IntPoint& other) const
+	{
+		return IntPoint(*this) /= other;
+	}
+
+	IntPoint& operator*=(IntType value)
+	{
+		mX *= value;
+		mY *= value;
+		return *this;
+	}
+	IntPoint& operator/=(IntType value)
+	{
+		mX /= value;
+		mY /= value;
+		return *this;
+	}
+	IntPoint& operator+=(const IntPoint& other)
+	{
+		mX += other.mX;
+		mY += other.mY;
+		return *this;
+	}
+	IntPoint& operator*=(const IntPoint& other)
+	{
+		mX *= other.mX;
+		mY *= other.mY;
+		return *this;
+	}
+	IntPoint& operator-=(const IntPoint& other)
+	{
+		mX -= other.mX;
+		mY -= other.mY;
+		return *this;
+	}
+	IntPoint& operator/=(const IntPoint& other)
+	{
+		mX /= other.mX;
+		mY /= other.mY;
+		return *this;
+	}
+
+	IntType& operator[](IntType index)
+	{
+		ASSERT(index >= 0 && index < 2);
+		return ((index == 0) ? mX : mY);
+	}
+	IntType operator[](IntType index) const
+	{
+		ASSERT(index >= 0 && index < 2);
+		return ((index == 0) ? mX : mY);
+	}
+
+public:
+	union
+	{
+		struct {
+			IntType mX;
+			IntType mY;
+		};
+		IntType mXY[2];
+	};
 };
 
 struct Manifold

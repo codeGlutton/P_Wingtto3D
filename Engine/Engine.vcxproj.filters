@@ -52,9 +52,6 @@
     <Filter Include="Core\App">
       <UniqueIdentifier>{a29523b9-dc78-4f1c-8faa-73fc0c1351bf}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Widget">
-      <UniqueIdentifier>{1aaf3193-3eff-40e5-9cbd-01b508d7c594}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Core\App\AppWindow">
       <UniqueIdentifier>{b266870c-9519-451e-91c7-f0084b8476aa}</UniqueIdentifier>
     </Filter>
@@ -102,6 +99,21 @@
     </Filter>
     <Filter Include="Core\Collision">
       <UniqueIdentifier>{8ff7f20f-ac60-4fd7-8e43-5b1769fd181a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Graphics\Widget">
+      <UniqueIdentifier>{1aaf3193-3eff-40e5-9cbd-01b508d7c594}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Graphics\Widget\Slot">
+      <UniqueIdentifier>{141da37a-e9cc-4213-8e7b-9eaddaaf4867}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Graphics\Widget\Type">
+      <UniqueIdentifier>{19d05465-9248-4b49-996b-72ac36dd3b99}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Graphics\Render">
+      <UniqueIdentifier>{fedca82e-7803-4c74-9a3a-4f9705c0f2ce}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Graphics\VirtualWindow">
+      <UniqueIdentifier>{4b5ea240-5a2d-4ad8-9626-9cefce0d1e83}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -171,7 +183,7 @@
     <ClInclude Include="Manager\ObjectManager.h">
       <Filter>Manager\Factory</Filter>
     </ClInclude>
-    <ClInclude Include="Graphics\Viewport\SceneViewport.h">
+    <ClInclude Include="Graphics\Viewport\DXSceneViewport.h">
       <Filter>Graphics\Viewport</Filter>
     </ClInclude>
     <ClInclude Include="Graphics\Viewport\Viewport.h">
@@ -203,9 +215,6 @@
     </ClInclude>
     <ClInclude Include="Manager\AppWindowManager.h">
       <Filter>Manager\Factory</Filter>
-    </ClInclude>
-    <ClInclude Include="Graphics\Viewport\ViewportComposite.h">
-      <Filter>Graphics\Viewport</Filter>
     </ClInclude>
     <ClInclude Include="Utils\Memory\MemoryPool.h">
       <Filter>Utils\Memory</Filter>
@@ -254,9 +263,6 @@
     </ClInclude>
     <ClInclude Include="Utils\StringUtils.h">
       <Filter>Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="Graphics\Viewport\LogViewport.h">
-      <Filter>Graphics\Viewport</Filter>
     </ClInclude>
     <ClInclude Include="Graphics\Viewport\DXViewport.h">
       <Filter>Graphics\Viewport</Filter>
@@ -411,6 +417,75 @@
     <ClInclude Include="Core\Collision\CollisionInclude.h">
       <Filter>Core\Collision</Filter>
     </ClInclude>
+    <ClInclude Include="Graphics\Widget\Widget.h">
+      <Filter>Graphics\Widget</Filter>
+    </ClInclude>
+    <ClInclude Include="Input\InputState.h">
+      <Filter>Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Manager\WorldGameInputManager.h">
+      <Filter>Manager\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Manager\WorldManagerBase.h">
+      <Filter>Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\Widget\Slot\WidgetSlot.h">
+      <Filter>Graphics\Widget\Slot</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\Widget\CompoundWidget.h">
+      <Filter>Graphics\Widget</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\Widget\Type\ArrangedWidget.h">
+      <Filter>Graphics\Widget\Type</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\Widget\Type\HitTestGrid.h">
+      <Filter>Graphics\Widget\Type</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\Widget\Type\WidgetGeometry.h">
+      <Filter>Graphics\Widget\Type</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\Widget\Type\WidgetPath.h">
+      <Filter>Graphics\Widget\Type</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\Widget\Type\PaintArgs.h">
+      <Filter>Graphics\Widget\Type</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\Render\WidgetDrawBuffer.h">
+      <Filter>Graphics\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\Render\RenderInclude.h">
+      <Filter>Graphics\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\Widget\Type\WidgetBrush.h">
+      <Filter>Graphics\Widget\Type</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\VirtualWindow\VirtualWindow.h">
+      <Filter>Graphics\VirtualWindow</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\VirtualWindow\LogVirtualWindow.h">
+      <Filter>Graphics\VirtualWindow</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\VirtualWindow\VirtualWindowSplitter.h">
+      <Filter>Graphics\VirtualWindow</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\VirtualWindow\VirtualWindowContent.h">
+      <Filter>Graphics\VirtualWindow</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\Widget\PanelWidget.h">
+      <Filter>Graphics\Widget</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\Widget\Type\WidgetTypeInclude.h">
+      <Filter>Graphics\Widget\Type</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\Widget\Slot\WidgetSlotOption.h">
+      <Filter>Graphics\Widget\Slot</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\App\InputMessageData.h">
+      <Filter>Core\App</Filter>
+    </ClInclude>
+    <ClInclude Include="Input\InputEvent.h">
+      <Filter>Input</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\Object.cpp">
@@ -458,7 +533,7 @@
     <ClCompile Include="Manager\ObjectManager.cpp">
       <Filter>Manager\Factory</Filter>
     </ClCompile>
-    <ClCompile Include="Graphics\Viewport\SceneViewport.cpp">
+    <ClCompile Include="Graphics\Viewport\DXSceneViewport.cpp">
       <Filter>Graphics\Viewport</Filter>
     </ClCompile>
     <ClCompile Include="Graphics\Viewport\Viewport.cpp">
@@ -490,9 +565,6 @@
     </ClCompile>
     <ClCompile Include="Manager\AppWindowManager.cpp">
       <Filter>Manager\Factory</Filter>
-    </ClCompile>
-    <ClCompile Include="Graphics\Viewport\ViewportComposite.cpp">
-      <Filter>Graphics\Viewport</Filter>
     </ClCompile>
     <ClCompile Include="Utils\Memory\MemoryPool.cpp">
       <Filter>Utils\Memory</Filter>
@@ -535,9 +607,6 @@
     </ClCompile>
     <ClCompile Include="Utils\StringUtils.cpp">
       <Filter>Utils</Filter>
-    </ClCompile>
-    <ClCompile Include="Graphics\Viewport\LogViewport.cpp">
-      <Filter>Graphics\Viewport</Filter>
     </ClCompile>
     <ClCompile Include="Manager\RenderManager.cpp">
       <Filter>Manager\Framework</Filter>
@@ -676,6 +745,72 @@
     </ClCompile>
     <ClCompile Include="Core\Transform.cpp">
       <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\Widget\Widget.cpp">
+      <Filter>Graphics\Widget</Filter>
+    </ClCompile>
+    <ClCompile Include="Input\InputState.cpp">
+      <Filter>Input</Filter>
+    </ClCompile>
+    <ClCompile Include="Manager\WorldGameInputManager.cpp">
+      <Filter>Manager\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Manager\WorldManagerBase.cpp">
+      <Filter>Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\Widget\Slot\WidgetSlot.cpp">
+      <Filter>Graphics\Widget\Slot</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\Widget\CompoundWidget.cpp">
+      <Filter>Graphics\Widget</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\Widget\Type\ArrangedWidget.cpp">
+      <Filter>Graphics\Widget\Type</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\Widget\Type\HitTestGrid.cpp">
+      <Filter>Graphics\Widget\Type</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\Widget\Type\WidgetGeometry.cpp">
+      <Filter>Graphics\Widget\Type</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\Widget\Type\WidgetPath.cpp">
+      <Filter>Graphics\Widget\Type</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\Widget\Type\PaintArgs.cpp">
+      <Filter>Graphics\Widget\Type</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\Render\WidgetDrawBuffer.cpp">
+      <Filter>Graphics\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\Widget\Type\WidgetBrush.cpp">
+      <Filter>Graphics\Widget\Type</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\VirtualWindow\VirtualWindow.cpp">
+      <Filter>Graphics\VirtualWindow</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\VirtualWindow\LogVirtualWindow.cpp">
+      <Filter>Graphics\VirtualWindow</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\VirtualWindow\VirtualWindowSplitter.cpp">
+      <Filter>Graphics\VirtualWindow</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\VirtualWindow\VirtualWindowContent.cpp">
+      <Filter>Graphics\VirtualWindow</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\Widget\PanelWidget.cpp">
+      <Filter>Graphics\Widget</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\Widget\Type\WidgetTypeInclude.cpp">
+      <Filter>Graphics\Widget\Type</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\Widget\Slot\WidgetSlotOption.cpp">
+      <Filter>Graphics\Widget\Slot</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\App\InputMessageData.cpp">
+      <Filter>Core\App</Filter>
+    </ClCompile>
+    <ClCompile Include="Input\InputEvent.cpp">
+      <Filter>Input</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -5,19 +5,19 @@
 #include "Manager/ThreadManager.h"
 
 template<typename T>
-struct RefCountData
+struct ThreadSafeRefCountData
 {
 public:
-	RefCountData()
+	ThreadSafeRefCountData()
 	{
 	}
-	RefCountData(std::function<void(const T&)> destructor)
+	ThreadSafeRefCountData(std::function<void(const T&)> destructor)
 	{
 		_mDestructor = [this, destructor]() {
 			destructor(mData);
 			};
 	}
-	~RefCountData()
+	~ThreadSafeRefCountData()
 	{
 		if (_mDestructor != nullptr)
 		{
@@ -33,10 +33,10 @@ private:
 };
 
 template<typename T>
-using RefCounting = std::shared_ptr<RefCountData<T>>;
+using ThreadSafeRefCounting = std::shared_ptr<ThreadSafeRefCountData<T>>;
 
 template<typename T>
-RefCounting<T> CreateRefCounting(std::function<void(const T&)> destructor)
+ThreadSafeRefCounting<T> CreateRefCounting(std::function<void(const T&)> destructor)
 {
-	return std::make_shared<RefCountData<T>>(destructor);
+	return std::make_shared<ThreadSafeRefCountData<T>>(destructor);
 }

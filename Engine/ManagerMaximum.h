@@ -9,4 +9,5 @@
 #include "Manager/PathManager.h"
 #include "Manager/TimeManager.h"
 #include "Manager/InputManager.h"
+#include "Manager/WorldGameInputManager.h"
 

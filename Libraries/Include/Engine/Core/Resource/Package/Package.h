@@ -43,8 +43,8 @@ protected:
 	 */
 	void CreateEmptyObjects(std::shared_ptr<ObjectLinker> linker);
 
-private:
-	virtual std::shared_ptr<Object> RequestToCreateObject(const ObjectTypeInfo* typeInfo, ObjectCreateFlag::Type flags) = 0;
+protected:
+	virtual std::shared_ptr<Object> RequestToCreateObject(const ObjectTypeInfo* typeInfo, ObjectCreateFlag::Type flags);
 
 protected:
 	std::unordered_map<std::wstring, std::weak_ptr<Object>> _mChildSharedObjects;
@@ -57,7 +57,7 @@ class AppWindowPackage : public Package
 protected:
 	virtual void RegisterPackage() override;
 
-private:
+protected:
 	virtual std::shared_ptr<Object> RequestToCreateObject(const ObjectTypeInfo* typeInfo, ObjectCreateFlag::Type flags) override;
 };
 
@@ -68,7 +68,7 @@ class ResourcePreviewPackage : public Package
 protected:
 	virtual void RegisterPackage() override;
 
-private:
+protected:
 	virtual std::shared_ptr<Object> RequestToCreateObject(const ObjectTypeInfo* typeInfo, ObjectCreateFlag::Type flags) override;
 };
 

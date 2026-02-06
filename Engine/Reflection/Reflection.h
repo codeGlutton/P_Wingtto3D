@@ -15,6 +15,8 @@
 // 타입 정보 매크로
 #pragma region TYPE_INFO_MACROS
 
+#define DECLARE_VIRTUAL_TYPE virtual
+
 #define DECLARE_STRUCT_TYPE(type)	\
 public:								\
 	using Base = type;				\
@@ -75,15 +77,14 @@ public:
 		return *_mTypeInfo;										\
 	}
 
-
-#define GEN_STRUCT_REFLECTION_INTERNAL(type)					\
+#define GEN_STRUCT_REFLECTION_INTERNAL(type, virtual_type)		\
 public:															\
 	using Super = SuperDefineType<type>;						\
 	using This = type;											\
 	DECLARE_STRUCT_TYPE(type)									\
 																\
 public:															\
-	virtual const StructTypeInfo& GetTypeInfo() const			\
+	virtual_type const StructTypeInfo& GetTypeInfo() const		\
 	{															\
 		return *_mTypeInfo;										\
 	}															\
@@ -181,14 +182,14 @@ private:																							\
 	}																								\
 private:
 
-#define GEN_REFLECTION_INTERNAL(type)							\
+#define GEN_REFLECTION_INTERNAL(type, virtual_type)				\
 public:															\
 	using Super = SuperDefineType<type>;						\
 	using Interfaces = InterfaceDefineType<type>;				\
 	using This = type;											\
 																\
 public:															\
-	virtual const ObjectTypeInfo& GetTypeInfo() const			\
+	virtual_type const ObjectTypeInfo& GetTypeInfo() const		\
 	{															\
 		return *_mTypeInfo;										\
 	}															\
@@ -220,23 +221,25 @@ private:														\
 private:
 
 #define GEN_INTERFACE_REFLECTION_INTERNAL(type)			\
-	GEN_REFLECTION_INTERNAL(type)						\
+	GEN_REFLECTION_INTERNAL(type, DECLARE_VIRTUAL_TYPE)	\
 	DECLARE_ABSTRACT_TYPE(type)
 
 #define GEN_ABSTRACT_REFLECTION_INTERNAL(type)			\
-	GEN_REFLECTION_INTERNAL(type)						\
+	GEN_REFLECTION_INTERNAL(type, DECLARE_VIRTUAL_TYPE)	\
 	DECLARE_OBJECT_TYPE(type)							\
 	DECLARE_ABSTRACT_TYPE(type)
 
 #define GEN_OBJECT_REFLECTION_INTERNAL(type)			\
-	GEN_REFLECTION_INTERNAL(type)						\
+	GEN_REFLECTION_INTERNAL(type, DECLARE_VIRTUAL_TYPE)	\
 	DECLARE_OBJECT_TYPE(type)							\
 	DECLARE_NOT_ABSTRACT_TYPE(type)
 
 #define GEN_REFLECTION(...) GEN_OBJECT_REFLECTION_INTERNAL(__VA_ARGS__)
 #define GEN_INTERFACE_REFLECTION(...) GEN_INTERFACE_REFLECTION_INTERNAL(__VA_ARGS__)
 #define GEN_ABSTRACT_REFLECTION(...) GEN_ABSTRACT_REFLECTION_INTERNAL(__VA_ARGS__)
-#define GEN_STRUCT_REFLECTION(...) GEN_STRUCT_REFLECTION_INTERNAL(__VA_ARGS__)
+
+#define GEN_MINIMUM_STRUCT_REFLECTION(...) GEN_STRUCT_REFLECTION_INTERNAL(__VA_ARGS__, )
+#define GEN_STRUCT_REFLECTION(...) GEN_STRUCT_REFLECTION_INTERNAL(__VA_ARGS__, DECLARE_VIRTUAL_TYPE)
 
 #pragma endregion
 // 타입 정보 매크로

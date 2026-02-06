@@ -237,7 +237,7 @@ void PointerTypeInfo<T>::Serialize(OUT Archive& archive, const void* inst) const
 	const T* const& instRef = *reinterpret_cast<const T* const*>(inst);
 
 	// 패키징 명 쓰기
-	const std::wstring* packagePath = GetObjectPath(reinterpret_cast<Object*>(GetInstancePackage(instRef).get()));
+	const std::wstring* packagePath = GetObjectPath(reinterpret_cast<Object*>(GetInstancePackage(inst).get()));
 	TypeInfoResolver<std::wstring>::Get().Serialize(archive, packagePath);
 
 	// 풀 주소 쓰기
@@ -291,11 +291,11 @@ void SharedPointerTypeInfo<T>::Serialize(OUT Archive& archive, const void* inst)
 	const std::shared_ptr<T>& instRef = *reinterpret_cast<const std::shared_ptr<T>*>(inst);
 
 	// 패키징 명 쓰기
-	const std::wstring* packagePath = GetObjectPath(reinterpret_cast<Object*>(GetInstancePackage(instRef.get()).get()));
+	const std::wstring* packagePath = GetObjectPath(reinterpret_cast<Object*>(GetInstancePackage(inst).get()));
 	TypeInfoResolver<std::wstring>::Get().Serialize(archive, packagePath);
 
 	// 풀 주소 쓰기
-	const std::wstring* objectFullPath = GetObjectFullPath(reinterpret_cast<Object*>(instRef.get()));
+	const std::wstring* objectFullPath = GetObjectFullPath(reinterpret_cast<const Object*>(instRef.get()));
 	TypeInfoResolver<std::wstring>::Get().Serialize(archive, objectFullPath);
 }
 
@@ -345,7 +345,7 @@ void WeakPointerTypeInfo<T>::Serialize(OUT Archive& archive, const void* inst) c
 	const std::shared_ptr<T> sharedInstRef = (*reinterpret_cast<const std::weak_ptr<T>*>(inst)).lock();
 
 	// 패키징 명 쓰기
-	const std::wstring* packagePath = GetObjectPath(reinterpret_cast<Object*>(GetInstancePackage(sharedInstRef.get()).get()));
+	const std::wstring* packagePath = GetObjectPath(reinterpret_cast<Object*>(GetInstancePackage(inst).get()));
 	TypeInfoResolver<std::wstring>::Get().Serialize(archive, packagePath);
 
 	// 풀 주소 쓰기

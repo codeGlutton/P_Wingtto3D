@@ -56,7 +56,7 @@ private:
 	void CreateDepthStencilView();
 
 private:
-	RefCounting<HWND> _mHWnd;
+	ThreadSafeRefCounting<HWND> _mHWnd;
 	uint32 _mWidth;
 	uint32 _mHeight;
 	bool _mIsWindowed;

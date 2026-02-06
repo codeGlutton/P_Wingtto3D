@@ -1,17 +1,22 @@
 ﻿#pragma once
 
-#include "Core/Object.h"
-#include "Graphics/Viewport/Viewport.h"
+#include "Graphics/Widget/CompoundWidget.h"
 #include "GraphicMinimum.h"
 
-#include "Manager/TimeManager.h"
 #include "Utils/Thread/RefCounting.h"
+
+#include "Graphics/Widget/Type/HitTestGrid.h"
+
+class WidgetPath;
+class VirtualWindow;
+struct ArrangedWidget;
+struct WindowRenderElementContainer;
 
 struct AppWindowDesc
 {
 	GEN_STRUCT_REFLECTION(AppWindowDesc)
 
-	RefCounting<HWND> mHWndRef = nullptr;
+	ThreadSafeRefCounting<HWND> mHWndRef = nullptr;
 	PROPERTY(mWidth)
 	float mWidth = 1280.f;
 	PROPERTY(mHeight)
@@ -21,6 +26,11 @@ struct AppWindowDesc
 	PROPERTY(mWindowed)
 	bool mWindowed = true;
 
+	PROPERTY(mOffsetX)
+	uint32 mOffsetX = CW_USEDEFAULT;
+	PROPERTY(mOffsetY)
+	uint32 mOffsetY = 0;
+
 	std::wstring mName = L"";
 	float mClientWidth;
 	float mClientHeight;
@@ -29,9 +39,9 @@ struct AppWindowDesc
 /**
  * 윈도우 창 객체. 내부 viewport는 렌더 스레드가 관리
  */
-class AppWindow abstract : public InterfaceReflector<Object, IUpdatable>
+class AppWindow : public CompoundWidget
 {
-	GEN_ABSTRACT_REFLECTION(AppWindow)
+	GEN_REFLECTION(AppWindow)
 
 	friend class AppWindowManager;
 
@@ -44,16 +54,18 @@ protected:
 
 protected:
 	bool InitWindow();
-	virtual void CreateRootViewport() = 0;
+	virtual void CreateRootVirtualWindow();
 	void ShowWindow();
 
 protected:
-	virtual void Update(float deltaTime) override;
-	virtual void FixedUpdate() override;
+	virtual void Update(const WidgetGeometry& screenGeometry, float deltaTime) override;
 
 protected:
-	void BeginFocus();
-	void EndFocus();
+	void PrepassWindow();
+	void PaintWindow(OUT std::shared_ptr<WindowRenderElementContainer> container, float deltaTime);
+
+protected:
+	virtual void OnMove();
 	virtual void OnResize(bool isWindowed, const RECT& clientSize);
 
 public:
@@ -69,25 +81,37 @@ public:
 	{
 		return _mOwner.lock() == nullptr;
 	}
+	float GetDPIScale() const
+	{
+		return ::GetDpiForWindow(_mDesc.mHWndRef->mData) / 96.f;
+	}
 
 public:
-	//void Picking();
+	std::shared_ptr<Widget> GetFocusWidget() const
+	{
+		return _mFocusWidget.lock();
+	}
+	void ChangeFocusWidget(std::shared_ptr<Widget> widget);
+
+public:
+	virtual void OnBeginFocus() override;
+	virtual void OnEndFocus() override;
+
+public:
+	bool IsContainScreenPos(POINT pos) const;
+	void GetWidgetUnderScreenPos(POINT pos, OUT ArrangedWidget& arrangedWidget) const;
+	void GetWidgetPathUnderScreenPos(POINT pos, OUT WidgetPath& path) const;
 
 private:
 	PROPERTY(_mDesc)
 	AppWindowDesc _mDesc;
 
-private:
 	// 부모 객체
 	PROPERTY(_mOwner)
 	std::weak_ptr<AppWindow> _mOwner;
 
-protected:
-	PROPERTY(_mRootViewport)
-	std::shared_ptr<Viewport> _mRootViewport;
-
 private:
-	std::shared_ptr<UpdateTargetContext> _mUpdateContext;
-	bool _mNeedSizeUpdate = false;
+	std::weak_ptr<Widget> _mFocusWidget;
+	std::unique_ptr<HitTestGrid> _mHitTestGrid;
 };
 

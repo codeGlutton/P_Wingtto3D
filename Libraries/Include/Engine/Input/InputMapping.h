@@ -25,7 +25,7 @@ class InputMappingContext : public Object
 {
 	GEN_REFLECTION(InputMappingContext)
 
-	friend class InputManager;
+	friend class WorldGameInputManager;
 
 protected:
 	PROPERTY(_mMappings)

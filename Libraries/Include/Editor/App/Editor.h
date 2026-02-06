@@ -9,6 +9,7 @@ class Editor : public AppModeBase
 {
 public:
 	using BuildConstraint = AppBuildConstraint<AppBuildTargetFlag::Editor | AppBuildTargetFlag::DebugAndRelease>;
+	//using DefaultWindow = AppWindow;
 
 public:
 	Editor();

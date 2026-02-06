@@ -1,7 +1,7 @@
 ﻿#include "pch.h"
 #include "Logger.h"
 
-#include "Graphics/Viewport/LogViewport.h"
+#include "Graphics/VirtualWindow/LogVirtualWindow.h"
 
 void Logger::PrintLogs(std::shared_ptr<LogViewport> viewport) const
 {

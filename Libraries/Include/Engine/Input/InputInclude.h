@@ -4,6 +4,8 @@
 #include <limits.h>
 #include <Xinput.h>
 #include <dinput.h>
+#include <unordered_set>
+#include <unordered_map>
 
 #define WIN_INPUT_COUNT (UCHAR_MAX + 1)
 #define DINPUT_COUNT (UCHAR_MAX + 1)
@@ -108,5 +110,50 @@ namespace KeyType
 		GpadX,
 		GpadY,
 	};
+
+	enum Modifier : uint8
+	{
+		Alt = KeyBoard::LAlt | KeyBoard::RAlt,
+		Ctrl = KeyBoard::LCtrl | KeyBoard::RCtrl,
+		Shift = KeyBoard::LShift | KeyBoard::RShift
+	};
 }
 
+namespace KeyState
+{
+	enum Type : uint8
+	{
+		None = 0xFF,
+		Press = 0,
+		Hold,
+		Release,
+		Trigger,
+		Count
+	};
+}
+
+enum class KeyValueType
+{
+	Bool,
+	Float,
+	Vec2,
+};
+
+struct KeyInfo
+{
+	KeyType::Type mType;
+	KeyValueType mKeyValueType;
+
+	bool operator==(const KeyInfo& other) const {
+		return mType == other.mType;
+	}
+};
+
+namespace std {
+	template<>
+	struct hash<KeyInfo> {
+		size_t operator()(const KeyInfo& member) const noexcept {
+			return std::hash<uint8>{}(static_cast<uint8>(member.mType));
+		}
+	};
+}

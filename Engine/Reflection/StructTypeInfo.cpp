@@ -109,7 +109,7 @@ void StructTypeInfo::Serialize(OUT Archive& archive, const void* inst) const
 
 void StructTypeInfo::Deserialize(Archive& archive, OUT void* inst) const
 {
-	// 프로퍼티 갯수 저장
+	// 프로퍼티 갯수 로드
 	std::size_t propertyCount;
 	TypeInfoResolver<std::size_t>::Get().Deserialize(archive, &propertyCount);
 

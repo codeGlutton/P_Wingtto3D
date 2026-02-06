@@ -37,6 +37,11 @@ float TimeManager::GetFixedDeltaTime() const
 	return _mFixedDeltaTime;
 }
 
+double TimeManager::GetPlayTime() const
+{
+	return _mPlayTimeAcc;
+}
+
 uint64 TimeManager::GetRenderFrameNumber() const
 {
 	return _mRenderFrameNumber.load();
@@ -131,6 +136,7 @@ void TimeManager::UpdateTime()
 	++_mFrameCount;
 	_mFrameTimeAcc += _mDeltaTime;
 	_mFixedTimeAcc += _mDeltaTime;
+	_mPlayTimeAcc += _mDeltaTime;
 
 	// 초당 몇 프레임이 나왔는가 계산
 	if (_mFrameTimeAcc > 1.f)

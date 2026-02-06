@@ -3,7 +3,7 @@
 
 #include "Input/DefaultEditorInputMappingContext.h"
 
-#include "Manager/InputManager.h"
+#include "Manager/WorldGameInputManager.h"
 
 Editor::Editor()
 {
@@ -30,7 +30,7 @@ void Editor::End()
 
 void Editor::BeginThread()
 {
-	INPUT_MANAGER->AddMappingContext(&DefaultEditorInputMappingContext::GetStaticTypeInfo(), 0);
+	WORLD_INPUT_MANAGER->AddMappingContext(&DefaultEditorInputMappingContext::GetStaticTypeInfo(), 0);
 
 	AppModeBase::BeginThread();
 }
