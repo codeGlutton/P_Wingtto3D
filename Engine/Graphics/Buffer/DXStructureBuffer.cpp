@@ -11,33 +11,54 @@ DXStructureBuffer::~DXStructureBuffer()
 {
 }
 
-void DXStructureBuffer::Init(const void* initData, uint32 inputStride, uint32 inputCount, uint32 outputStride, uint32 outputCount)
+void DXStructureBuffer::Init(const void* initData, uint32 inputStride, uint32 inputCount, uint32 inputSlot, uint32 outputStride, uint32 outputCount, uint32 outputSlot, bool canCpuWrite)
 {
 	_mInputStride = inputStride;
 	_mInputCount = inputCount;
+	_mInputSlot = inputSlot;
 	_mOutputStride = outputStride;
 	_mOutputCount = outputCount;
+	_mOutputSlot = outputSlot;
 
 	if (outputStride == 0 || outputCount == 0)
 	{
 		_mOutputStride = inputStride;
 		_mOutputCount = inputCount;
 	}
+
+	_mResourceFlags = DXResourceFlag::HasOutput;
+	if (canCpuWrite == true)
+	{
+		_mResourceFlags |= DXResourceFlag::Updatable;
+	}
 	
 	CreateBuffer(initData);
 }
 
-void DXStructureBuffer::PushData(const void* data)
+void DXStructureBuffer::PushData() const
 {
+	DX_DEVICE_CONTEXT->CSSetShaderResources(_mInputSlot, 1, _mInputSRV.GetAddressOf());
+	DX_DEVICE_CONTEXT->CSSetUnorderedAccessViews(_mOutputSlot, 1, _mOutputUAV.GetAddressOf(), nullptr);
+}
+
+bool DXStructureBuffer::UpdateData(const void* data) const
+{
+	if (IsUpdatable() == false)
+	{
+		return false;
+	}
+
 	D3D11_MAPPED_SUBRESOURCE subResource;
 	DX_DEVICE_CONTEXT->Map(_mInputBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &subResource);
 	{
 		memcpy(subResource.pData, data, GetInputByteWidth());
 	}
 	DX_DEVICE_CONTEXT->Unmap(_mInputBuffer.Get(), 0);
+
+	return true;
 }
 
-void DXStructureBuffer::PopData(OUT void* data)
+void DXStructureBuffer::PopData(OUT void* data) const
 {
 	// Output 데이터를 CPU 읽기가 가능한 Result에 옮기기
 	DX_DEVICE_CONTEXT->CopyResource(_mResultBuffer.Get(), _mOutputBuffer.Get());
@@ -69,15 +90,22 @@ void DXStructureBuffer::CreateInput(const void* initData)
 	// 리소스를 스트럭쳐 버퍼로 할꺼야
 	desc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
 	desc.StructureByteStride = _mInputStride;
-	desc.Usage = D3D11_USAGE_DYNAMIC;
-	desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
-	D3D11_SUBRESOURCE_DATA subResource = { 0 };
-	subResource.pSysMem = initData;
+	if (IsUpdatable() == true)
+	{
+		desc.Usage = D3D11_USAGE_DYNAMIC;
+		desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	}
+	else
+	{
+		desc.Usage = D3D11_USAGE_IMMUTABLE;
+	}
 
 	// 존재 시
 	if (initData != nullptr)
 	{
+		D3D11_SUBRESOURCE_DATA subResource = { 0 };
+		subResource.pSysMem = initData;
 		CHECK_WIN_MSG(DX_DEVICE->CreateBuffer(&desc, &subResource, _mInputBuffer.GetAddressOf()), "Structure input buffer creation is failed");
 	}
 	// 기존 데이터 없을 시

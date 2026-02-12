@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Graphics/Resource/DXResource.h"
 #include "Core/Resource/BulkData.h"
 
 using IndexBulkData = BulkWrapper<std::vector<uint32>>;
@@ -7,7 +8,7 @@ using IndexBulkData = BulkWrapper<std::vector<uint32>>;
 /**
  * 인덱스 버퍼 Wrapper 클래스
  */
-class DXIndexBuffer : public std::enable_shared_from_this<DXIndexBuffer>
+class DXIndexBuffer : public DXResource
 {
 public:
 	DXIndexBuffer();
@@ -31,17 +32,25 @@ public:
 		return _mCount; 
 	}
 
-public:
-	void Init(std::shared_ptr<IndexBulkData> bulkData, uint32 offset = 0);
+	void SetOffset(uint32 offset) const
+	{
+		_mOffset = offset;
+	}
 
 public:
-	void PushData();
-	void PushData(uint32 offset);
+	void Init(std::shared_ptr<IndexBulkData> bulkData, bool canCpuWrite = false, uint32 offset = 0);
+	void Init(std::vector<uint32> indices, bool canCpuWrite = false, uint32 offset = 0);
+
+public:
+	void PushData() const;
+	bool UpdateData(std::shared_ptr<IndexBulkData> bulkData) const;
 
 private:
 	ComPtr<ID3D11Buffer> _mIndexBuffer;
 
+private:
 	uint32 _mStride = 0;
-	uint32 _mOffset = 0;
 	uint32 _mCount = 0;
+
+	mutable uint32 _mOffset = 0;
 };

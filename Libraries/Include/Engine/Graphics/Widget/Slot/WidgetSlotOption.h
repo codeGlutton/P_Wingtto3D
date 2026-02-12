@@ -13,7 +13,7 @@ enum class SlotAlignmentType : uint8
 	Down = Right,
 };
 
-template<typename MinIn>
+template<typename MixIn>
 struct PaddingSlotOption
 {
 public:
@@ -24,14 +24,14 @@ public:
 	void SetPadding(const Margin& padding)
 	{
 		_mPadding = padding;
-		static_cast<MinIn*>(this)->OnResize();
+		static_cast<MixIn*>(this)->OnResize();
 	}
 
 protected:
 	Margin _mPadding;
 };
 
-template<typename MinIn>
+template<typename MixIn>
 struct AlignmentSlotOption
 {
 public:
@@ -47,12 +47,12 @@ public:
 	void SetHorizonAlignment(SlotAlignmentType type)
 	{
 		_mHorizonAlignment = type;
-		static_cast<MinIn*>(this)->OnResize();
+		static_cast<MixIn*>(this)->OnResize();
 	}
 	void SetVerticalAlignment(SlotAlignmentType type)
 	{
 		_mVerticalAlignment = type;
-		static_cast<MinIn*>(this)->OnResize();
+		static_cast<MixIn*>(this)->OnResize();
 	}
 
 protected:

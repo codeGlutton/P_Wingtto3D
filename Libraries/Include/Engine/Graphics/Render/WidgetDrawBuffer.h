@@ -23,6 +23,9 @@ struct RenderElement
 {
 	RenderElementType::Type mType;
 
+	Matrix2D mRenderMatrix;
+	Vec2 mBoxSize;
+
 	uint8 mSceneId;
 	uint32 mLayerId;
 
@@ -61,6 +64,10 @@ public:
 
 public:
 	void ResetElements();
+
+private:
+	bool IsCulling(const WidgetGeometry& paintGeometry);
+	bool IsCulling(const WidgetBrush& brush, const Color& color);
 
 public:
 	std::weak_ptr<AppWindow> mWindow;

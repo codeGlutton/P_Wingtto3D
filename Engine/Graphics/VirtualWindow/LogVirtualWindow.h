@@ -1,10 +1,10 @@
 ﻿#pragma once
 
 #include "Graphics/VirtualWindow/VirtualWindowContent.h"
-#include "Utils/Thread/RenderJobQueue.h"
+#include "Utils/Thread/SceneJobQueue.h"
 #include "Utils/Debugger/Logger.h"
 
-class LogPrinter : public RenderJobQueue
+class LogPrinter : public SceneJobQueue
 {
 public:
 	void Print(std::vector<LogCommand> commands, LogLevelType level)

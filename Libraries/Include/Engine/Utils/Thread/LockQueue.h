@@ -10,7 +10,7 @@ public:
 
 	T Pop();
 	void PopAll(OUT std::vector<T>& items);
-	int32 PopUntil(OUT std::vector<T>& items, std::function<bool(const T&)> condition);
+	int32 PopUntil(OUT std::vector<T>& items, std::function<bool(const T&)> condition, bool isAllowedToPopAll = true);
 	int32 PopBatch(OUT std::vector<T>& items, int32 batchSize);
 
 public:
@@ -59,7 +59,7 @@ inline void LockQueue<T>::PopAll(OUT std::vector<T>& items)
 }
 
 template<typename T>
-inline int32 LockQueue<T>::PopUntil(OUT std::vector<T>& items, std::function<bool(const T&)> condition)
+inline int32 LockQueue<T>::PopUntil(OUT std::vector<T>& items, std::function<bool(const T&)> condition, bool isAllowedToPopAll)
 {
 	WRITE_LOCK(_mLock);
 
@@ -68,12 +68,24 @@ inline int32 LockQueue<T>::PopUntil(OUT std::vector<T>& items, std::function<boo
 		T item = _mItems.front();
 		if (condition(item) == false)
 		{
-			break;
+			return static_cast<int32>(_mItems.size());
 		}
 		items.push_back(std::move(item));
 		_mItems.pop();
 	}
-	return static_cast<int32>(_mItems.size());
+
+	if (isAllowedToPopAll == true)
+	{
+		return static_cast<int32>(_mItems.size());
+	}
+	else
+	{
+		for (auto& item : items)
+		{
+			_mItems.push(item);
+		}
+		return 0;
+	}
 }
 
 template<typename T>

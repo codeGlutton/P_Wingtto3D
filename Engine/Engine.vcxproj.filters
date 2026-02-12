@@ -115,6 +115,9 @@
     <Filter Include="Graphics\VirtualWindow">
       <UniqueIdentifier>{4b5ea240-5a2d-4ad8-9626-9cefce0d1e83}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Graphics\State">
+      <UniqueIdentifier>{972f80e1-a820-4464-849a-052d198a06fa}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\Object.h">
@@ -291,7 +294,7 @@
     <ClInclude Include="Utils\Thread\MPSCJobQueue.h">
       <Filter>Utils\Thread\Job</Filter>
     </ClInclude>
-    <ClInclude Include="Utils\Thread\RenderJobQueue.h">
+    <ClInclude Include="Utils\Thread\SceneJobQueue.h">
       <Filter>Utils\Thread\Job</Filter>
     </ClInclude>
     <ClInclude Include="Manager\PathManager.h">
@@ -486,6 +489,39 @@
     <ClInclude Include="Input\InputEvent.h">
       <Filter>Input</Filter>
     </ClInclude>
+    <ClInclude Include="Graphics\Resource\DXShader.h">
+      <Filter>Graphics\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\Resource\DXInputLayout.h">
+      <Filter>Graphics\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\Resource\DXResource.h">
+      <Filter>Graphics\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\DXReflectionMetaData.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\State\DXSamplerState.h">
+      <Filter>Graphics\State</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\Resource\DXMaterial.h">
+      <Filter>Graphics\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\State\DXBlendState.h">
+      <Filter>Graphics\State</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\State\DXRasterizerState.h">
+      <Filter>Graphics\State</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Resource\Material.h">
+      <Filter>Core\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Resource\ConstantData.h">
+      <Filter>Core\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\GeometryUtils.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\Object.cpp">
@@ -632,7 +668,7 @@
     <ClCompile Include="Utils\Thread\MPSCJobQueue.cpp">
       <Filter>Utils\Thread\Job</Filter>
     </ClCompile>
-    <ClCompile Include="Utils\Thread\RenderJobQueue.cpp">
+    <ClCompile Include="Utils\Thread\SceneJobQueue.cpp">
       <Filter>Utils\Thread\Job</Filter>
     </ClCompile>
     <ClCompile Include="Manager\PathManager.cpp">
@@ -811,6 +847,39 @@
     </ClCompile>
     <ClCompile Include="Input\InputEvent.cpp">
       <Filter>Input</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\Resource\DXShader.cpp">
+      <Filter>Graphics\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\Resource\DXInputLayout.cpp">
+      <Filter>Graphics\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\Resource\DXResource.cpp">
+      <Filter>Graphics\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\DXReflectionMetaData.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\State\DXSamplerState.cpp">
+      <Filter>Graphics\State</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\Resource\DXMaterial.cpp">
+      <Filter>Graphics\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\State\DXBlendState.cpp">
+      <Filter>Graphics\State</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\State\DXRasterizerState.cpp">
+      <Filter>Graphics\State</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Resource\Material.cpp">
+      <Filter>Core\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Resource\ConstantData.cpp">
+      <Filter>Core\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\GeometryUtils.cpp">
+      <Filter>Utils</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

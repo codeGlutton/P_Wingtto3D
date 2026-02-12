@@ -1,6 +1,7 @@
 ﻿#pragma once
+#include "Graphics/Resource/DXResource.h"
 
-class DXStructureBuffer : public std::enable_shared_from_this<DXStructureBuffer>
+class DXStructureBuffer : public DXResource
 {
 public:
 	DXStructureBuffer();
@@ -17,21 +18,49 @@ public:
 	}
 
 public:
-	uint32 GetInputByteWidth() 
+	uint32 GetInputByteWidth() const
 	{ 
 		return _mInputStride * _mInputCount;
 	}
-	uint32 GetOutputByteWidth() 
+	uint32 GetOutputByteWidth() const
 	{ 
 		return _mOutputStride * _mOutputCount;
 	}
 
 public:
-	void Init(const void* initData, uint32 inputStride, uint32 inputCount, uint32 outputStride, uint32 outputCount);
+	uint32 GetInputSlot() const
+	{
+		return _mInputSlot;
+	}
+	uint32 GetInputCount() const
+	{
+		return _mInputCount;
+	}
+	uint32 GetOutputSlot() const
+	{
+		return _mOutputSlot;
+	}
+	uint32 GetOutputCount() const
+	{
+		return _mOutputCount;
+	}
+
+	void SetInputSlot(uint32 slot) const
+	{
+		_mInputSlot = slot;
+	}
+	void SetOutputSlot(uint32 slot) const
+	{
+		_mOutputSlot = slot;
+	}
 
 public:
-	void PushData(const void* data);
-	void PopData(OUT void* data);
+	void Init(const void* initData, uint32 inputStride, uint32 inputCount, uint32 inputSlot, uint32 outputStride, uint32 outputCount, uint32 outputSlot, bool canCpuWrite = true);
+
+public:
+	void PushData() const;
+	bool UpdateData(const void* data) const;
+	void PopData(OUT void* data) const;
 
 private:
 	void CreateBuffer(const void* initData);
@@ -61,6 +90,9 @@ private:
 	uint32 _mInputCount = 0;
 	uint32 _mOutputStride = 0;
 	uint32 _mOutputCount = 0;
+
+	mutable uint32 _mInputSlot = 0;
+	mutable uint32 _mOutputSlot = 0;
 };
 
 template<typename In, std::size_t InN, typename Out = In, std::size_t OutN = InN>
@@ -70,8 +102,8 @@ public:
 	void Init(const In& initData);
 
 public:
-	void PushData(const In& data);
-	void PopData(OUT Out& data);
+	bool UpdateData(const In& data) const;
+	void PopData(OUT Out& data) const;
 };
 
 template<typename In, std::size_t InN, typename Out, std::size_t OutN>
@@ -81,13 +113,13 @@ inline void DXTypedStructureBuffer<In, InN, Out, OutN>::Init(const In& initData)
 }
 
 template<typename In, std::size_t InN, typename Out, std::size_t OutN>
-inline void DXTypedStructureBuffer<In, InN, Out, OutN>::PushData(const In& data)
+inline bool DXTypedStructureBuffer<In, InN, Out, OutN>::UpdateData(const In& data) const
 {
-	DXStructureBuffer::PushData(&data);
+	return DXStructureBuffer::PushData(&data);
 }
 
 template<typename In, std::size_t InN, typename Out, std::size_t OutN>
-inline void DXTypedStructureBuffer<In, InN, Out, OutN>::PopData(OUT Out& data)
+inline void DXTypedStructureBuffer<In, InN, Out, OutN>::PopData(OUT Out& data) const
 {
 	DXStructureBuffer::PopData(&data);
 }

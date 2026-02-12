@@ -1,8 +1,10 @@
 ﻿#pragma once
 
 #include "Graphics/Render/WidgetDrawBuffer.h"
+#include "Graphics/Scene/Scene.h"
 
 #define RENDER_MANAGER RenderManager::GetInst()
+#define SCENE RENDER_MANAGER->GetScene()
 
 struct WindowDrawInputs
 {
@@ -28,6 +30,12 @@ public:
 	}
 
 public:
+	Scene* GetScene()
+	{
+		return &_mSceneSnapShot;
+	}
+
+public:
 	void Init();
 	void Destroy();
 
@@ -42,5 +50,6 @@ public:
 
 private:
 	WidgetDrawBuffer mWidgetBuffer;
+	Scene _mSceneSnapShot;
 };
 

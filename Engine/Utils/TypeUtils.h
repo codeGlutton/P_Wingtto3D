@@ -4,6 +4,48 @@
 #include "Core/CommonType/SoftObjectPtr.h"
 #include "Core/CommonType/SubClass.h"
 
+#define GEN_ENUM_OPERATORS(type)                                                \
+    inline type operator+(type lhs, type rhs)                                   \
+    {                                                                           \
+        using T = std::underlying_type_t<type>;                                 \
+        return static_cast<type>(static_cast<T>(lhs) + static_cast<T>(rhs));    \
+    }                                                                           \
+    inline type& operator+=(type& lhs, type rhs)                                \
+    {                                                                           \
+        lhs = lhs + rhs;                                                        \
+        return lhs;                                                             \
+    }                                                                           \
+    inline type operator-(type lhs, type rhs)                                   \
+    {                                                                           \
+        using T = std::underlying_type_t<type>;                                 \
+        return static_cast<type>(static_cast<T>(lhs) - static_cast<T>(rhs));    \
+    }                                                                           \
+    inline type& operator-=(type& lhs, type rhs)                                \
+    {                                                                           \
+        lhs = lhs - rhs;                                                        \
+        return lhs;                                                             \
+    }                                                                           \
+    inline type operator|(type lhs, type rhs)                                   \
+    {                                                                           \
+        using T = std::underlying_type_t<type>;                                 \
+        return static_cast<type>(static_cast<T>(lhs) | static_cast<T>(rhs));    \
+    }                                                                           \
+    inline type& operator|=(type& lhs, type rhs)                                \
+    {                                                                           \
+        lhs = lhs | rhs;                                                        \
+        return lhs;                                                             \
+    }                                                                           \
+    inline type operator&(type lhs, type rhs)                                   \
+    {                                                                           \
+        using T = std::underlying_type_t<type>;                                 \
+        return static_cast<type>(static_cast<T>(lhs) & static_cast<T>(rhs));    \
+    }                                                                           \
+    inline type& operator&=(type& lhs, type rhs)                                \
+    {                                                                           \
+        lhs = lhs & rhs;                                                        \
+        return lhs;                                                             \
+    }
+
 template<typename To, typename From>
 To* Cast(From* src);
 
@@ -81,5 +123,14 @@ struct TypeInfoResolver<std::array<T, N>, void>;
  */
 template<typename T>
 struct TypeInfoResolver<T, std::enable_if_t<IsIteratorContanier<T> && UseAllocator<T>>>;
+
+
+template<typename Enum, Enum Value> requires std::is_enum_v<Enum>
+struct EnumValueType
+{
+    static constexpr Enum mValue = Value;
+};
+template <auto T> requires std::is_enum_v<decltype(T)>
+using EnumValueTag = EnumValueType<std::remove_cv_t<decltype(T)>, T>;
 
 #include "TypeUtils.inl"

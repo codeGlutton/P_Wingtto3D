@@ -2,6 +2,8 @@
 
 #include "Utils/Thread/Thread.h"
 
+class DXSharedResource;
+
 namespace MainThreadType
 {
 	enum Type : uint32
@@ -30,6 +32,15 @@ public:
 class RenderThread : public MainThread
 {
 private:
+	virtual void Init() override;
 	virtual void Work() override;
+	virtual void Destroy() override;
+
+protected:
+	virtual void RegisterDefaultResources();
+	virtual void UnregisterDefaultResources();
+
+protected:
+	std::vector<std::shared_ptr<DXSharedResource>> _mDefaultResources;
 };
 

@@ -1,99 +1,127 @@
 ﻿#pragma once
 
+#include "Graphics/Resource/DXResource.h"
+#include "Core/Resource/BulkData.h"
 #include "Manager/DXGraphicSystem.h"
 
-/**
- * 상수 버퍼 Wrapper 클래스
- */
-template<typename T>
-class DXConstantBuffer : public std::enable_shared_from_this<DXConstantBuffer<T>>
+constexpr auto CBUFFER_GLOBAL_PREFIX = L"G_";
+constexpr auto CBUFFER_FRAME_PREFIX = L"F_";
+constexpr auto CBUFFER_MAT_PREFIX = L"M_";
+constexpr auto CBUFFER_OBJ_PREFIX = L"O_";
+
+struct ConstantBufferBulkData : public BulkData
+{
+	GEN_STRUCT_REFLECTION(ConstantBufferBulkData)
+
+public:
+	PROPERTY(mSize)
+	std::size_t mSize;
+	PROPERTY(mRawBytes)
+	std::vector<uint8> mRawBytes;
+};
+
+class DXConstantBuffer : public DXResource
 {
 public:
 	DXConstantBuffer()
 	{
 	}
-	~DXConstantBuffer() 
+	~DXConstantBuffer()
 	{
 	}
 
 public:
-	ComPtr<ID3D11Buffer> GetBuffer() 
-	{ 
+	ComPtr<ID3D11Buffer> GetBuffer()
+	{
 		return _mConstantBuffer;
 	}
+	uint32 GetSlot() const
+	{
+		return _mSlot;
+	}
+	DXResourceUsageFlag::Type GetUsageFlags() const
+	{
+		return _mUsageFlags;
+	}
+
+	void SetSlot(uint32 slot) const
+	{
+		_mSlot = slot;
+	}
+	void SetUsageFlags(DXResourceUsageFlag::Type flags) const
+	{
+		_mUsageFlags = flags;
+	}
+
+public:
+	bool CanBeUsedFor(DXResourceUsageFlag::Type flag) const
+	{
+		return _mUsageFlags & flag;
+	}
+
+public:
+	void Init(std::shared_ptr<ConstantBufferBulkData> bulkData, uint32 slot = 0, DXResourceUsageFlag::Type usageFlags = DXResourceUsageFlag::None, bool canCpuWrite = false);
+	void Init(std::size_t stride, uint32 slot = 0, DXResourceUsageFlag::Type usageFlags = DXResourceUsageFlag::None, bool canCpuWrite = false);
+	void Init(const void* initData, std::size_t stride, uint32 slot = 0, DXResourceUsageFlag::Type usageFlags = DXResourceUsageFlag::None, bool canCpuWrite = false);
+	bool UpdateData(const void* data, std::size_t stride) const;
+	void PushData() const;
+
+protected:
+	ComPtr<ID3D11Buffer> _mConstantBuffer;
+
+protected:
+	mutable uint32 _mSlot;
+	mutable DXResourceUsageFlag::Type _mUsageFlags;
+};
+
+/**
+ * 상수 버퍼 Wrapper 클래스
+ */
+template<typename T>
+class DXConstantBufferTemplate : public DXConstantBuffer
+{
+public:
+	DXConstantBufferTemplate()
+	{
+	}
+	~DXConstantBufferTemplate() 
+	{
+	}
+
+public:
 	uint32 GetStride() const
 	{
 		return sizeof(T);
 	}
 
 public:
-	void Init();
-	void Init(const T& initData);
-	void PushData(const T& data);
-
-private:
-	ComPtr<ID3D11Buffer> _mConstantBuffer;
+	void Init(std::shared_ptr<ConstantBufferBulkData> bulkData, uint32 slot = 0, DXResourceUsageFlag::Type usageFlags = DXResourceUsageFlag::None, bool canCpuWrite = false);
+	void Init(uint32 slot = 0, DXResourceUsageFlag::Type usageFlags = DXResourceUsageFlag::None, bool canCpuWrite = false);
+	void Init(const T& initData, uint32 slot = 0, DXResourceUsageFlag::Type usageFlags = DXResourceUsageFlag::None, bool canCpuWrite = false);
+	bool UpdateData(const T& data) const;
 };
 
 template<typename T>
-inline void DXConstantBuffer<T>::Init()
+inline void DXConstantBufferTemplate<T>::Init(std::shared_ptr<ConstantBufferBulkData> bulkData, uint32 slot, DXResourceUsageFlag::Type usageFlags, bool canCpuWrite)
 {
-	D3D11_BUFFER_DESC desc;
-	memset(&desc, 0, sizeof(desc));
-	ZeroMemory(&desc, sizeof(desc));
-
-	desc.Usage = D3D11_USAGE_DYNAMIC;				// GPU는 읽을 수만 있고 CPU는 쓸 수만 있다
-	desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;	// 셰이더에서 상수 버퍼 용도
-	desc.ByteWidth = sizeof(T);						// T 구초제로 할당될 상수 버퍼
-	desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;	// CPU 접근 플래그 설정
-
-	CHECK_WIN_MSG(DX_DEVICE->CreateBuffer(&desc, nullptr, _mConstantBuffer.GetAddressOf()), "Constant buffer creation is failed");
+	ASSERT_MSG(bulkData->mSize == sizeof(T), "Bulk data has other type data");
+	DXConstantBuffer::Init(bulkData, slot, usageFlags, canCpuWrite);
 }
 
 template<typename T>
-inline void DXConstantBuffer<T>::Init(const T& initData)
+inline void DXConstantBufferTemplate<T>::Init(uint32 slot, DXResourceUsageFlag::Type usageFlags, bool canCpuWrite)
 {
-	D3D11_BUFFER_DESC desc;
-	memset(&desc, 0, sizeof(desc));
-	ZeroMemory(&desc, sizeof(desc));
-
-	desc.Usage = D3D11_USAGE_DYNAMIC;				// GPU는 읽을 수만 있고 CPU는 쓸 수만 있다
-	desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;	// 셰이더에서 상수 버퍼 용도
-	desc.ByteWidth = sizeof(T);						// T 구초제로 할당될 상수 버퍼
-	desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;	// CPU 접근 플래그 설정
-
-	// 관련 CPU 데이터 연결 (GPU에 복제됨)
-	D3D11_SUBRESOURCE_DATA data;
-	memset(&data, 0, sizeof(data));
-	data.pSysMem = &initData;
-
-	CHECK_WIN_MSG(DX_DEVICE->CreateBuffer(&desc, &data, _mConstantBuffer.GetAddressOf()), "Constant buffer creation is failed");
+	DXConstantBuffer::Init(GetStride(), slot, usageFlags, canCpuWrite);
 }
 
 template<typename T>
-inline void DXConstantBuffer<T>::PushData(const T& data)
+inline void DXConstantBufferTemplate<T>::Init(const T& initData, uint32 slot, DXResourceUsageFlag::Type usageFlags, bool canCpuWrite)
 {
-	D3D11_MAPPED_SUBRESOURCE subResource;
-	memset(&subResource, 0, sizeof(D3D11_MAPPED_SUBRESOURCE));
-
-	DX_DEVICE_CONTEXT->Map(
-		_mConstantBuffer.Get(),
-		0,							// 하위 리소스 인덱스 번호
-		D3D11_MAP_WRITE_DISCARD,	// CPU 읽기 쓰기 권한에 대한 타입
-		0,							// GPU가 사용 중일 때, CPU의 작업 권한 플래그
-		&subResource				// 하위 리소스 데이터들 (버퍼를 통해 전달될 데이터)
-	);
-
-	// 전달 데이터를 할당
-	::memcpy(
-		subResource.pData,
-		&data,
-		sizeof(data)
-	);
-
-	DX_DEVICE_CONTEXT->Unmap(
-		_mConstantBuffer.Get(),
-		0							// 하위 리소스 인덱스 번호
-	);
+	DXConstantBuffer::Init(&initData, GetStride(), slot, usageFlags, canCpuWrite);
 }
 
+template<typename T>
+inline bool DXConstantBufferTemplate<T>::UpdateData(const T& data) const
+{
+	return DXConstantBuffer::UpdateData(&data, GetStride());
+}

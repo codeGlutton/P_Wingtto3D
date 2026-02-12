@@ -12,7 +12,7 @@ void Resource::PostCreate()
 
 void Resource::BeginDestroy()
 {
-	RESOURCE_MANAGER->NotifyToRemoveResource(GetPath());
+	RESOURCE_MANAGER->NotifyToRemoveResource(GetFullPath());
 	Super::BeginDestroy();
 }
 

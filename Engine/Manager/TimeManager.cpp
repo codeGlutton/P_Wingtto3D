@@ -14,12 +14,6 @@ TimeManager::~TimeManager()
 {
 }
 
-uint64 TimeManager::GetGameFrameNumber() const
-{
-	ASSERT_THREAD(MainThreadType::Game);
-	return _mGameFrameNumber;
-}
-
 uint32 TimeManager::GetFps() const
 {
 	ASSERT_THREAD(MainThreadType::Game);
@@ -40,17 +34,6 @@ float TimeManager::GetFixedDeltaTime() const
 double TimeManager::GetPlayTime() const
 {
 	return _mPlayTimeAcc;
-}
-
-uint64 TimeManager::GetRenderFrameNumber() const
-{
-	return _mRenderFrameNumber.load();
-}
-
-void TimeManager::SetRenderFrameNumber(uint64 frameNumber)
-{
-	ASSERT_THREAD(MainThreadType::Render);
-	_mRenderFrameNumber.store(frameNumber);
 }
 
 void TimeManager::NotifyToAddTarget(std::shared_ptr<UpdateTargetContext> data)
@@ -122,9 +105,6 @@ void TimeManager::Destroy()
 
 void TimeManager::UpdateTime()
 {
-	// 프레임 넘버 증가
-	++_mGameFrameNumber;
-
 	uint64 currentCount;
 	::QueryPerformanceCounter(reinterpret_cast<LARGE_INTEGER*>(&currentCount));
 
@@ -258,3 +238,43 @@ void TimeManager::UpdateTargets()
 	}
 }
 
+RenderTimeManager::RenderTimeManager()
+{
+}
+
+RenderTimeManager::~RenderTimeManager()
+{
+}
+
+float RenderTimeManager::GetDeltaTime() const
+{
+	ASSERT_THREAD(MainThreadType::Render);
+	return _mDeltaTime;
+}
+
+void RenderTimeManager::Init()
+{
+	ASSERT_THREAD(MainThreadType::Render);
+
+	// 주파수 기록
+	::QueryPerformanceFrequency(reinterpret_cast<LARGE_INTEGER*>(&_mFrequency));
+	// CPU 클럭 카운트 기록
+	::QueryPerformanceCounter(reinterpret_cast<LARGE_INTEGER*>(&_mPrevCount));
+}
+
+void RenderTimeManager::Update()
+{
+	ASSERT_THREAD(MainThreadType::Render);
+
+	uint64 currentCount;
+	::QueryPerformanceCounter(reinterpret_cast<LARGE_INTEGER*>(&currentCount));
+
+	// 지난 시간 = 몇 클록이 지났는가 / 주파수
+	_mDeltaTime = (currentCount - _mPrevCount) / static_cast<float>(_mFrequency);
+	_mPrevCount = currentCount;
+}
+
+void RenderTimeManager::Destroy()
+{
+	ASSERT_THREAD(MainThreadType::Render);
+}

@@ -9,9 +9,12 @@
 #define THREAD_MANAGER ThreadManager::GetInst()
 
 class Job;
+template<typename MetaData>
+class JobContext;
 class MPSCJobQueue;
 class SequentialJobQueue;
 class ConcurrentJobQueue;
+class SceneJobQueue;
 
 /**
  * Thread Manager의 Global Queue를 처리하는 스레드
@@ -51,9 +54,23 @@ public:
 		return _mIsAlive.load();
 	}
 
+	/* 게임 Job Q */
 public:
 	void PushGameThreadJob(std::shared_ptr<Job> job);
 
+public:
+	void DoGameJob();
+
+	/* 랜더 Job Q */
+public:
+	void PushRenderThreadLogicUpdateJob(std::shared_ptr<Job> job);
+	void PushRenderThreadSceneUpdateJob(std::shared_ptr<JobContext<float>> job);
+	void PushRenderThreadRenderJob(std::shared_ptr<Job> job);
+
+public:
+	void DoRenderJob();
+
+	/* 글로벌 Job Q */
 public:
 	void PushGlobalSequentialJobQ(std::shared_ptr<SequentialJobQueue> jobQueue);
 
@@ -61,7 +78,6 @@ public:
 	void PushGlobalConcurrentJobQ(std::shared_ptr<ConcurrentJobQueue> jobQueue);
 
 public:
-	void DoGameJob();
 	void DoGlobalJob();
 
 private:
@@ -82,6 +98,15 @@ private:
 	/* 게임 Job Q */
 private:
 	std::shared_ptr<MPSCJobQueue> _mGameThreadJobQueue;
+
+	/* 렌더 Job Q */
+private:
+	// 랜더 틱마다 렌더 스레드의 DeltaTime보다 크거나 같은 첫번째 씬까지 처리 
+	std::shared_ptr<SceneJobQueue> _mRenderThreadSceneUpdateJobQueue;
+	// 렌더 틱마다 가장 최신 상태만 드로잉
+	std::shared_ptr<MPSCJobQueue> _mRenderThreadRenderJobQueue;
+	// 랜더 명령은 제외. 매 랜더 틱마다 모든 작업 처리
+	std::shared_ptr<MPSCJobQueue> _mRenderThreadLogicUpdateJobQueue;
 
 private:
 	std::mutex _mLock;

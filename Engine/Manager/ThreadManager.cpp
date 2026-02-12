@@ -3,6 +3,7 @@
 
 #include "Utils/Thread/JobQueue.h"
 #include "Utils/Thread/MPSCJobQueue.h"
+#include "Utils/Thread/SceneJobQueue.h"
 
 void GlobalWorkerThread::Work()
 {
@@ -48,6 +49,7 @@ void ThreadManager::Launch(std::shared_ptr<WorkerThread> thread)
 			InitTLS();
 			thread->Init();
 			thread->Run();
+			thread->Destroy();
 			DestroyTLS();
 
 			const std::thread::id id = std::this_thread::get_id();
@@ -77,6 +79,7 @@ void ThreadManager::LaunchMainThreads(std::array<std::shared_ptr<MainThread>, Ma
 				InitTLS_Internal(threadId);
 				thread->Init();
 				thread->Run();
+				thread->Destroy();
 				DestroyTLS();
 
 				const std::thread::id id = std::this_thread::get_id();
@@ -119,6 +122,52 @@ void ThreadManager::PushGameThreadJob(std::shared_ptr<Job> job)
 	_mGameThreadJobQueue->DoAsync(*job);
 }
 
+void ThreadManager::DoGameJob()
+{
+	ASSERT_THREAD(MainThreadType::Game);
+	_mGameThreadJobQueue->Execute();
+}
+
+void ThreadManager::PushRenderThreadLogicUpdateJob(std::shared_ptr<Job> job)
+{
+	if (job != nullptr)
+	{
+		return;
+	}
+	_mRenderThreadLogicUpdateJobQueue->DoAsync(*job);
+}
+
+void ThreadManager::PushRenderThreadSceneUpdateJob(std::shared_ptr<JobContext<float>> job)
+{
+	if (job != nullptr)
+	{
+		return;
+	}
+	_mRenderThreadSceneUpdateJobQueue->DoAsync(*job);
+}
+
+void ThreadManager::PushRenderThreadRenderJob(std::shared_ptr<Job> job)
+{
+	if (job != nullptr)
+	{
+		return;
+	}
+	_mRenderThreadRenderJobQueue->DoAsync(*job);
+}
+
+void ThreadManager::DoRenderJob()
+{
+	ASSERT_THREAD(MainThreadType::Render);
+
+	// 콜백 주로 처리
+	_mRenderThreadLogicUpdateJobQueue->ExecuteOnce();
+	// 씬 내부 데이터 업데이트
+	_mRenderThreadSceneUpdateJobQueue->ExecuteOnce();
+
+	// 위젯 랜더 (SceneViewport 존재 시, 월드도 랜더)
+	_mRenderThreadRenderJobQueue->ExecuteOnlyLastOne();
+}
+
 void ThreadManager::PushGlobalSequentialJobQ(std::shared_ptr<SequentialJobQueue> jobQueue)
 {
 	_mGlobalSequentialJobQueues.Push(jobQueue);
@@ -136,12 +185,6 @@ void ThreadManager::PushGlobalConcurrentJob(std::shared_ptr<Job> job, bool pushO
 void ThreadManager::PushGlobalConcurrentJobQ(std::shared_ptr<ConcurrentJobQueue> jobQueue)
 {
 	_mGlobalConcurrentJobQueue->Append(jobQueue);
-}
-
-void ThreadManager::DoGameJob()
-{
-	ASSERT_THREAD(MainThreadType::Game);
-	_mGameThreadJobQueue->Execute();
 }
 
 void ThreadManager::DoGlobalJob()

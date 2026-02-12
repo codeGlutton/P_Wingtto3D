@@ -26,6 +26,38 @@ void MPSCJobQueue::Execute()
 	}
 }
 
+void MPSCJobQueue::ExecuteOnce()
+{
+	// 가능하대로 빼내 처리 (도중에 새로운 Job 추가 가능성 있음)
+	std::vector<std::shared_ptr<Job>> jobs;
+	_mJobs.PopAll(OUT jobs);
+
+	// 처리가 확정된 job 갯수
+	const int32 jobCount = static_cast<int32>(jobs.size());
+	for (int32 i = 0; i < jobCount; ++i)
+	{
+		jobs[i]->Execute();
+	}
+
+	_mJobCount.fetch_sub(jobCount);
+}
+
+void MPSCJobQueue::ExecuteOnlyLastOne()
+{
+	// 가능하대로 빼내 처리 (도중에 새로운 Job 추가 가능성 있음)
+	std::vector<std::shared_ptr<Job>> jobs;
+	_mJobs.PopAll(OUT jobs);
+
+	// 처리가 확정된 job 갯수
+	const int32 jobCount = static_cast<int32>(jobs.size());
+	if (jobs.empty() == false)
+	{
+		jobs.back()->Execute();
+	}
+
+	_mJobCount.fetch_sub(jobCount);
+}
+
 void MPSCJobQueue::Push(const std::shared_ptr<Job>& job)
 {
 	// 실제 job 추가 전에 Count 증가로 PushJobQ 예고

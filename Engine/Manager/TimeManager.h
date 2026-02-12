@@ -7,6 +7,9 @@
 #define FPS TIME_MANAGER->GetFps()
 #define DELTA_TIME TIME_MANAGER->GetDeltaTime()
 
+#define RENDER_TIME_MANAGER RenderTimeManager::GetInst()
+#define RENDER_DELTA_TIME RENDER_TIME_MANAGER->GetDeltaTime()
+
 enum class UpdatePhase : uint8
 {
 	None = 255,
@@ -85,15 +88,10 @@ public:
 	}
 
 public:
-	uint64 GetGameFrameNumber() const;
 	uint32 GetFps() const;
 	float GetDeltaTime() const;
 	float GetFixedDeltaTime() const;
 	double GetPlayTime() const;
-
-public:
-	uint64 GetRenderFrameNumber() const;
-	void SetRenderFrameNumber(uint64 frameNumber);
 
 public:
 	void NotifyToAddTarget(std::shared_ptr<UpdateTargetContext> data);
@@ -133,9 +131,35 @@ private:
 	bool _mUseFixedUpdate = false;
 
 	double _mPlayTimeAcc = 0.;
+};
+
+class RenderTimeManager
+{
+private:
+	RenderTimeManager();
+	~RenderTimeManager();
+
+public:
+	static RenderTimeManager* GetInst()
+	{
+		static RenderTimeManager inst;
+		return &inst;
+	}
+
+public:
+	float GetDeltaTime() const;
+
+public:
+	void Init();
+	void Update();
+	void Destroy();
 
 private:
-	uint64 _mGameFrameNumber = 0ull;
-	std::atomic<uint64> _mRenderFrameNumber = 0ull;
+	// 클록 주파수
+	uint64 _mFrequency = 0ull;
+	// 이전 클록 카운트
+	uint64 _mPrevCount = 0ull;
+	// 업데이트 델타
+	float _mDeltaTime = 0.f;
 };
 

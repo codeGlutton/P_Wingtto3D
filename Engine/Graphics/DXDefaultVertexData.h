@@ -1,14 +1,20 @@
 ﻿#pragma once
 
+struct DXInputElementList;
+
 /**
  * 정점 정보 및 컬러를 소유한 VS Input
  */
 struct ColorUIVertexData
 {
-	GEN_STRUCT_REFLECTION(ColorUIVertexData)
+	GEN_MINIMUM_STRUCT_REFLECTION(ColorUIVertexData)
 
 	bool operator==(const ColorUIVertexData&) const = default;
 
+public:
+	static const DXInputElementList& MakeLayout();
+
+public:
 	PROPERTY(mPosition)
 	Vec3 mPosition = { 0.f, 0.f, 0.f };
 	PROPERTY(mColor)
@@ -20,10 +26,14 @@ struct ColorUIVertexData
  */
 struct TextureUIVertexData
 {
-	GEN_STRUCT_REFLECTION(TextureUIVertexData)
+	GEN_MINIMUM_STRUCT_REFLECTION(TextureUIVertexData)
 
 	bool operator==(const TextureUIVertexData&) const = default;
 
+public:
+	static const DXInputElementList& MakeLayout();
+
+public:
 	PROPERTY(mPosition)
 	Vec3 mPosition = { 0.f, 0.f, 0.f };
 	PROPERTY(mUV)
@@ -35,10 +45,14 @@ struct TextureUIVertexData
  */
 struct StaticVertexData
 {
-	GEN_STRUCT_REFLECTION(StaticVertexData)
+	GEN_MINIMUM_STRUCT_REFLECTION(StaticVertexData)
 
 	bool operator==(const StaticVertexData&) const = default;
 
+public:
+	static const DXInputElementList& MakeLayout();
+
+public:
 	PROPERTY(mPosition)
 	Vec3 mPosition = { 0.f, 0.f, 0.f };
 	PROPERTY(mUV)
@@ -54,10 +68,14 @@ struct StaticVertexData
  */
 struct SkeletalVertexData
 {
-	GEN_STRUCT_REFLECTION(SkeletalVertexData)
+	GEN_MINIMUM_STRUCT_REFLECTION(SkeletalVertexData)
 
 	bool operator==(const SkeletalVertexData&) const = default;
 
+public:
+	static const DXInputElementList& MakeLayout();
+
+public:
 	PROPERTY(mPosition)
 	Vec3 mPosition = { 0.f, 0.f, 0.f };
 	PROPERTY(mUV)

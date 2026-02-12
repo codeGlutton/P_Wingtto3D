@@ -410,7 +410,7 @@ void AppModeBase::ProcessReplyData(const ReplyData& reply, const std::shared_ptr
 		APP_WIN_MANAGER->NotifyToChangeFocus(reply.mFocusWidget);
 	}
 }
-	
+
 void AppModeBase::BeginThread()
 {
 	/* 스레드 생성 */
@@ -430,6 +430,8 @@ void AppModeBase::BeginThread()
 		std::make_shared<RenderThread>()
 	};
 	THREAD_MANAGER->LaunchMainThreads(mainThreads);
+
+	// 초기 객체
 }
 
 void AppModeBase::EndThread()

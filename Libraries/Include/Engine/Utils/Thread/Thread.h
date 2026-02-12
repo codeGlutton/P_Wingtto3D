@@ -11,6 +11,9 @@ public:
 		rand();
 	}
 	virtual void Run() = 0;
+	virtual void Destroy()
+	{
+	}
 };
 
 class WorkerThread : public Thread

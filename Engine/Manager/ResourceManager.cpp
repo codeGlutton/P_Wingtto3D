@@ -60,6 +60,24 @@ std::shared_ptr<ResourceHeader> ResourceManager::CreateResourceHeader(std::share
 	return resourceHeader;
 }
 
+std::shared_ptr<Resource> ResourceManager::CreateOrGetResource(const std::wstring& resourcePath, ObjectTypeInfo* typeInfo, ObjectCreateFlag::Type flags)
+{
+	if (_mResources.find(resourcePath) != _mResources.end())
+	{
+		return _mResources[resourcePath].lock();
+	}
+
+	ASSERT_MSG(typeInfo->IsChildOf<Resource>() == true, "GetResource func is not allowed to create non Resource class");
+
+	std::wstring typeName = ConvertUtf8ToWString(typeInfo->GetName());
+	std::shared_ptr<Resource> resource = std::static_pointer_cast<Resource>(NewObject(_mPackage, typeInfo, typeName, flags));
+	if (resource == nullptr)
+	{
+		return nullptr;
+	}
+	return resource;
+}
+
 void ResourceManager::NotifyToAddResourceHeader(std::shared_ptr<ResourceHeader> resourceHeader)
 {
 	ASSERT_MSG(resourceHeader == nullptr, "Can't add nullptr resource header");
@@ -79,7 +97,7 @@ void ResourceManager::NotifyToAddResource(std::shared_ptr<Resource> resource)
 {
 	ASSERT_MSG(resource == nullptr, "Can't add nullptr resource");
 
-	std::wstring resourcePath = resource->GetPath();
+	std::wstring resourcePath = resource->GetFullPath();
 
 	// 이미 있는 리소스면 반환
 	auto resourceIter = _mResources.find(resourcePath);
@@ -93,6 +111,29 @@ void ResourceManager::NotifyToAddResource(std::shared_ptr<Resource> resource)
 void ResourceManager::NotifyToRemoveResource(const std::wstring& resourcePath)
 {
 	std::size_t eraseCount = _mResources.erase(resourcePath);
+}
+
+void ResourceManager::NotifyToAddRenderResource(DXSharedResourceType::Type type, std::shared_ptr<DXSharedResource> resource)
+{
+	ASSERT_MSG(type > DXSharedResourceType::None && type < DXSharedResourceType::Count, "Invalid render resource type");
+	ASSERT_MSG(resource == nullptr, "Can't add nullptr render resource");
+
+	const std::wstring& resourcePath = resource->GetFullPath();
+
+	// 이미 있는 리소스면 반환
+	auto resourceIter = _mRenderThreadResources[type].find(resourcePath);
+	if (resourceIter != _mRenderThreadResources[type].end())
+	{
+		return;
+	}
+	_mRenderThreadResources[type][resourcePath] = std::move(resource);
+}
+
+void ResourceManager::NotifyToRemoveRenderResource(DXSharedResourceType::Type type, const std::wstring& resourcePath)
+{
+	ASSERT_MSG(type > DXSharedResourceType::None && type < DXSharedResourceType::Count, "Invalid render resource type");
+
+	std::size_t eraseCount = _mRenderThreadResources[type].erase(resourcePath);
 }
 
 

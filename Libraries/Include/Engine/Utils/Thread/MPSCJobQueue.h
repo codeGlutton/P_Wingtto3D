@@ -52,6 +52,9 @@ public:
 	}
 
 	virtual void Execute();
+	virtual void ExecuteOnce();
+
+	virtual void ExecuteOnlyLastOne();
 
 private:
 	virtual void Push(const std::shared_ptr<Job>& job);

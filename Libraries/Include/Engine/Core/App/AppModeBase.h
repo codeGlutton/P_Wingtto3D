@@ -24,7 +24,7 @@ public:
 	virtual void OnDoubleClickMouse(std::shared_ptr<AppWindow> target, std::shared_ptr<PointEvent>& event) override;
 
 	virtual void OnMoveMouse(std::shared_ptr<PointEvent>& event) override;
-
+	
 protected:
 	void ProcessReplyData(const ReplyData& reply, const std::shared_ptr<KeyEvent>& event);
 	void ProcessReplyData(const ReplyData& reply, const std::shared_ptr<PointEvent>& event);
