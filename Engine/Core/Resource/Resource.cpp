@@ -4,6 +4,8 @@
 #include "Manager/ResourceManager.h"
 #include "Core/Resource/ResourceHeader.h"
 
+#include "Manager/PackageManager.h"
+
 void Resource::PostCreate()
 {
 	Super::PostCreate();
@@ -12,8 +14,18 @@ void Resource::PostCreate()
 
 void Resource::BeginDestroy()
 {
-	RESOURCE_MANAGER->NotifyToRemoveResource(GetFullPath());
+	RESOURCE_MANAGER->NotifyToRemoveResource(GetPath());
 	Super::BeginDestroy();
+}
+
+void Resource::Save() const
+{
+	PACKAGE_MANAGER->SavePackage(GetOuter()->GetPath());
+}
+
+void Resource::SaveAsync(std::function<void()> callback) const
+{
+	PACKAGE_MANAGER->SavePackageAsync(GetOuter()->GetPath(), callback);
 }
 
 void Resource::MakeHeader()

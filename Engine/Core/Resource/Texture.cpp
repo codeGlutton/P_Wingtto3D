@@ -24,11 +24,11 @@ void Texture2D::PostLoad()
 	_mBulkData->SerializeFromMemory();
 	if (_mBulkData->IsArray() == true)
 	{
-		_mProxy->mData = RESOURCE_MANAGER->CreateRenderResource<DXConstTexture2DArray>(GetName(), GetFullPath());
+		_mProxy->mData = RESOURCE_MANAGER->CreateRenderResource<DXConstTexture2DArray>(GetName(), GetPath());
 	}
 	else
 	{
-		_mProxy->mData = RESOURCE_MANAGER->CreateRenderResource<DXConstTexture2D>(GetName(), GetFullPath());
+		_mProxy->mData = RESOURCE_MANAGER->CreateRenderResource<DXConstTexture2D>(GetName(), GetPath());
 	}
 	_mNeedInitProxy = true;
 

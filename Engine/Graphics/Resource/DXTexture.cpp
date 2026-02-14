@@ -85,7 +85,7 @@ void DXTexture2DBase::InitImmutableTex(const void* initData, uint32 width, uint3
 		data.pSysMem = initData;
 		data.SysMemPitch = static_cast<uint32>(pitch);
 
-		CHECK_WIN_MSG(DX_DEVICE->CreateTexture2D(&desc, &data, _mTexture.GetAddressOf()), "Texture creation is failed");
+		CHECK_WIN_MSG(DX_DEVICE->CreateTexture2D(&desc, &data, _mTexture.ReleaseAndGetAddressOf()), "Texture creation is failed");
 	}
 
 	{
@@ -95,7 +95,7 @@ void DXTexture2DBase::InitImmutableTex(const void* initData, uint32 width, uint3
 		desc.Format = format;
 		desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 
-		CHECK_WIN_MSG(DX_DEVICE->CreateShaderResourceView(_mTexture.Get(), &desc, _mSRV.GetAddressOf()), "Texture SRV creation is failed");
+		CHECK_WIN_MSG(DX_DEVICE->CreateShaderResourceView(_mTexture.Get(), &desc, _mSRV.ReleaseAndGetAddressOf()), "Texture SRV creation is failed");
 	}
 }
 
@@ -118,11 +118,11 @@ void DXTexture2DBase::InitImmutableTex(std::shared_ptr<Texture2DBulkData> bulkDa
 		0,
 		0,
 		false,
-		_mSRV.GetAddressOf()			// OUT 생성된 SRT 객체
+		_mSRV.ReleaseAndGetAddressOf()			// OUT 생성된 SRT 객체
 	);
 	CHECK_WIN_MSG(hr, "Texture default SRV creation is failed");
 
-	_mSRV->GetResource(reinterpret_cast<ID3D11Resource**>(_mTexture.GetAddressOf()));
+	_mSRV->GetResource(reinterpret_cast<ID3D11Resource**>(_mTexture.ReleaseAndGetAddressOf()));
 
 	_mWidth = static_cast<uint32>(bulkData->mMetaData.width);
 	_mHeight = static_cast<uint32>(bulkData->mMetaData.height);
@@ -150,7 +150,7 @@ void DXTexture2DBase::InitDefaultTex(const void* initData, uint32 width, uint32 
 
 		if (initData == nullptr)
 		{
-			CHECK_WIN_MSG(DX_DEVICE->CreateTexture2D(&desc, nullptr, _mTexture.GetAddressOf()), "Texture creation is failed");
+			CHECK_WIN_MSG(DX_DEVICE->CreateTexture2D(&desc, nullptr, _mTexture.ReleaseAndGetAddressOf()), "Texture creation is failed");
 		}
 		else
 		{
@@ -163,7 +163,7 @@ void DXTexture2DBase::InitDefaultTex(const void* initData, uint32 width, uint32 
 			data.pSysMem = initData;
 			data.SysMemPitch = static_cast<uint32>(pitch);
 
-			CHECK_WIN_MSG(DX_DEVICE->CreateTexture2D(&desc, &data, _mTexture.GetAddressOf()), "Texture creation is failed");
+			CHECK_WIN_MSG(DX_DEVICE->CreateTexture2D(&desc, &data, _mTexture.ReleaseAndGetAddressOf()), "Texture creation is failed");
 		}
 	}
 
@@ -174,7 +174,7 @@ void DXTexture2DBase::InitDefaultTex(const void* initData, uint32 width, uint32 
 		desc.Format = format;
 		desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 
-		CHECK_WIN_MSG(DX_DEVICE->CreateShaderResourceView(_mTexture.Get(), &desc, _mSRV.GetAddressOf()), "Texture SRV creation is failed");
+		CHECK_WIN_MSG(DX_DEVICE->CreateShaderResourceView(_mTexture.Get(), &desc, _mSRV.ReleaseAndGetAddressOf()), "Texture SRV creation is failed");
 	}
 }
 
@@ -197,11 +197,11 @@ void DXTexture2DBase::InitDefaultTex(std::shared_ptr<Texture2DBulkData> bulkData
 		0,
 		0,
 		false,
-		_mSRV.GetAddressOf()	// OUT 생성된 SRT 객체
+		_mSRV.ReleaseAndGetAddressOf()	// OUT 생성된 SRT 객체
 	);
 	CHECK_WIN_MSG(hr, "Texture default SRV creation is failed");
 
-	_mSRV->GetResource(reinterpret_cast<ID3D11Resource**>(_mTexture.GetAddressOf()));
+	_mSRV->GetResource(reinterpret_cast<ID3D11Resource**>(_mTexture.ReleaseAndGetAddressOf()));
 
 	_mWidth = static_cast<uint32>(bulkData->mMetaData.width);
 	_mHeight = static_cast<uint32>(bulkData->mMetaData.height);
@@ -242,7 +242,7 @@ void DXTexture2D::Init(ComPtr<ID3D11ShaderResourceView> initSRVData, D3D11_BIND_
 	ASSERT_MSG(initSRVData != nullptr, "Null srv data can't be allowed to initialize texture2D");
 	
 	ComPtr<ID3D11Texture2D> texture;
-	initSRVData->GetResource((ID3D11Resource**)texture.GetAddressOf());
+	initSRVData->GetResource((ID3D11Resource**)texture.ReleaseAndGetAddressOf());
 
 	ASSERT_MSG(texture != nullptr, "Empty texture resource can't be used for texture2D");
 
@@ -262,7 +262,7 @@ void DXTexture2D::Init(ComPtr<ID3D11ShaderResourceView> initSRVData, D3D11_BIND_
 		srcDesc.BindFlags = _mBindFlags;
 		srcDesc.Usage = D3D11_USAGE_DEFAULT;
 
-		CHECK_WIN_MSG(DX_DEVICE->CreateTexture2D(&srcDesc, nullptr, _mTexture.GetAddressOf()), "Texture creation is failed");
+		CHECK_WIN_MSG(DX_DEVICE->CreateTexture2D(&srcDesc, nullptr, _mTexture.ReleaseAndGetAddressOf()), "Texture creation is failed");
 		DX_DEVICE_CONTEXT->CopyResource(_mTexture.Get(), texture.Get());
 	}
 
@@ -273,7 +273,7 @@ void DXTexture2D::Init(ComPtr<ID3D11ShaderResourceView> initSRVData, D3D11_BIND_
 		desc.Format = srcDesc.Format;
 		desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 
-		CHECK_WIN_MSG(DX_DEVICE->CreateShaderResourceView(_mTexture.Get(), &desc, _mSRV.GetAddressOf()), "Texture SRV creation is failed");
+		CHECK_WIN_MSG(DX_DEVICE->CreateShaderResourceView(_mTexture.Get(), &desc, _mSRV.ReleaseAndGetAddressOf()), "Texture SRV creation is failed");
 	}
 }
 
@@ -335,7 +335,7 @@ void DXTexture2DArrayBase::InitImmutableTex(const void* initData, uint32 arraySi
 			datas[i].SysMemSlicePitch = static_cast<uint32>(slice);
 		}
 
-		CHECK_WIN_MSG(DX_DEVICE->CreateTexture2D(&desc, datas.data(), _mTexture.GetAddressOf()), "Texture creation is failed");
+		CHECK_WIN_MSG(DX_DEVICE->CreateTexture2D(&desc, datas.data(), _mTexture.ReleaseAndGetAddressOf()), "Texture creation is failed");
 	}
 
 	{
@@ -347,7 +347,7 @@ void DXTexture2DArrayBase::InitImmutableTex(const void* initData, uint32 arraySi
 		desc.Texture2DArray.MipLevels = 1;
 		desc.Texture2DArray.ArraySize = arraySize;
 
-		CHECK_WIN_MSG(DX_DEVICE->CreateShaderResourceView(_mTexture.Get(), &desc, _mSRV.GetAddressOf()), "Texture SRV creation is failed");
+		CHECK_WIN_MSG(DX_DEVICE->CreateShaderResourceView(_mTexture.Get(), &desc, _mSRV.ReleaseAndGetAddressOf()), "Texture SRV creation is failed");
 	}
 }
 
@@ -371,11 +371,11 @@ void DXTexture2DArrayBase::InitImmutableTex(std::shared_ptr<Texture2DBulkData> b
 		0,
 		0,
 		false,
-		_mSRV.GetAddressOf()			// OUT 생성된 SRT 객체
+		_mSRV.ReleaseAndGetAddressOf()	// OUT 생성된 SRT 객체
 	);
 	CHECK_WIN_MSG(hr, "Texture default SRV creation is failed");
 
-	_mSRV->GetResource(reinterpret_cast<ID3D11Resource**>(_mTexture.GetAddressOf()));
+	_mSRV->GetResource(reinterpret_cast<ID3D11Resource**>(_mTexture.ReleaseAndGetAddressOf()));
 
 	_mWidth = static_cast<uint32>(bulkData->mMetaData.width);
 	_mHeight = static_cast<uint32>(bulkData->mMetaData.height);
@@ -407,7 +407,7 @@ void DXTexture2DArrayBase::InitDefaultTex(const void* initData, uint32 arraySize
 
 		if (initData == nullptr)
 		{
-			CHECK_WIN_MSG(DX_DEVICE->CreateTexture2D(&desc, nullptr, _mTexture.GetAddressOf()), "Texture creation is failed");
+			CHECK_WIN_MSG(DX_DEVICE->CreateTexture2D(&desc, nullptr, _mTexture.ReleaseAndGetAddressOf()), "Texture creation is failed");
 		}
 		else
 		{
@@ -423,7 +423,7 @@ void DXTexture2DArrayBase::InitDefaultTex(const void* initData, uint32 arraySize
 				datas[i].SysMemSlicePitch = static_cast<uint32>(slice);
 			}
 
-			CHECK_WIN_MSG(DX_DEVICE->CreateTexture2D(&desc, datas.data(), _mTexture.GetAddressOf()), "Texture creation is failed");
+			CHECK_WIN_MSG(DX_DEVICE->CreateTexture2D(&desc, datas.data(), _mTexture.ReleaseAndGetAddressOf()), "Texture creation is failed");
 		}
 	}
 
@@ -436,7 +436,7 @@ void DXTexture2DArrayBase::InitDefaultTex(const void* initData, uint32 arraySize
 		desc.Texture2DArray.MipLevels = 1;
 		desc.Texture2DArray.ArraySize = arraySize;
 
-		CHECK_WIN_MSG(DX_DEVICE->CreateShaderResourceView(_mTexture.Get(), &desc, _mSRV.GetAddressOf()), "Texture SRV creation is failed");
+		CHECK_WIN_MSG(DX_DEVICE->CreateShaderResourceView(_mTexture.Get(), &desc, _mSRV.ReleaseAndGetAddressOf()), "Texture SRV creation is failed");
 	}
 }
 
@@ -460,11 +460,11 @@ void DXTexture2DArrayBase::InitDefaultTex(std::shared_ptr<Texture2DBulkData> bul
 		0,
 		0,
 		false,
-		_mSRV.GetAddressOf()	// OUT 생성된 SRT 객체
+		_mSRV.ReleaseAndGetAddressOf()	// OUT 생성된 SRT 객체
 	);
 	CHECK_WIN_MSG(hr, "Texture default SRV creation is failed");
 
-	_mSRV->GetResource(reinterpret_cast<ID3D11Resource**>(_mTexture.GetAddressOf()));
+	_mSRV->GetResource(reinterpret_cast<ID3D11Resource**>(_mTexture.ReleaseAndGetAddressOf()));
 
 	_mWidth = static_cast<uint32>(bulkData->mMetaData.width);
 	_mHeight = static_cast<uint32>(bulkData->mMetaData.height);
@@ -484,7 +484,7 @@ void DXTexture2DArray::Init(ComPtr<ID3D11ShaderResourceView> initSRVData, D3D11_
 	ASSERT_MSG(initSRVData != nullptr, "Null srv data can't be allowed to initialize texture2DArray");
 
 	ComPtr<ID3D11Texture2D> texture;
-	initSRVData->GetResource((ID3D11Resource**)texture.GetAddressOf());
+	initSRVData->GetResource((ID3D11Resource**)texture.ReleaseAndGetAddressOf());
 
 	ASSERT_MSG(texture != nullptr, "Empty texture resource can't be used for texture2DArray");
 
@@ -505,7 +505,7 @@ void DXTexture2DArray::Init(ComPtr<ID3D11ShaderResourceView> initSRVData, D3D11_
 		srcDesc.BindFlags = _mBindFlags;
 		srcDesc.Usage = D3D11_USAGE_DEFAULT;
 
-		CHECK_WIN_MSG(DX_DEVICE->CreateTexture2D(&srcDesc, nullptr, _mTexture.GetAddressOf()), "Texture creation is failed");
+		CHECK_WIN_MSG(DX_DEVICE->CreateTexture2D(&srcDesc, nullptr, _mTexture.ReleaseAndGetAddressOf()), "Texture creation is failed");
 		DX_DEVICE_CONTEXT->CopyResource(_mTexture.Get(), texture.Get());
 	}
 
@@ -518,7 +518,7 @@ void DXTexture2DArray::Init(ComPtr<ID3D11ShaderResourceView> initSRVData, D3D11_
 		desc.Texture2DArray.MipLevels = 1;
 		desc.Texture2DArray.ArraySize = _mArraySize;
 
-		CHECK_WIN_MSG(DX_DEVICE->CreateShaderResourceView(_mTexture.Get(), &desc, _mSRV.GetAddressOf()), "Texture SRV creation is failed");
+		CHECK_WIN_MSG(DX_DEVICE->CreateShaderResourceView(_mTexture.Get(), &desc, _mSRV.ReleaseAndGetAddressOf()), "Texture SRV creation is failed");
 	}
 }
 

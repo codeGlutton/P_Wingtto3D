@@ -35,7 +35,7 @@ void DXConstantBuffer::Init(std::shared_ptr<ConstantBufferBulkData> bulkData, ui
 	memset(&data, 0, sizeof(data));
 	data.pSysMem = bulkData->mRawBytes.data();
 
-	CHECK_WIN_MSG(DX_DEVICE->CreateBuffer(&desc, &data, _mConstantBuffer.GetAddressOf()), "Constant buffer creation is failed");
+	CHECK_WIN_MSG(DX_DEVICE->CreateBuffer(&desc, &data, _mConstantBuffer.ReleaseAndGetAddressOf()), "Constant buffer creation is failed");
 }
 
 void DXConstantBuffer::Init(std::size_t stride, uint32 slot, DXResourceUsageFlag::Type usageFlags, bool canCpuWrite)
@@ -67,7 +67,7 @@ void DXConstantBuffer::Init(std::size_t stride, uint32 slot, DXResourceUsageFlag
 		desc.Usage = D3D11_USAGE_IMMUTABLE; // GPU만 읽을 수 있음
 	}
 
-	CHECK_WIN_MSG(DX_DEVICE->CreateBuffer(&desc, nullptr, _mConstantBuffer.GetAddressOf()), "Constant buffer creation is failed");
+	CHECK_WIN_MSG(DX_DEVICE->CreateBuffer(&desc, nullptr, _mConstantBuffer.ReleaseAndGetAddressOf()), "Constant buffer creation is failed");
 }
 
 inline void DXConstantBuffer::Init(const void* initData, std::size_t stride, uint32 slot, DXResourceUsageFlag::Type usageFlags, bool canCpuWrite)
@@ -102,7 +102,7 @@ inline void DXConstantBuffer::Init(const void* initData, std::size_t stride, uin
 	memset(&data, 0, sizeof(data));
 	data.pSysMem = initData;
 
-	CHECK_WIN_MSG(DX_DEVICE->CreateBuffer(&desc, &data, _mConstantBuffer.GetAddressOf()), "Constant buffer creation is failed");
+	CHECK_WIN_MSG(DX_DEVICE->CreateBuffer(&desc, &data, _mConstantBuffer.ReleaseAndGetAddressOf()), "Constant buffer creation is failed");
 }
 
 inline bool DXConstantBuffer::UpdateData(const void* data, std::size_t stride) const

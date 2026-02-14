@@ -6,9 +6,12 @@
 #include "Graphics/Widget/Type/WidgetGeometry.h"
 #include "Graphics/Widget/Type/WidgetBrush.h"
 
-class AppWindow;
+#include "Graphics/DXDefaultVertexData.h"
 
-namespace RenderElementType
+class AppWindow;
+class DXTextureBase;
+
+namespace WidgetRenderElementType
 {
 	enum Type
 	{
@@ -19,43 +22,57 @@ namespace RenderElementType
 	};
 }
 
-struct RenderElement
+struct WidgetRenderElement
 {
-	RenderElementType::Type mType;
+	WidgetRenderElementType::Type mType;
 
-	Matrix2D mRenderMatrix;
-	Vec2 mBoxSize;
+	Matrix mRenderMat = Matrix::Identity;
+	Vec2 mBoxSize = Vec2();
 
-	uint8 mSceneId;
-	uint32 mLayerId;
+	uint8 mSceneId = 0u;
+	uint32 mLayerId = 0u;
 
-	Matrix mRenderMat;
-	WidgetDrawOptionFlag::Type mDrawOpt;
+	// TODO 아직 미적용
+	WidgetDrawOptionFlag::Type mDrawOpt = WidgetDrawOptionFlag::None;
 };
 
-struct RenderTintElement
+struct WidgetRenderTintElement
 {
-	Color mTint;
+	Color mTint = Color::White;
 };
 
-struct RenderBoxElement : public RenderElement, public RenderTintElement
+struct WidgetRenderBoxElement : public WidgetRenderElement, public WidgetRenderTintElement
 {
 public:
-	RenderBoxElement()
+	WidgetRenderBoxElement()
 	{
-		mType = RenderElementType::Box;
+		mType = WidgetRenderElementType::Box;
 	}
 
 public:
 	Margin mMargin;
-	//const FSlateShaderResourceProxy* ResourceProxy;
+	std::shared_ptr<DXTextureBase> mResource;
 	TilingType mTiling;
 	WidgetBrushType mBrushType;
 };
 
+struct WidgetRenderBatch
+{
+	WidgetRenderBatch(const std::shared_ptr<DXTextureBase>& texture, uint32 startIndex) :
+		mTexture(texture),
+		mStartIndex(startIndex),
+		mIndexCount(0u)
+	{
+	}
+
+	const std::shared_ptr<DXTextureBase>& mTexture;
+	uint32 mStartIndex;
+	uint32 mIndexCount;
+};
+
 struct WindowRenderElementContainer
 {
-	using ElementList = std::vector<std::unique_ptr<RenderElement>>;
+	using ElementList = std::vector<std::unique_ptr<WidgetRenderElement>>;
 
 public:
 	void CreateBoxElement(uint32 layerId, const WidgetGeometry& paintGeometry, const WidgetBrush& brush, const Color& color, WidgetDrawOptionFlag::Type drawOpt);
@@ -74,7 +91,12 @@ public:
 	Vec2 mWindowSize;
 
 public:
-	std::array<ElementList, RenderElementType::Count> mElementLists;
+	std::vector<WidgetRenderBatch> mBatches;
+	std::vector<UIVertexData> mVertices;
+	std::vector<uint32> mIndices;
+
+	std::vector<ElementList> mElementLayers;
+	std::size_t mElementCount = 0;
 };
 
 /**

@@ -5,6 +5,7 @@
 
 #include "Utils/Thread/MainThread.h"
 #include "Utils/Thread/LockQueue.h"
+#include "Utils/Thread/DeadLockProfiler.h"
 
 #define THREAD_MANAGER ThreadManager::GetInst()
 
@@ -45,8 +46,8 @@ public:
 public:
 	void Launch(std::function<void()> work, std::function<bool()> condition = nullptr);
 	void Launch(std::shared_ptr<WorkerThread> thread);
-	void LaunchMainThreads(std::array<std::shared_ptr<MainThread>, MainThreadType::Count> threads);
-	void Join();
+	void LaunchMainThreads(std::array<std::shared_ptr<MainThread>, MainThreadType::Count - 1> threads);
+	void Join(bool isForced = true);
 
 public:
 	bool IsAlive() const
@@ -60,6 +61,7 @@ public:
 
 public:
 	void DoGameJob();
+	void ClearGameJob();
 
 	/* 랜더 Job Q */
 public:
@@ -69,6 +71,7 @@ public:
 
 public:
 	void DoRenderJob();
+	void ClearRenderJob();
 
 	/* 글로벌 Job Q */
 public:
@@ -79,6 +82,16 @@ public:
 
 public:
 	void DoGlobalJob();
+	void ClearGlobalJob();
+
+	/* 디버깅 */
+#ifdef _DEBUG
+public:
+	DeadLockProfiler& GetDeadLockProfiler()
+	{
+		return _mDeadLockProfiler;
+	}
+#endif
 
 private:
 	/**
@@ -114,5 +127,9 @@ private:
 
 private:
 	std::atomic<bool> _mIsAlive;
+
+	/* 디버깅 */
+private:
+	DeadLockProfiler _mDeadLockProfiler;
 };
 

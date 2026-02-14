@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#define READ_LOCK(lock) ReadLockGuard readLockGuard_##lock(lock, typeid(this).name())
-#define WRITE_LOCK(lock) WriteLockGuard writeLockGuard_##lock(lock, typeid(this).name())
+#define READ_LOCK(lock) ReadLockGuard readLockGuard_##lock(lock, this, typeid(this).name())
+#define WRITE_LOCK(lock) WriteLockGuard writeLockGuard_##lock(lock, this, typeid(this).name())
 
 class Lock
 {
@@ -16,10 +16,10 @@ class Lock
 	};
 
 public:
-	void WriteLock(const char* thread);
-	void WriteUnlock(const char* thread);
-	void ReadLock(const char* thread);
-	void ReadUnlock(const char* thread);
+	void WriteLock(const void* owner, const char* name);
+	void WriteUnlock(const void* owner);
+	void ReadLock(const void* owner, const char* name);
+	void ReadUnlock(const void* owner);
 
 private:
 	// 상위 16비트는 Thread id, 하위 16비트는 걸린 read lock 수
@@ -34,37 +34,41 @@ private:
 class ReadLockGuard
 {
 public:
-	ReadLockGuard(Lock& lock, const char* thread) : 
+	ReadLockGuard(Lock& lock, const void* owner, const char* name) : 
 		_mLock(lock),
-		_mName(thread)
+		_mOwner(owner),
+		_mName(name)
 	{ 
-		_mLock.ReadLock(thread); 
+		_mLock.ReadLock(_mOwner, _mName);
 	}
 	~ReadLockGuard() 
 	{ 
-		_mLock.ReadUnlock(_mName); 
+		_mLock.ReadUnlock(_mOwner);
 	}
 
 private:
 	Lock& _mLock;
+	const void* _mOwner;
 	const char* _mName;
 };
 
 class WriteLockGuard
 {
 public:
-	WriteLockGuard(Lock& lock, const char* thread) :
+	WriteLockGuard(Lock& lock, const void* owner, const char* name) :
 		_mLock(lock), 
-		_mName(thread)
+		_mOwner(owner),
+		_mName(name)
 	{
-		_mLock.WriteLock(thread);
+		_mLock.WriteLock(_mOwner, _mName);
 	}
 	~WriteLockGuard() 
 	{
-		_mLock.WriteUnlock(_mName);
+		_mLock.WriteUnlock(_mOwner);
 	}
 
 private:
 	Lock& _mLock;
+	const void* _mOwner;
 	const char* _mName;
 };

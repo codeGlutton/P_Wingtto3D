@@ -26,6 +26,17 @@ protected:
 public:
 	const ProxyType& GetProxy() const;
 
+#ifdef _EDITOR
+
+public:
+	void UpdateProxy(
+		std::shared_ptr<MaterialBulkData> newBulkData,
+		const std::vector<std::pair<std::string, std::shared_ptr<ConstantDataBase>>>& newMatConstantDatas,
+		const std::vector<std::pair<std::string, std::shared_ptr<Texture2D>>>& newBoundTextures
+	);
+
+#endif
+
 private:
 	PROPERTY(_mMatConstantDatas)
 	std::vector<std::pair<std::string, std::shared_ptr<ConstantDataBase>>> _mMatConstantDatas;

@@ -21,7 +21,7 @@ void DXInputLayout::Init(const std::vector<D3D11_INPUT_ELEMENT_DESC>& descs, con
 		static_cast<int32>(descs.size()),
 		shader._mBlob->GetBufferPointer(), 
 		shader._mBlob->GetBufferSize(),
-		_mLayout.GetAddressOf()
+		_mLayout.ReleaseAndGetAddressOf()
 	), "Input layout creation is failed");
 }
 

@@ -48,7 +48,7 @@ void SequentialJobQueue::Push(const std::shared_ptr<Job>& job, bool pushOnly)
 	if (preCount == 0)
 	{
 		// Execute 내부에서 Execute 방지
-		if (LCurrentJobQueue == nullptr && pushOnly == false && LThreadId >= MainThreadType::Count)
+		if (LCurrentJobQueue == nullptr && pushOnly == false && LThreadId >= MainThreadType::End)
 		{
 			Execute();
 		}
@@ -69,7 +69,7 @@ void SequentialJobQueue::Push(std::shared_ptr<Job>&& job, bool pushOnly)
 	if (preCount == 0)
 	{
 		// Execute 내부에서 Execute 방지
-		if (LCurrentJobQueue == nullptr && pushOnly == false && LThreadId >= MainThreadType::Count)
+		if (LCurrentJobQueue == nullptr && pushOnly == false && LThreadId >= MainThreadType::End)
 		{
 			Execute();
 		}

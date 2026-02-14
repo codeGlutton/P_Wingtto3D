@@ -5,20 +5,12 @@
 
 #include "Graphics/Resource/DXInputLayout.h"
 
-const DXInputElementList& ColorUIVertexData::MakeLayout()
+const DXInputElementList& UIVertexData::MakeLayout()
 {
 	static DXInputElementList inputElements = DXInputElementList::Make()
 		.Push3Float("Position", 0)
-		.Push3Float("Color", 0);
-
-	return inputElements;
-}
-
-const DXInputElementList& TextureUIVertexData::MakeLayout()
-{
-	static DXInputElementList inputElements = DXInputElementList::Make()
-		.Push3Float("Position", 0)
-		.Push2Float("UV", 0);
+		.Push2Float("UV", 0)
+		.Push3Float("Tint", 0);
 
 	return inputElements;
 }

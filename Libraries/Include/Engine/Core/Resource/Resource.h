@@ -14,6 +14,10 @@ protected:
 	virtual void PostCreate() override;
 	virtual void BeginDestroy() override;
 
+public:
+	virtual void Save() const;
+	virtual void SaveAsync(std::function<void()> callback) const;
+
 private:
 	void MakeHeader();
 

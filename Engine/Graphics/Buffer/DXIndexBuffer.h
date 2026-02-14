@@ -39,11 +39,13 @@ public:
 
 public:
 	void Init(std::shared_ptr<IndexBulkData> bulkData, bool canCpuWrite = false, uint32 offset = 0);
-	void Init(std::vector<uint32> indices, bool canCpuWrite = false, uint32 offset = 0);
+	void Init(const std::vector<uint32>& indices, bool canCpuWrite = false, uint32 offset = 0);
+	void Init(uint32 count, uint32 offset = 0);
 
 public:
 	void PushData() const;
 	bool UpdateData(std::shared_ptr<IndexBulkData> bulkData) const;
+	bool UpdateData(const std::vector<uint32>& indices) const;
 
 private:
 	ComPtr<ID3D11Buffer> _mIndexBuffer;

@@ -12,6 +12,7 @@
 
 class ResourceHeader;
 class ResourcePreviewPackage;
+class ResourcePackage;
 
 class ResourceManager : public IPackageRuntimeOwner
 {
@@ -34,7 +35,7 @@ public:
 
 public:
 	void RegisterPackage(std::shared_ptr<Package> package) override;
-	void Save() override;
+	void Save() const override;
 	void Load() override;
 
 public:
@@ -42,16 +43,45 @@ public:
 
 	/* 게임 스레드 Only */
 public:
+	/**
+	 * 게임 스레드 측에서 Object 파생 객체 리소스 가져오기. 필요시 패키징 로드
+	 * \param resourcePath 리소스 경로
+	 * \return 리소스 객체
+	 */
 	template<typename T> requires std::is_base_of_v<Resource, T>
-	std::shared_ptr<T> CreateOrGetResource(const std::wstring& resourcePath, ObjectCreateFlag::Type flags = ObjectCreateFlag::None);
-	std::shared_ptr<Resource> CreateOrGetResource(const std::wstring& resourcePath, ObjectTypeInfo* typeInfo, ObjectCreateFlag::Type flags = ObjectCreateFlag::None);
+	std::shared_ptr<T> LoadOrGetResource(const std::wstring& resourcePath);
+	std::shared_ptr<Resource> LoadOrGetResource(const std::wstring& resourcePath, const ObjectTypeInfo* typeInfo);
+	/**
+	 * 게임 스레드 측에서 Object 파생 객체 리소스 가져오기. 필요시 패키징 비동기 로드
+	 * \param resourcePath 리소스 경로
+	 * \param callback 콜백 함수
+	 * \return 리소스 객체
+	 */
+	template<typename T> requires std::is_base_of_v<Resource, T>
+	void LoadOrGetResourceAsync(const std::wstring& resourcePath, std::function<void(std::shared_ptr<T>)> callback);
+	void LoadOrGetResourceAsync(const std::wstring& resourcePath, const ObjectTypeInfo* typeInfo, std::function<void(std::shared_ptr<Resource>)> callback);
 
+	/**
+	 * 게임 스레드 리소스 생성
+	 * \param package 연관된 리소스 패키징
+	 * \param flags 생성 플래그
+	 * \return 리소스 객체
+	 */
+	template<typename T> requires std::is_base_of_v<Resource, T>
+	std::shared_ptr<T> CreateResource(std::shared_ptr<ResourcePackage> outer, ObjectCreateFlag::Type flags = ObjectCreateFlag::None);
+	std::shared_ptr<Resource> CreateResource(std::shared_ptr<ResourcePackage> outer, const ObjectTypeInfo* typeInfo, ObjectCreateFlag::Type flags = ObjectCreateFlag::None);
+	/**
+	 * 렌더 스레드 리소스 생성 (생성 이후에는 랜더에서만 조작 가능)
+	 * \param resourceName 리소스 이름
+	 * \param resourcePath 리소스 경로
+	 * \return 랜더 리소스 객체
+	 */
 	template<typename T> requires std::is_base_of_v<DXSharedResource, T>
 	std::shared_ptr<T> CreateRenderResource(const std::wstring& resourceName, const std::wstring& resourcePath);
 
 	bool IsLoadedResource(const std::wstring& resourcePath) const
 	{
-		return _mResources.find(resourcePath) != _mResources.end();
+		return _mGameThreadResources.find(resourcePath) != _mGameThreadResources.end();
 	}
 	
 	void NotifyToAddResourceHeader(std::shared_ptr<ResourceHeader> resourceHeader);
@@ -60,12 +90,29 @@ public:
 
 	/* 렌더 스레드 Only */
 public:
+	/**
+	 * 랜더 스레드 리소스 가져오기
+	 * \param resourcePath 리소스 경로
+	 * \param renderResourceType 리소스 타입
+	 * \return 랜더 리소스 객체
+	 */
 	template<typename T> requires std::is_base_of_v<DXSharedResource, T>
 	std::shared_ptr<T> GetRenderResource(const std::wstring& resourcePath, DXSharedResourceType::Type renderResourceType);
+	/**
+	 * 랜더 스레드 임시 리소스 생성 (이름 비명시적 부여)
+	 * \param renderResourceType 리소스 타입
+	 * \return 랜더 리소스 객체
+	 */
 	template<typename T> requires std::is_base_of_v<DXSharedResource, T>
 	std::shared_ptr<T> CreateTransientRenderResource(DXSharedResourceType::Type renderResourceType);
+	/**
+	 * 랜더 스레드 런타임 리소스 생성
+	 * \param name 리소스 이름
+	 * \param renderResourceType 리소스 타입
+	 * \return 랜더 리소스 객체
+	 */
 	template<typename T> requires std::is_base_of_v<DXSharedResource, T>
-	std::shared_ptr<T> CreateOrGetTransientRenderResource(const std::wstring& name, DXSharedResourceType::Type renderResourceType);
+	std::shared_ptr<T> CreateOrGetRuntimeRenderResource(const std::wstring& name, DXSharedResourceType::Type renderResourceType);
 	
 	bool IsLoadedRenderResource(DXSharedResourceType::Type type, const std::wstring& resourcePath) const
 	{
@@ -84,7 +131,7 @@ private:
 
 private:
 	// 패키징 참조에 의해 로드될 리소스
-	std::unordered_map<std::wstring, std::weak_ptr<Resource>> _mResources;
+	std::unordered_map<std::wstring, std::weak_ptr<Resource>> _mGameThreadResources;
 
 private:
 	// 렌더 스레드 리소스
@@ -92,9 +139,23 @@ private:
 };
 
 template<typename T> requires std::is_base_of_v<Resource, T>
-inline std::shared_ptr<T> ResourceManager::CreateOrGetResource(const std::wstring& resourcePath, ObjectCreateFlag::Type flags)
+inline std::shared_ptr<T> ResourceManager::LoadOrGetResource(const std::wstring& resourcePath)
 {
-	return std::static_pointer_cast<T>(GetResource(resourcePath, &T::GetStaticTypeInfo(), flags));
+	return std::static_pointer_cast<T>(LoadOrGetResource(resourcePath, &T::GetStaticTypeInfo()));
+}
+
+template<typename T> requires std::is_base_of_v<Resource, T>
+inline void ResourceManager::LoadOrGetResourceAsync(const std::wstring& resourcePath, std::function<void(std::shared_ptr<T>)> callback)
+{
+	LoadOrGetResourceAsync(resourcePath, &T::GetStaticTypeInfo(), [callback](std::shared_ptr<Resource> resource) {
+		callback(std::static_pointer_cast<T>(resource));
+		});
+}
+
+template<typename T> requires std::is_base_of_v<Resource, T>
+inline std::shared_ptr<T> ResourceManager::CreateResource(std::shared_ptr<ResourcePackage> outer, ObjectCreateFlag::Type flags)
+{
+	return std::static_pointer_cast<T>(CreateResource(outer, &T::GetStaticTypeInfo(), flags));
 }
 
 template<typename T> requires std::is_base_of_v<DXSharedResource, T>
@@ -104,7 +165,7 @@ inline std::shared_ptr<T> ResourceManager::CreateRenderResource(const std::wstri
 		delete p;
 		});
 	renderResource->_mName = resourceName;
-	renderResource->_mFullPath = resourcePath;
+	renderResource->_mPath = resourcePath;
 
 	THREAD_MANAGER->PushRenderThreadLogicUpdateJob(ObjectPool<Job>::MakeShared([renderResource = renderResource]() {
 		renderResource->PostCreate();
@@ -135,14 +196,14 @@ inline std::shared_ptr<T> ResourceManager::CreateTransientRenderResource(DXShare
 		delete p;
 		});
 	renderResource->_mName = name;
-	renderResource->_mFullPath = fullPath;
+	renderResource->_mPath = fullPath;
 	renderResource->PostCreate();
 
 	return renderResource;
 }
 
 template<typename T> requires std::is_base_of_v<DXSharedResource, T>
-inline std::shared_ptr<T> ResourceManager::CreateOrGetTransientRenderResource(const std::wstring& name, DXSharedResourceType::Type renderResourceType)
+inline std::shared_ptr<T> ResourceManager::CreateOrGetRuntimeRenderResource(const std::wstring& name, DXSharedResourceType::Type renderResourceType)
 {
 	const std::wstring fullPath = L"Transient/" + name;
 
@@ -156,7 +217,7 @@ inline std::shared_ptr<T> ResourceManager::CreateOrGetTransientRenderResource(co
 		delete p;
 		});
 	renderResource->_mName = name;
-	renderResource->_mFullPath = fullPath;
+	renderResource->_mPath = fullPath;
 	renderResource->PostCreate();
 
 	return renderResource;

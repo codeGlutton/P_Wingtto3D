@@ -23,7 +23,7 @@ void DXBlendState::Init(D3D11_RENDER_TARGET_BLEND_DESC desc)
 
 	blendDesc.RenderTarget[0] = desc;
 
-	CHECK_WIN_MSG(DX_DEVICE->CreateBlendState(&blendDesc, _mState.GetAddressOf()), "Blend state creation is failed");
+	CHECK_WIN_MSG(DX_DEVICE->CreateBlendState(&blendDesc, _mState.ReleaseAndGetAddressOf()), "Blend state creation is failed");
 }
 
 void DXBlendState::PushData() const

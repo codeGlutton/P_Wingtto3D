@@ -36,7 +36,7 @@ void DXSamplerState::Init(D3D11_FILTER filter, D3D11_COMPARISON_FUNC func, D3D11
 	desc.MinLOD = 0.f;
 	desc.MaxLOD = D3D11_FLOAT32_MAX;
 
-	CHECK_WIN_MSG(DX_DEVICE->CreateSamplerState(&desc, _mState.GetAddressOf()), "Sample state creation is failed");
+	CHECK_WIN_MSG(DX_DEVICE->CreateSamplerState(&desc, _mState.ReleaseAndGetAddressOf()), "Sample state creation is failed");
 }
 
 void DXSamplerState::PushData() const

@@ -29,7 +29,7 @@ void Widget::Prepass(const Vec2& layoutMultiplyValue)
 
 uint32 Widget::Paint(OUT WindowRenderElementContainer& drawElements, uint32 accLayerId, const PaintArgs& args, const WidgetGeometry& allottedGeometry, const BoundingAABB2D& parentCulling, const WidgetInheritedColor& inheritedColor)
 {
-    // 컬링
+    // 컬링 (수정 필요)
     BoundingAABB2D cullingBox = CalculateClipping(allottedGeometry, parentCulling);
 
     // 부모 스타일 상속
@@ -64,7 +64,7 @@ uint32 Widget::Paint(OUT WindowRenderElementContainer& drawElements, uint32 accL
 
     // 페인트
 
-    uint32 childAccLayerId = OnPaint(drawElements, accLayerId, args, allottedGeometry, parentCulling, contentInheritedColor);
+    uint32 childAccLayerId = OnPaint(drawElements, accLayerId, args, allottedGeometry, cullingBox, contentInheritedColor);
     return childAccLayerId;
 }
 

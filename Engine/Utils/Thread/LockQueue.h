@@ -14,7 +14,7 @@ public:
 	int32 PopBatch(OUT std::vector<T>& items, int32 batchSize);
 
 public:
-	void Clear();
+	int32 Clear();
 	bool IsEmpty() const;
 
 private:
@@ -40,7 +40,7 @@ inline T LockQueue<T>::Pop()
 		return T();
 	}
 
-	T item = _mItems.front();
+	T item = std::move(_mItems.front());
 	_mItems.pop();
 
 	return item;
@@ -53,7 +53,7 @@ inline void LockQueue<T>::PopAll(OUT std::vector<T>& items)
 
 	while (_mItems.empty() == false)
 	{
-		items.push_back(_mItems.front());
+		items.push_back(std::move(_mItems.front()));
 		_mItems.pop();
 	}
 }
@@ -63,7 +63,7 @@ inline int32 LockQueue<T>::PopUntil(OUT std::vector<T>& items, std::function<boo
 {
 	WRITE_LOCK(_mLock);
 
-	while (items.empty() == false)
+	while (_mItems.empty() == false)
 	{
 		T item = _mItems.front();
 		if (condition(item) == false)
@@ -82,8 +82,9 @@ inline int32 LockQueue<T>::PopUntil(OUT std::vector<T>& items, std::function<boo
 	{
 		for (auto& item : items)
 		{
-			_mItems.push(item);
+			_mItems.push(std::move(item));
 		}
+		items.clear();
 		return 0;
 	}
 }
@@ -95,23 +96,26 @@ inline int32 LockQueue<T>::PopBatch(OUT std::vector<T>& items, int32 batchSize)
 
 	for (int32 i = 0; i < batchSize; ++i)
 	{
-		if (IsEmpty() == true)
+		if (_mItems.empty() == true)
 		{
 			break;
 		}
 
-		items.push_back(_mItems.front());
+		items.push_back(std::move(_mItems.front()));
 		_mItems.pop();
 	}
 	return static_cast<int32>(_mItems.size());
 }
 
 template<typename T>
-inline void LockQueue<T>::Clear()
+inline int32 LockQueue<T>::Clear()
 {
 	WRITE_LOCK(_mLock);
 
+	int32 size = static_cast<int32>(_mItems.size());
 	_mItems = std::queue<T>();
+
+	return size;
 }
 
 template<typename T>

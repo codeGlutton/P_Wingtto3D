@@ -12,6 +12,9 @@
 
 #include "Graphics/Widget/Type/WidgetPath.h"
 
+#include "Graphics/DXSwapChain.h"
+#include "Graphics/Viewport/DXViewport.h"
+
 AppWindow::AppWindow()
 {
 	_mIsFocusable = true;
@@ -21,12 +24,53 @@ AppWindow::~AppWindow()
 {
 }
 
+void AppWindow::PostCreate()
+{
+	Super::PostCreate();
+	_mSwapChainProxy = CreateRefCounting<std::shared_ptr<DXSwapChain>, MainThreadType::Render>();
+	_mViewportProxy = CreateRefCounting<std::shared_ptr<DXViewport>, MainThreadType::Render>();
+}
+
 void AppWindow::PostLoad()
 {
 	Super::PostLoad();
 	ASSERT_MSG(InitWindow() == true, "Fail to create window");
 	APP_WIN_MANAGER->NotifyToAddAppWindow(std::static_pointer_cast<AppWindow>(shared_from_this()));
+
+	_mSwapChainProxy->mData = std::make_shared<DXSwapChain>(static_cast<uint32>(_mDesc.mWidth), static_cast<uint32>(_mDesc.mHeight), _mDesc.mWindowed, _mDesc.mHWndRef);
+	_mViewportProxy->mData = std::make_shared<DXViewport>(_mDesc.mWidth, _mDesc.mHeight);
+
+	_mNeedInitProxy = true;
+
 	ShowWindow();
+}
+
+const AppWindow::SwapChainProxyType& AppWindow::GetSwapChainProxy() const
+{
+	if (_mNeedInitProxy == true)
+	{
+		_mNeedInitProxy = false;
+
+		THREAD_MANAGER->PushRenderThreadLogicUpdateJob(ObjectPool<Job>::MakeShared([swapChain = _mSwapChainProxy->mData, viewport = _mViewportProxy->mData]() {
+			swapChain->Init();
+			viewport->Init();
+			}));
+	}
+	return _mSwapChainProxy;
+}
+
+const AppWindow::ViewportProxyType& AppWindow::GetViewportProxy() const
+{
+	if (_mNeedInitProxy == true)
+	{
+		_mNeedInitProxy = false;
+
+		THREAD_MANAGER->PushRenderThreadLogicUpdateJob(ObjectPool<Job>::MakeShared([swapChain = _mSwapChainProxy->mData, viewport = _mViewportProxy->mData]() {
+			swapChain->Init();
+			viewport->Init();
+			}));
+	}
+	return _mViewportProxy;
 }
 
 bool AppWindow::InitWindow()
@@ -155,6 +199,12 @@ void AppWindow::OnResize(bool isWindowed, const RECT& clientSize)
 	_mDesc.mOffsetY = windowSize.top;
 
 	_mNeedToPrepass = true;
+	THREAD_MANAGER->PushRenderThreadLogicUpdateJob(ObjectPool<Job>::MakeShared(
+		[width = _mDesc.mWidth, height = _mDesc.mHeight, swapChain = GetSwapChainProxy()->mData, viewport = GetViewportProxy()->mData]() {
+			swapChain->Resize(static_cast<uint32>(width), static_cast<uint32>(height));
+			viewport->Resize(width, height);
+		})
+	);
 }
 
 void AppWindow::ChangeFocusWidget(std::shared_ptr<Widget> widget)

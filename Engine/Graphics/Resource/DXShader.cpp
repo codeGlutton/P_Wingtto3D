@@ -37,7 +37,7 @@ ComPtr<ID3D11ShaderReflection> DXShader::Reflect() const
 		_mBlob->GetBufferPointer(),
 		_mBlob->GetBufferSize(),
 		IID_ID3D11ShaderReflection,
-		reinterpret_cast<void**>(reflection.GetAddressOf())
+		reinterpret_cast<void**>(reflection.ReleaseAndGetAddressOf())
 	), "Shader reflection is failed");
 
 	return reflection;
@@ -45,7 +45,7 @@ ComPtr<ID3D11ShaderReflection> DXShader::Reflect() const
 
 void DXShader::Load(const wchar_t* path, const char* entryName, const char* version)
 {
-	std::wstring fullPath = (PATH_MANAGER->GetEngineResourcePath() / path).wstring();
+	std::wstring fullPath = (PATH_MANAGER->GetEngineResourcePath() / L"HLSL" / path).wstring();
 	const uint32 compileFlag = 0;
 
 #ifdef DEBUG
@@ -90,7 +90,7 @@ void DXShader::Load(const wchar_t* path, const char* entryName, const char* vers
 		version,							// 셰이더 버전
 		compileFlag,						// 컴파일 옵션 설정 플래그
 		0,									// Effect 컴파일 시에만 사용되는 추가 플래그 옵션
-		_mBlob.GetAddressOf(),				// (출력) 컴파일된 코드를 엑세스할 수 있는 버퍼
+		_mBlob.ReleaseAndGetAddressOf(),	// (출력) 컴파일된 코드를 엑세스할 수 있는 버퍼
 		nullptr								// (선택, 출력) 에러 메세지 
 	), "Shader compile error");
 
@@ -132,10 +132,10 @@ void DXVertexShader::Init(const wchar_t* path, const char* entryName)
 	Load(path, entryName, DX_VS_VER);
 
 	CHECK_WIN_MSG(DX_DEVICE->CreateVertexShader(
-		_mBlob->GetBufferPointer(),		// Shader 코드 위치
-		_mBlob->GetBufferSize(),		// Shader 코드 길이
-		nullptr,						// 클래스 링크 포인터 (동적으로 셰이더 내 객체 변경해주는 객체)
-		_mShader.GetAddressOf()			// (출력) Shader 객체
+		_mBlob->GetBufferPointer(),				// Shader 코드 위치
+		_mBlob->GetBufferSize(),				// Shader 코드 길이
+		nullptr,								// 클래스 링크 포인터 (동적으로 셰이더 내 객체 변경해주는 객체)
+		_mShader.ReleaseAndGetAddressOf()		// (출력) Shader 객체
 	), "Vertex shader creation is failed");
 }
 
@@ -158,10 +158,10 @@ void DXPixelShader::Init(const wchar_t* path, const char* entryName)
 	Load(path, entryName, DX_PS_VER);
 
 	CHECK_WIN_MSG(DX_DEVICE->CreatePixelShader(
-		_mBlob->GetBufferPointer(),		// Shader 코드 위치
-		_mBlob->GetBufferSize(),		// Shader 코드 길이
-		nullptr,						// 클래스 링크 포인터 (동적으로 셰이더 내 객체 변경해주는 객체)
-		_mShader.GetAddressOf()			// (출력) Shader 객체
+		_mBlob->GetBufferPointer(),				// Shader 코드 위치
+		_mBlob->GetBufferSize(),				// Shader 코드 길이
+		nullptr,								// 클래스 링크 포인터 (동적으로 셰이더 내 객체 변경해주는 객체)
+		_mShader.ReleaseAndGetAddressOf()		// (출력) Shader 객체
 	), "Pixel shader creation is failed");
 }
 
@@ -184,10 +184,10 @@ void DXDomainShader::Init(const wchar_t* path, const char* entryName)
 	Load(path, entryName, DX_DS_VER);
 
 	CHECK_WIN_MSG(DX_DEVICE->CreateDomainShader(
-		_mBlob->GetBufferPointer(),		// Shader 코드 위치
-		_mBlob->GetBufferSize(),		// Shader 코드 길이
-		nullptr,						// 클래스 링크 포인터 (동적으로 셰이더 내 객체 변경해주는 객체)
-		_mShader.GetAddressOf()			// (출력) Shader 객체
+		_mBlob->GetBufferPointer(),				// Shader 코드 위치
+		_mBlob->GetBufferSize(),				// Shader 코드 길이
+		nullptr,								// 클래스 링크 포인터 (동적으로 셰이더 내 객체 변경해주는 객체)
+		_mShader.ReleaseAndGetAddressOf()		// (출력) Shader 객체
 	), "Domain shader creation is failed");
 }
 
@@ -210,10 +210,10 @@ void DXHullShader::Init(const wchar_t* path, const char* entryName)
 	Load(path, entryName, DX_HS_VER);
 
 	CHECK_WIN_MSG(DX_DEVICE->CreateHullShader(
-		_mBlob->GetBufferPointer(),		// Shader 코드 위치
-		_mBlob->GetBufferSize(),		// Shader 코드 길이
-		nullptr,						// 클래스 링크 포인터 (동적으로 셰이더 내 객체 변경해주는 객체)
-		_mShader.GetAddressOf()			// (출력) Shader 객체
+		_mBlob->GetBufferPointer(),				// Shader 코드 위치
+		_mBlob->GetBufferSize(),				// Shader 코드 길이
+		nullptr,								// 클래스 링크 포인터 (동적으로 셰이더 내 객체 변경해주는 객체)
+		_mShader.ReleaseAndGetAddressOf()		// (출력) Shader 객체
 	), "Hull shader creation is failed");
 }
 
@@ -236,10 +236,10 @@ void DXGeometryShader::Init(const wchar_t* path, const char* entryName)
 	Load(path, entryName, DX_GS_VER);
 
 	CHECK_WIN_MSG(DX_DEVICE->CreateGeometryShader(
-		_mBlob->GetBufferPointer(),		// Shader 코드 위치
-		_mBlob->GetBufferSize(),		// Shader 코드 길이
-		nullptr,						// 클래스 링크 포인터 (동적으로 셰이더 내 객체 변경해주는 객체)
-		_mShader.GetAddressOf()			// (출력) Shader 객체
+		_mBlob->GetBufferPointer(),					// Shader 코드 위치
+		_mBlob->GetBufferSize(),					// Shader 코드 길이
+		nullptr,									// 클래스 링크 포인터 (동적으로 셰이더 내 객체 변경해주는 객체)
+		_mShader.ReleaseAndGetAddressOf()			// (출력) Shader 객체
 	), "Geometry shader creation is failed");
 }
 
@@ -321,10 +321,10 @@ void DXComputeShader::Init(const wchar_t* path, const char* entryName)
 	Load(path, entryName, DX_CS_VER);
 
 	CHECK_WIN_MSG(DX_DEVICE->CreateComputeShader(
-		_mBlob->GetBufferPointer(),		// Shader 코드 위치
-		_mBlob->GetBufferSize(),		// Shader 코드 길이
-		nullptr,						// 클래스 링크 포인터 (동적으로 셰이더 내 객체 변경해주는 객체)
-		_mShader.GetAddressOf()			// (출력) Shader 객체
+		_mBlob->GetBufferPointer(),					// Shader 코드 위치
+		_mBlob->GetBufferSize(),					// Shader 코드 길이
+		nullptr,									// 클래스 링크 포인터 (동적으로 셰이더 내 객체 변경해주는 객체)
+		_mShader.ReleaseAndGetAddressOf()			// (출력) Shader 객체
 	), "Compute shader creation is failed");
 
 	MakeMetaData();
@@ -390,7 +390,7 @@ DXMinimumGraphicShader::~DXMinimumGraphicShader()
 {
 }
 
-inline void DXMinimumGraphicShader::Bind(const std::string& name, std::shared_ptr<const DXConstantBuffer> buffer) const
+void DXMinimumGraphicShader::Bind(const std::string& name, std::shared_ptr<const DXConstantBuffer> buffer) const
 {
 	const std::unordered_map<std::string, DXBindingMetaData>& slotMap = _mMetaData.mBindingSlots[DXShaderBindingType::CBuffer];
 	ASSERT_MSG(slotMap.find(name) != slotMap.end(), "Constant buffer can't be found in graphic shader");

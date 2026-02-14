@@ -2,9 +2,14 @@
 #include "Lock.h"
 
 #include <thread>
+#include "Manager/ThreadManager.h"
 
-void Lock::WriteLock(const char* thread)
+void Lock::WriteLock(const void* owner, const char* name)
 {
+#if _DEBUG
+	THREAD_MANAGER->GetDeadLockProfiler().PushLock(owner, name);
+#endif
+
 	const uint32 lockThreadId = (_mLockFlag.load() & WRITE_THREAD_MASK) >> 16;
 	// 이미 write lock을 가진 스레드일 걍우 바로 통과
 	if (LThreadId == lockThreadId)
@@ -36,8 +41,12 @@ void Lock::WriteLock(const char* thread)
 	}
 }
 
-void Lock::WriteUnlock(const char* thread)
+void Lock::WriteUnlock(const void* owner)
 {
+#if _DEBUG
+	THREAD_MANAGER->GetDeadLockProfiler().PopLock(owner);
+#endif
+
 	ASSERT_MSG((_mLockFlag.load() & READ_COUNT_MASK) == 0ul, "Invalid write unlock. Writer thread is null");
 
 	const int32 lockCount = --_mWriterCount;
@@ -47,8 +56,12 @@ void Lock::WriteUnlock(const char* thread)
 	}
 }
 
-void Lock::ReadLock(const char* thread)
+void Lock::ReadLock(const void* owner, const char* name)
 {
+#if _DEBUG
+	THREAD_MANAGER->GetDeadLockProfiler().PushLock(owner, name);
+#endif
+
 	const uint32 lockThreadId = (_mLockFlag.load() & WRITE_THREAD_MASK) >> 16;
 	if (LThreadId == lockThreadId)
 	{
@@ -77,7 +90,11 @@ void Lock::ReadLock(const char* thread)
 	}
 }
 
-void Lock::ReadUnlock(const char* thread)
+void Lock::ReadUnlock(const void* owner)
 {
+#if _DEBUG
+	THREAD_MANAGER->GetDeadLockProfiler().PopLock(owner);
+#endif
+
 	ASSERT_MSG((_mLockFlag.fetch_sub(1) & READ_COUNT_MASK) != 0, "Unlock was called redundantly");
 }

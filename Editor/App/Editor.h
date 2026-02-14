@@ -22,5 +22,9 @@ public:
 
 private:
 	void BeginThread() override;
+
+protected:
+	virtual void RegisterDefaultResources() override;
+	virtual void UnregisterDefaultResources() override;
 };
 

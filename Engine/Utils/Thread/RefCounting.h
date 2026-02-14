@@ -4,7 +4,7 @@
 #include "Utils/Memory/ObjectPool.h"
 #include "Manager/ThreadManager.h"
 
-template<typename T, MainThreadType::Type MainThreadT = MainThreadType::Game> requires (MainThreadT != MainThreadType::Count)
+template<typename T, MainThreadType::Type MainThreadT = MainThreadType::Game> requires (MainThreadT == MainThreadType::Game || MainThreadT == MainThreadType::Render)
 struct ThreadSafeRefCountData
 {
 public:

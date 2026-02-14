@@ -4,10 +4,10 @@
 #include "Core/Resource/BulkData.h"
 #include "Manager/DXGraphicSystem.h"
 
-constexpr auto CBUFFER_GLOBAL_PREFIX = L"G_";
-constexpr auto CBUFFER_FRAME_PREFIX = L"F_";
-constexpr auto CBUFFER_MAT_PREFIX = L"M_";
-constexpr auto CBUFFER_OBJ_PREFIX = L"O_";
+// CBUFFER_GLOBAL_PREFIX = "G_";
+// CBUFFER_FRAME_PREFIX = "F_";
+// CBUFFER_MAT_PREFIX = "M_";
+// CBUFFER_OBJ_PREFIX = "O_";
 
 struct ConstantBufferBulkData : public BulkData
 {

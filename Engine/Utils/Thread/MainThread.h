@@ -8,16 +8,18 @@ namespace MainThreadType
 {
 	enum Type : uint32
 	{
-		Game = 0xFFFFFFFF,
-		Render = 0,
+		None = 0, // Lock 소유자 없음을 표기하기 위한 값
+		Game,
+		Render,
 
 		// 여기에 반드시 필요한 스레드 타입 추가
 
-		Count
+		End,
+		Count = End - 1
 	};
 }
 
-class MainThread : public Thread
+class MainThread abstract : public Thread
 {
 public:
 	virtual void Run() final;
@@ -37,8 +39,8 @@ private:
 	virtual void Destroy() override;
 
 protected:
-	virtual void RegisterDefaultResources();
-	virtual void UnregisterDefaultResources();
+	virtual void RegisterDefaultRuntimeResources();
+	virtual void UnregisterDefaultRuntimeResources();
 
 protected:
 	std::vector<std::shared_ptr<DXSharedResource>> _mDefaultResources;

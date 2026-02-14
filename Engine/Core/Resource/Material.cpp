@@ -22,7 +22,7 @@ void Material::PostLoad()
 {
 	Super::PostLoad();
 
-	_mProxy->mData = RESOURCE_MANAGER->CreateRenderResource<DXMaterial>(GetName(), GetFullPath());
+	_mProxy->mData = RESOURCE_MANAGER->CreateRenderResource<DXMaterial>(GetName(), GetPath());
 	_mNeedInitProxy = true;
 }
 
@@ -52,4 +52,13 @@ const Material::ProxyType& Material::GetProxy() const
 		);
 	}
 	return _mProxy;
+}
+
+void Material::UpdateProxy(std::shared_ptr<MaterialBulkData> newBulkData, const std::vector<std::pair<std::string, std::shared_ptr<ConstantDataBase>>>& newMatConstantDatas, const std::vector<std::pair<std::string, std::shared_ptr<Texture2D>>>& newBoundTextures)
+{
+	_mBulkData = newBulkData;
+	_mMatConstantDatas = newMatConstantDatas;
+	_mBoundTextures = newBoundTextures;
+
+	_mNeedInitProxy = true;
 }

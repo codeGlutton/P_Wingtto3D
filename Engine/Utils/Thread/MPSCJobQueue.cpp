@@ -60,6 +60,8 @@ void MPSCJobQueue::ExecuteOnlyLastOne()
 
 void MPSCJobQueue::Push(const std::shared_ptr<Job>& job)
 {
+	ASSERT_MSG(job != nullptr, "nullptr job isn't allowed");
+
 	// 실제 job 추가 전에 Count 증가로 PushJobQ 예고
 	const int32 preCount = _mJobCount.fetch_add(1);
 	_mJobs.Push(job);
@@ -67,6 +69,8 @@ void MPSCJobQueue::Push(const std::shared_ptr<Job>& job)
 
 void MPSCJobQueue::Push(std::shared_ptr<Job>&& job)
 {
+	ASSERT_MSG(job != nullptr, "nullptr job isn't allowed");
+
 	// 실제 job 추가 전에 Count 증가로 PushJobQ 예고
 	const int32 preCount = _mJobCount.fetch_add(1);
 	_mJobs.Push(job);

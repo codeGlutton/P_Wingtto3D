@@ -6,7 +6,7 @@
 
 #include "Core/Resource/BulkData.h"
 
-using Texture2DBulkData = BulkWrapper<std::vector<char>>;
+struct Texture2DBulkData;
 struct StaticMeshBulkData;
 
 class TextureConvertor

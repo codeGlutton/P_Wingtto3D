@@ -13,7 +13,10 @@ void GlobalWorkerThread::Work()
 ThreadManager::ThreadManager() :
 	_mIsAlive(true),
 	_mGlobalConcurrentJobQueue(std::make_shared<ConcurrentJobQueue>()),
-	_mGameThreadJobQueue(std::make_shared<MPSCJobQueue>())
+	_mGameThreadJobQueue(std::make_shared<MPSCJobQueue>()),
+	_mRenderThreadSceneUpdateJobQueue(std::make_shared<SceneJobQueue>()),
+	_mRenderThreadRenderJobQueue(std::make_shared<MPSCJobQueue>()),
+	_mRenderThreadLogicUpdateJobQueue(std::make_shared<MPSCJobQueue>())
 {
 }
 
@@ -28,8 +31,10 @@ void ThreadManager::Init()
 
 void ThreadManager::Destroy()
 {
-	_mIsAlive.store(false);
-	Join();
+	ClearGlobalJob();
+	ClearRenderJob();
+	ClearGameJob();
+
 	DestroyTLS();
 }
 
@@ -67,14 +72,14 @@ void ThreadManager::Launch(std::shared_ptr<WorkerThread> thread)
 	));
 }
 
-void ThreadManager::LaunchMainThreads(std::array<std::shared_ptr<MainThread>, MainThreadType::Count> threads)
+void ThreadManager::LaunchMainThreads(std::array<std::shared_ptr<MainThread>, MainThreadType::Count - 1> threads)
 {
 	ASSERT_THREAD(MainThreadType::Game);
-	for (uint32 threadId = 0; threadId < MainThreadType::Count; ++threadId)
+	for (uint32 threadId = MainThreadType::Game + 1; threadId < MainThreadType::End; ++threadId)
 	{
 		std::lock_guard<std::mutex> guard(_mLock);
 
-		_mThreads.push_back(std::thread([this, threadId, thread = threads[threadId]]()
+		_mThreads.push_back(std::thread([this, threadId, thread = threads[threadId - MainThreadType::Game - 1]]()
 			{
 				InitTLS_Internal(threadId);
 				thread->Init();
@@ -100,9 +105,14 @@ void ThreadManager::LaunchMainThreads(std::array<std::shared_ptr<MainThread>, Ma
 	// 게임 스레드 동작은 App의 Update에서 처리 중
 }
 
-void ThreadManager::Join()
+void ThreadManager::Join(bool isForced)
 {
 	ASSERT_THREAD(MainThreadType::Game);
+	if (isForced == true)
+	{
+		_mIsAlive.store(false);
+	}
+
 	for (std::thread& t : _mThreads)
 	{
 		if (t.joinable() == true)
@@ -115,7 +125,7 @@ void ThreadManager::Join()
 
 void ThreadManager::PushGameThreadJob(std::shared_ptr<Job> job)
 {
-	if (job != nullptr)
+	if (job == nullptr)
 	{
 		return;
 	}
@@ -128,9 +138,14 @@ void ThreadManager::DoGameJob()
 	_mGameThreadJobQueue->Execute();
 }
 
+void ThreadManager::ClearGameJob()
+{
+	_mGameThreadJobQueue->ClearJob();
+}
+
 void ThreadManager::PushRenderThreadLogicUpdateJob(std::shared_ptr<Job> job)
 {
-	if (job != nullptr)
+	if (job == nullptr)
 	{
 		return;
 	}
@@ -139,7 +154,7 @@ void ThreadManager::PushRenderThreadLogicUpdateJob(std::shared_ptr<Job> job)
 
 void ThreadManager::PushRenderThreadSceneUpdateJob(std::shared_ptr<JobContext<float>> job)
 {
-	if (job != nullptr)
+	if (job == nullptr)
 	{
 		return;
 	}
@@ -148,7 +163,7 @@ void ThreadManager::PushRenderThreadSceneUpdateJob(std::shared_ptr<JobContext<fl
 
 void ThreadManager::PushRenderThreadRenderJob(std::shared_ptr<Job> job)
 {
-	if (job != nullptr)
+	if (job == nullptr)
 	{
 		return;
 	}
@@ -168,6 +183,13 @@ void ThreadManager::DoRenderJob()
 	_mRenderThreadRenderJobQueue->ExecuteOnlyLastOne();
 }
 
+void ThreadManager::ClearRenderJob()
+{
+	_mRenderThreadLogicUpdateJobQueue->ClearJob();
+	_mRenderThreadSceneUpdateJobQueue->ClearJob();
+	_mRenderThreadRenderJobQueue->ClearJob();
+}
+
 void ThreadManager::PushGlobalSequentialJobQ(std::shared_ptr<SequentialJobQueue> jobQueue)
 {
 	_mGlobalSequentialJobQueues.Push(jobQueue);
@@ -175,7 +197,7 @@ void ThreadManager::PushGlobalSequentialJobQ(std::shared_ptr<SequentialJobQueue>
 
 void ThreadManager::PushGlobalConcurrentJob(std::shared_ptr<Job> job, bool pushOnly)
 {
-	if (job != nullptr)
+	if (job == nullptr)
 	{
 		return;
 	}
@@ -215,9 +237,15 @@ void ThreadManager::DoGlobalJob()
 	}
 }
 
+void ThreadManager::ClearGlobalJob()
+{
+	_mGlobalConcurrentJobQueue->ClearJob();
+	_mGlobalSequentialJobQueues.Clear();
+}
+
 void ThreadManager::InitTLS()
 {
-	static std::atomic<uint32> threadId = MainThreadType::Count;
+	static std::atomic<uint32> threadId = MainThreadType::End;
 	uint32 newId = threadId.fetch_add(1);
 	InitTLS_Internal(newId);
 }

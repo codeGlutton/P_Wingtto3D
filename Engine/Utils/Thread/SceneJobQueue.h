@@ -50,7 +50,7 @@ public:
 	// JobQueue가 더 이상 필요하지 않을 경우, 순환 참조 끊어주기 위함
 	void ClearJob()
 	{
-		_mJobs.Clear();
+		_mJobCount.fetch_sub(_mJobs.Clear());
 	}
 
 	virtual void ExecuteOnce();

@@ -10,4 +10,5 @@
 #include "Manager/TimeManager.h"
 #include "Manager/InputManager.h"
 #include "Manager/WorldGameInputManager.h"
+#include "Manager/DXGraphicSystem.h"
 

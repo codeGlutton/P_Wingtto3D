@@ -106,12 +106,12 @@ void DXStructureBuffer::CreateInput(const void* initData)
 	{
 		D3D11_SUBRESOURCE_DATA subResource = { 0 };
 		subResource.pSysMem = initData;
-		CHECK_WIN_MSG(DX_DEVICE->CreateBuffer(&desc, &subResource, _mInputBuffer.GetAddressOf()), "Structure input buffer creation is failed");
+		CHECK_WIN_MSG(DX_DEVICE->CreateBuffer(&desc, &subResource, _mInputBuffer.ReleaseAndGetAddressOf()), "Structure input buffer creation is failed");
 	}
 	// 기존 데이터 없을 시
 	else
 	{
-		CHECK_WIN_MSG(DX_DEVICE->CreateBuffer(&desc, nullptr, _mInputBuffer.GetAddressOf()), "Structure input buffer creation is failed");
+		CHECK_WIN_MSG(DX_DEVICE->CreateBuffer(&desc, nullptr, _mInputBuffer.ReleaseAndGetAddressOf()), "Structure input buffer creation is failed");
 	}
 }
 
@@ -127,7 +127,7 @@ void DXStructureBuffer::CreateSRV()
 	// 전체 데이터 수
 	srcDesc.BufferEx.NumElements = _mInputCount;
 
-	CHECK_WIN_MSG(DX_DEVICE->CreateShaderResourceView(_mInputBuffer.Get(), &srcDesc, _mInputSRV.GetAddressOf()), "Structure input SRV creation is failed");
+	CHECK_WIN_MSG(DX_DEVICE->CreateShaderResourceView(_mInputBuffer.Get(), &srcDesc, _mInputSRV.ReleaseAndGetAddressOf()), "Structure input SRV creation is failed");
 }
 
 void DXStructureBuffer::CreateOutput()
@@ -141,7 +141,7 @@ void DXStructureBuffer::CreateOutput()
 	desc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
 	desc.StructureByteStride = _mOutputStride;
 
-	CHECK_WIN_MSG(DX_DEVICE->CreateBuffer(&desc, nullptr, _mOutputBuffer.GetAddressOf()), "Structure output buffer creation is failed");
+	CHECK_WIN_MSG(DX_DEVICE->CreateBuffer(&desc, nullptr, _mOutputBuffer.ReleaseAndGetAddressOf()), "Structure output buffer creation is failed");
 }
 
 void DXStructureBuffer::CreateUAV()
@@ -156,7 +156,7 @@ void DXStructureBuffer::CreateUAV()
 	// 전체 데이터 수
 	uavDesc.Buffer.NumElements = _mOutputCount;
 
-	CHECK_WIN_MSG(DX_DEVICE->CreateUnorderedAccessView(_mOutputBuffer.Get(), &uavDesc, _mOutputUAV.GetAddressOf()), "Structure output UAV creation is failed");
+	CHECK_WIN_MSG(DX_DEVICE->CreateUnorderedAccessView(_mOutputBuffer.Get(), &uavDesc, _mOutputUAV.ReleaseAndGetAddressOf()), "Structure output UAV creation is failed");
 }
 
 void DXStructureBuffer::CreateResult()
@@ -169,5 +169,5 @@ void DXStructureBuffer::CreateResult()
 	desc.BindFlags = 0;
 	desc.MiscFlags = 0;
 
-	CHECK_WIN_MSG(DX_DEVICE->CreateBuffer(&desc, nullptr, _mResultBuffer.GetAddressOf()), "Structure result buffer creation is failed");
+	CHECK_WIN_MSG(DX_DEVICE->CreateBuffer(&desc, nullptr, _mResultBuffer.ReleaseAndGetAddressOf()), "Structure result buffer creation is failed");
 }

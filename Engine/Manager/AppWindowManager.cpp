@@ -32,7 +32,7 @@ void AppWindowManager::Update()
 		std::shared_ptr<WindowRenderElementContainer> container = RENDER_MANAGER->GetWidgetBuffer().GetContainer(focusedWindow);
 		focusedWindow->PaintWindow(OUT container, TIME_MANAGER->GetDeltaTime());
 
-		RENDER_MANAGER->DrawWindow();
+		RENDER_MANAGER->DrawWindow(container);
 	}
 }
 
@@ -75,7 +75,7 @@ void AppWindowManager::RegisterPackage(std::shared_ptr<Package> package)
 	_mPackage = CastSharedPointer<AppWindowPackage>(package);
 }
 
-void AppWindowManager::Save()
+void AppWindowManager::Save() const
 {
 	std::wstring packagePath = PATH_MANAGER->GetEngineResourceFolderName();
 	packagePath.append(L"\\AppWindows");

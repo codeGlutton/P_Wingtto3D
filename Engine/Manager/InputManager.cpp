@@ -604,9 +604,9 @@ void InputManager::InitDInputDevices()
     {
         if (FAILED(
             _mDInput->CreateDevice(
-                GUID_SysKeyboard,               // 생성할 Device 종류
-                _mDInputKeyboard.GetAddressOf(),// (출력) Direct Input Device 객체
-                nullptr                         // COM 집계용. 거의 nullptr로 사용
+                GUID_SysKeyboard,                           // 생성할 Device 종류
+                _mDInputKeyboard.ReleaseAndGetAddressOf(),  // (출력) Direct Input Device 객체
+                nullptr                                     // COM 집계용. 거의 nullptr로 사용
             )
         ))
         {
@@ -622,9 +622,9 @@ void InputManager::InitDInputDevices()
     {
         if (FAILED(
             _mDInput->CreateDevice(
-                GUID_SysMouse,                  // 생성할 Device 종류
-                _mDInputMouse.GetAddressOf(),   // (출력) Direct Input Device 객체
-                nullptr                         // COM 집계용. 거의 nullptr로 사용
+                GUID_SysMouse,                              // 생성할 Device 종류
+                _mDInputMouse.ReleaseAndGetAddressOf(),     // (출력) Direct Input Device 객체
+                nullptr                                     // COM 집계용. 거의 nullptr로 사용
             )
         ))
         {

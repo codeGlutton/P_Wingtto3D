@@ -222,6 +222,6 @@ std::shared_ptr<Object> ResourcePreviewPackage::RequestToCreateObject(const Obje
 
 std::shared_ptr<Object> ResourcePackage::RequestToCreateObject(const ObjectTypeInfo* typeInfo, ObjectCreateFlag::Type flags)
 {
-	// TODO
-	return std::shared_ptr<Object>();
+	_mResource = RESOURCE_MANAGER->CreateResource(std::static_pointer_cast<ResourcePackage>(shared_from_this()), typeInfo, flags);
+	return _mResource;
 }

@@ -7,6 +7,9 @@
 
 #include "Graphics/Widget/Type/HitTestGrid.h"
 
+class DXSwapChain;
+class DXViewport;
+
 class WidgetPath;
 class VirtualWindow;
 struct ArrangedWidget;
@@ -46,11 +49,20 @@ class AppWindow : public CompoundWidget
 	friend class AppWindowManager;
 
 public:
+	using SwapChainProxyType = ThreadSafeRefCounting<std::shared_ptr<DXSwapChain>, MainThreadType::Render>;
+	using ViewportProxyType = ThreadSafeRefCounting<std::shared_ptr<DXViewport>, MainThreadType::Render>;
+
+public:
 	AppWindow();
 	virtual ~AppWindow();
 
 protected:
+	virtual void PostCreate() override;
 	virtual void PostLoad() override;
+
+public:
+	const SwapChainProxyType& GetSwapChainProxy() const;
+	const ViewportProxyType& GetViewportProxy() const;
 
 protected:
 	bool InitWindow();
@@ -109,6 +121,13 @@ private:
 	// 부모 객체
 	PROPERTY(_mOwner)
 	std::weak_ptr<AppWindow> _mOwner;
+
+private:
+	SwapChainProxyType _mSwapChainProxy;
+	ViewportProxyType _mViewportProxy;
+
+private:
+	mutable bool _mNeedInitProxy = false;
 
 private:
 	std::weak_ptr<Widget> _mFocusWidget;

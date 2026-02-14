@@ -11,7 +11,7 @@ DXSharedResource::~DXSharedResource()
 {
 	RESOURCE_MANAGER->NotifyToRemoveRenderResource(
 		GetSharedResourceType(),
-		GetFullPath()
+		GetPath()
 	);
 }
 

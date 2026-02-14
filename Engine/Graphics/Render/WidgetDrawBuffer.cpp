@@ -2,6 +2,9 @@
 #include "WidgetDrawBuffer.h"
 
 #include "Core/App/AppWindow/AppWindow.h"
+#include "Graphics/Resource/DXTexture.h"
+
+#include "Manager/ResourceManager.h"
 
 void WindowRenderElementContainer::CreateBoxElement(uint32 layerId, const WidgetGeometry& paintGeometry, const WidgetBrush& brush, const Color& color, WidgetDrawOptionFlag::Type drawOpt)
 {
@@ -10,32 +13,47 @@ void WindowRenderElementContainer::CreateBoxElement(uint32 layerId, const Widget
         return;
     }
 
-    std::unique_ptr<RenderBoxElement> box = std::make_unique<RenderBoxElement>();
+    std::unique_ptr<WidgetRenderBoxElement> box = std::make_unique<WidgetRenderBoxElement>();
+    box->mResource = RESOURCE_MANAGER->CreateOrGetRuntimeRenderResource<DXTexture2D>(L"White", DXSharedResourceType::Texture);
 
     switch (brush.mType)
     {
-    case WidgetBrushType::Box:
     case WidgetBrushType::Image:
     {
+        box->mResource = brush.mProxy->mData;
+        [[fallthrough]];
+    }
+    case WidgetBrushType::Box:
+    {
         box->mTint = color;
+
         box->mMargin = brush.mMargin;
         box->mTiling = brush.mTiling;
         box->mBrushType = brush.mType;
-        //box->mProxy
-        //box.Init(ElementList, ElementType, InLayer, PaintGeometry, InDrawEffects);
+
+        box->mRenderMat = paintGeometry.GetAccRenderMatrix2D();
+        box->mBoxSize = paintGeometry.mBoxSize;
+        box->mLayerId = layerId;
+        box->mDrawOpt = drawOpt;
         
-        mElementLists[RenderElementType::Box].push_back(std::move(box));
+        while (mElementLayers.size() < layerId + 1)
+        {
+            mElementLayers.push_back(ElementList());
+        }
+        mElementLayers[layerId].push_back(std::move(box));
         break;
     }
     }
+    ++mElementCount;
 }
 
 void WindowRenderElementContainer::ResetElements()
 {
-    for (auto& elements : mElementLists)
-    {
-        elements.clear();
-    }
+    mElementLayers.clear();
+    mBatches.clear();
+    mVertices.clear();
+    mIndices.clear();
+    mElementCount = 0u;
 }
 
 bool WindowRenderElementContainer::IsCulling(const WidgetGeometry& paintGeometry)
@@ -62,7 +80,7 @@ bool WindowRenderElementContainer::IsCulling(const WidgetBrush& brush, const Col
         return true;
     }
     // 브러쉬가 비정상적
-    if (brush.mType == WidgetBrushType::None || brush.mType == WidgetBrushType::Image && brush.mResource == nullptr)
+    if (brush.mType == WidgetBrushType::None || brush.mType == WidgetBrushType::Image && brush.mProxy == nullptr)
     {
         return true;
     }

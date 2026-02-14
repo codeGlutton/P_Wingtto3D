@@ -4,6 +4,7 @@
 #include "Core/Resource/BulkData.h"
 
 #include "Graphics/Buffer/DXConstantBuffer.h"
+#include "Graphics/Resource/DXShader.h"
 
 class DXTextureBase;
 class DXSamplerState;
@@ -36,6 +37,10 @@ public:
 	void Init(std::shared_ptr<MaterialBulkData> bulkData, std::vector<ConstantBufferData> bufferBulkDatas, std::vector<TextureBinding> textures);
 	void PushData() const;
 
+public:
+	template<typename T> requires std::is_base_of_v<DXResource, T>
+	void PushTransientData(const std::string& name, std::shared_ptr<T> resource) const;
+
 private:
 	std::vector<ConstantBufferBinding> _mBoundMatCBuffers;			// 직접 전달
 	std::vector<TextureBinding> _mBoundTextures;					// 직접 전달
@@ -62,3 +67,9 @@ public:
 	PROPERTY(mShaderName)
 	DXMaterial::ResourceName mShaderName;
 };
+
+template<typename T> requires std::is_base_of_v<DXResource, T>
+inline void DXMaterial::PushTransientData(const std::string& name, std::shared_ptr<T> resource) const
+{
+	_mShader->Bind(name, resource);
+}

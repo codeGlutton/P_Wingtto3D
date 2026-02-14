@@ -3,32 +3,13 @@
 struct DXInputElementList;
 
 /**
- * 정점 정보 및 컬러를 소유한 VS Input
- */
-struct ColorUIVertexData
-{
-	GEN_MINIMUM_STRUCT_REFLECTION(ColorUIVertexData)
-
-	bool operator==(const ColorUIVertexData&) const = default;
-
-public:
-	static const DXInputElementList& MakeLayout();
-
-public:
-	PROPERTY(mPosition)
-	Vec3 mPosition = { 0.f, 0.f, 0.f };
-	PROPERTY(mColor)
-	Color mColor = { 0.f, 0.f, 0.f, 0.f };
-};
-
-/**
  * 정점 정보 및 텍스처 uv 소유한 VS Input
  */
-struct TextureUIVertexData
+struct UIVertexData
 {
-	GEN_MINIMUM_STRUCT_REFLECTION(TextureUIVertexData)
+	GEN_MINIMUM_STRUCT_REFLECTION(UIVertexData)
 
-	bool operator==(const TextureUIVertexData&) const = default;
+	bool operator==(const UIVertexData&) const = default;
 
 public:
 	static const DXInputElementList& MakeLayout();
@@ -38,6 +19,8 @@ public:
 	Vec3 mPosition = { 0.f, 0.f, 0.f };
 	PROPERTY(mUV)
 	Vec2 mUV = { 0.f, 0.f };
+	PROPERTY(mTint)
+	Color mTint = { 0.f, 0.f, 0.f, 0.f };
 };
 
 /**

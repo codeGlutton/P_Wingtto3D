@@ -26,13 +26,13 @@ void DXSwapChain::Resize(uint32 width, uint32 height)
 	_mHeight = height;
 
 	_mRenderTargetView.Reset();
-	_mSwapChain->ResizeBuffers(
+	CHECK_WIN_MSG(_mSwapChain->ResizeBuffers(
 		0,							// 기존 버퍼 갯수 유지
-		_mWidth, 
+		_mWidth,
 		_mHeight,
-		DXGI_FORMAT_R8G8B8A8_UNORM, 
+		DXGI_FORMAT_R8G8B8A8_UNORM,
 		0
-	);
+	), "ResizeBuffers failed");
 
 	/* 해당 윈도우 창의 RTV 생성 */
 	CreateRenderTargetView();
@@ -73,7 +73,7 @@ void DXSwapChain::ResetRenderTargets(RenderTargetResetFlag::Type flags)
 	}
 	else
 	{
-		DX_DEVICE_CONTEXT->OMGetRenderTargets(1, targetRTV.GetAddressOf(), targetDSV.GetAddressOf());
+		DX_DEVICE_CONTEXT->OMGetRenderTargets(1, targetRTV.ReleaseAndGetAddressOf(), targetDSV.ReleaseAndGetAddressOf());
 	}
 
 	if (flags & RenderTargetResetFlag::DefaultRTV)
@@ -138,8 +138,8 @@ void DXSwapChain::CreateSwapChain()
 void DXSwapChain::CreateRenderTargetView()
 {
 	ComPtr<ID3D11Texture2D> backBuffer = nullptr;
-	CHECK_WIN_MSG(_mSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(backBuffer.GetAddressOf())), "Swap chain RTV texture creation is failed");
-	CHECK_WIN_MSG(DX_DEVICE->CreateRenderTargetView(backBuffer.Get(), nullptr, _mRenderTargetView.GetAddressOf()), "Swap chain RTV creation is failed");
+	CHECK_WIN_MSG(_mSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(backBuffer.ReleaseAndGetAddressOf())), "Swap chain RTV texture creation is failed");
+	CHECK_WIN_MSG(DX_DEVICE->CreateRenderTargetView(backBuffer.Get(), nullptr, _mRenderTargetView.ReleaseAndGetAddressOf()), "Swap chain RTV creation is failed");
 }
 
 void DXSwapChain::CreateDepthStencilView()
@@ -159,7 +159,7 @@ void DXSwapChain::CreateDepthStencilView()
 		desc.CPUAccessFlags = 0;
 		desc.MiscFlags = 0;
 
-		CHECK_WIN_MSG(DX_DEVICE->CreateTexture2D(&desc, nullptr, _mDepthStencilTexture.GetAddressOf()), "Swap chain DSV Texture creation is failed");
+		CHECK_WIN_MSG(DX_DEVICE->CreateTexture2D(&desc, nullptr, _mDepthStencilTexture.ReleaseAndGetAddressOf()), "Swap chain DSV Texture creation is failed");
 	}
 
 	{
@@ -170,6 +170,6 @@ void DXSwapChain::CreateDepthStencilView()
 		desc.Texture2D.MipSlice = 0;
 
 		// 해당 ID3D11Texture2D를 뎁스 스텐실로 사용할 거야. 같이 DepthStencilView(핸들러 객체)를 반환해줘
-		CHECK_WIN_MSG(DX_DEVICE->CreateDepthStencilView(_mDepthStencilTexture.Get(), &desc, _mDepthStencilView.GetAddressOf()), "Swap chain DSV Texture creation is failed");
+		CHECK_WIN_MSG(DX_DEVICE->CreateDepthStencilView(_mDepthStencilTexture.Get(), &desc, _mDepthStencilView.ReleaseAndGetAddressOf()), "Swap chain DSV Texture creation is failed");
 	}
 }

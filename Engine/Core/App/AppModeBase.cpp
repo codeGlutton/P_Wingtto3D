@@ -6,6 +6,9 @@
 #include "Utils/Thread/Thread.h"
 #include "Utils/Thread/MainThread.h"
 
+#include "Core/Resource/Resource.h"
+#include "Core/Resource/Material.h"
+
 void AppModeBase::Init()
 {
 	/* 싱글톤 초기화 */
@@ -35,6 +38,7 @@ void AppModeBase::Init()
 	{
 		// 최후 시작 요구
 
+		DX_GRAPHICS->Init();
 		RENDER_MANAGER->Init();
 		THREAD_MANAGER->Init();
 	}
@@ -61,7 +65,9 @@ void AppModeBase::End()
 	{
 		// 최후 시작 요구
 
+		THREAD_MANAGER->Destroy();
 		RENDER_MANAGER->Destroy();
+		DX_GRAPHICS->Destroy();
 	}
 
 	{
@@ -416,7 +422,7 @@ void AppModeBase::BeginThread()
 	/* 스레드 생성 */
 
 	const uint32 coreCount = std::thread::hardware_concurrency();
-	const uint32 reservedCount = MainThreadType::Count + 1; // 자기 자신 (게임 스레드) 추가
+	const uint32 reservedCount = MainThreadType::Count;
 
 	// 글로벌 워커 스레드 실행
 	const uint32 workerThreadCount = (coreCount > reservedCount) ? (coreCount - reservedCount) : 1u;
@@ -426,17 +432,39 @@ void AppModeBase::BeginThread()
 	}
 
 	// 메인 스레드 실행
-	std::array<std::shared_ptr<MainThread>, MainThreadType::Count> mainThreads = {
+	RegisterDefaultResources();
+	std::array<std::shared_ptr<MainThread>, MainThreadType::Count - 1> mainThreads = {
 		std::make_shared<RenderThread>()
 	};
 	THREAD_MANAGER->LaunchMainThreads(mainThreads);
-
-	// 초기 객체
 }
 
 void AppModeBase::EndThread()
 {
-	THREAD_MANAGER->Destroy();
+	THREAD_MANAGER->Join();
+	UnregisterDefaultResources();
+}
+
+void AppModeBase::RegisterDefaultResources()
+{
+	std::wstring packagePath = PATH_MANAGER->GetEngineResourceFolderName();
+
+	/* 메테리얼 */
+
+	// UI
+	{
+		std::shared_ptr<Material> matUI = RESOURCE_MANAGER->LoadOrGetResource<Material>(packagePath + L"\\M_UI");
+		matUI->GetProxy();
+		_mDefaultResources.push_back(matUI);
+
+		// 게임 빌드 옵션에서는 엔진 리소스가 없는 경우, 에러 발생
+		// 에디터 빌드 옵션에서는 Editor 참고
+	}
+}
+
+void AppModeBase::UnregisterDefaultResources()
+{
+	_mDefaultResources.clear();
 }
 
 void AppModeBase::ClearUserData()

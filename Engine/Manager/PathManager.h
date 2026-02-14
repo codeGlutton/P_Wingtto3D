@@ -19,6 +19,7 @@ public:
 	void Init();
 	void Destroy();
 
+	/* 주소 */
 public:
 	const std::filesystem::path& GetRootPath() const
 	{
@@ -46,6 +47,7 @@ public:
 		return _mExternalResourcePath;
 	}
 
+	/* 폴더명 */
 public:
 	const std::wstring& GetConfigFolderName() const
 	{
@@ -65,13 +67,19 @@ public:
 	}
 
 private:
+	// 메인 폴더
 	std::filesystem::path _mRootPath;
+	// 설정 폴더
 	std::filesystem::path _mConfigPath;
 
 private:
+	// 리소스 폴더
 	std::filesystem::path _mResourcePath;
+	// 빌드 설정에 따른 리소스 폴더
 	std::filesystem::path _mIsolationResourcePath;
+	// 엔진 리소스 폴더
 	std::filesystem::path _mEngineResourcePath;
+	// 외부 리소스 폴더
 	std::filesystem::path _mExternalResourcePath;
 
 private:

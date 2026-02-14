@@ -20,7 +20,8 @@ namespace RenderTargetResetFlag
 class DXSwapChain
 {
 public:
-	DXSwapChain(uint32 width, uint32 height, bool isWindowed) :
+	DXSwapChain(uint32 width, uint32 height, bool isWindowed, ThreadSafeRefCounting<HWND> hWnd) :
+		_mHWnd(hWnd),
 		_mWidth(width),
 		_mHeight(height),
 		_mIsWindowed(isWindowed)

@@ -3,12 +3,14 @@
 #include <latch>
 #include "Utils/Thread/LockQueue.h"
 
-#define TIME_MANAGER TimeManager::GetInst()
-#define FPS TIME_MANAGER->GetFps()
-#define DELTA_TIME TIME_MANAGER->GetDeltaTime()
+#define TIME_MANAGER			TimeManager::GetInst()
+#define FPS						TIME_MANAGER->GetFps()
+#define DELTA_TIME				TIME_MANAGER->GetDeltaTime()
+#define FIXED_DELTA_TIME		TIME_MANAGER->GetFixedDeltaTime()
+#define PLAY_TIME				TIME_MANAGER->GetPlayTime()
 
-#define RENDER_TIME_MANAGER RenderTimeManager::GetInst()
-#define RENDER_DELTA_TIME RENDER_TIME_MANAGER->GetDeltaTime()
+#define RENDER_TIME_MANAGER		RenderTimeManager::GetInst()
+#define RENDER_DELTA_TIME		RENDER_TIME_MANAGER->GetDeltaTime()
 
 enum class UpdatePhase : uint8
 {

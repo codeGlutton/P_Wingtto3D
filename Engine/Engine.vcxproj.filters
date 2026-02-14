@@ -118,6 +118,12 @@
     <Filter Include="Graphics\State">
       <UniqueIdentifier>{972f80e1-a820-4464-849a-052d198a06fa}</UniqueIdentifier>
     </Filter>
+    <Filter Include="HLSL">
+      <UniqueIdentifier>{74a863fb-938c-4a96-b0aa-20df29bfe30c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="HLSL\Common">
+      <UniqueIdentifier>{9bd57227-2f9d-489e-a83e-d583c48ee2dd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\Object.h">
@@ -522,6 +528,12 @@
     <ClInclude Include="Utils\GeometryUtils.h">
       <Filter>Utils</Filter>
     </ClInclude>
+    <ClInclude Include="Graphics\Render\DXWidgetBatchMesh.h">
+      <Filter>Graphics\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\Thread\DeadLockProfiler.h">
+      <Filter>Utils\Thread\Lock</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\Object.cpp">
@@ -881,5 +893,33 @@
     <ClCompile Include="Utils\GeometryUtils.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
+    <ClCompile Include="Graphics\Render\DXWidgetBatchMesh.cpp">
+      <Filter>Graphics\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\Thread\DeadLockProfiler.cpp">
+      <Filter>Utils\Thread\Lock</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Resources\Engine\HLSL\AnimationCommon.hlsli">
+      <Filter>HLSL\Common</Filter>
+    </None>
+    <None Include="..\Resources\Engine\HLSL\GlobalDefine.hlsli">
+      <Filter>HLSL\Common</Filter>
+    </None>
+    <None Include="..\Resources\Engine\HLSL\InstancingCommon.hlsli">
+      <Filter>HLSL\Common</Filter>
+    </None>
+    <None Include="..\Resources\Engine\HLSL\LightCommon.hlsli">
+      <Filter>HLSL\Common</Filter>
+    </None>
+    <None Include="..\Resources\Engine\HLSL\ShaderCommon.hlsli">
+      <Filter>HLSL\Common</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="..\Resources\Engine\HLSL\UIRender.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

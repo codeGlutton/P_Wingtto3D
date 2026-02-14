@@ -49,7 +49,7 @@ void DXComputeTextureBuffer::Init(const void* initData, uint32 width, uint32 hei
 		data.pSysMem = initData;
 		data.SysMemPitch = static_cast<uint32>(pitch);
 
-		CHECK_WIN_MSG(DX_DEVICE->CreateTexture2D(&desc, &data, _mInputTexture.GetAddressOf()), "Compute input texture creation is failed");
+		CHECK_WIN_MSG(DX_DEVICE->CreateTexture2D(&desc, &data, _mInputTexture.ReleaseAndGetAddressOf()), "Compute input texture creation is failed");
 	}
 	CreateBuffer();
 }
@@ -88,7 +88,7 @@ void DXComputeTextureBuffer::Init(const void* initData, uint32 width, uint32 hei
 			datas[i].SysMemSlicePitch = static_cast<uint32>(slice);
 		}
 
-		CHECK_WIN_MSG(DX_DEVICE->CreateTexture2D(&desc, datas.data(), _mInputTexture.GetAddressOf()), "Compute input texture creation is failed");
+		CHECK_WIN_MSG(DX_DEVICE->CreateTexture2D(&desc, datas.data(), _mInputTexture.ReleaseAndGetAddressOf()), "Compute input texture creation is failed");
 	}
 	CreateBuffer();
 }
@@ -96,7 +96,7 @@ void DXComputeTextureBuffer::Init(const void* initData, uint32 width, uint32 hei
 void DXComputeTextureBuffer::Init(ComPtr<ID3D11ShaderResourceView> initData)
 {
 	ComPtr<ID3D11Texture2D> texture;
-	initData->GetResource((ID3D11Resource**)texture.GetAddressOf());
+	initData->GetResource((ID3D11Resource**)texture.ReleaseAndGetAddressOf());
 
 	ASSERT_MSG(texture != nullptr, "Empty texture resource can't be used for compute texture buffer");
 
@@ -121,7 +121,7 @@ void DXComputeTextureBuffer::Init(ComPtr<ID3D11ShaderResourceView> initData)
 		inputDesc.MipLevels = 1;
 		inputDesc.SampleDesc.Count = 1;
 
-		CHECK_WIN_MSG(DX_DEVICE->CreateTexture2D(&inputDesc, nullptr, _mInputTexture.GetAddressOf()), "Compute input texture creation is failed");
+		CHECK_WIN_MSG(DX_DEVICE->CreateTexture2D(&inputDesc, nullptr, _mInputTexture.ReleaseAndGetAddressOf()), "Compute input texture creation is failed");
 		DX_DEVICE_CONTEXT->CopyResource(_mInputTexture.Get(), texture.Get());
 	}
 	CreateBuffer();
@@ -158,7 +158,7 @@ void DXComputeTextureBuffer::CreateSRV()
 	srvDesc.Texture2DArray.MipLevels = 1;
 	srvDesc.Texture2DArray.ArraySize = _mArraySize;
 
-	CHECK_WIN_MSG(DX_DEVICE->CreateShaderResourceView(_mInputTexture.Get(), &srvDesc, _mInputSRV.GetAddressOf()), "Compute input SRV creation is failed");
+	CHECK_WIN_MSG(DX_DEVICE->CreateShaderResourceView(_mInputTexture.Get(), &srvDesc, _mInputSRV.ReleaseAndGetAddressOf()), "Compute input SRV creation is failed");
 }
 
 void DXComputeTextureBuffer::CreateOutput()
@@ -173,7 +173,7 @@ void DXComputeTextureBuffer::CreateOutput()
 	desc.MipLevels = 1;
 	desc.SampleDesc.Count = 1;
 
-	CHECK_WIN_MSG(DX_DEVICE->CreateTexture2D(&desc, NULL, _mOutputTexture.GetAddressOf()), "Compute output texture creation is failed");
+	CHECK_WIN_MSG(DX_DEVICE->CreateTexture2D(&desc, NULL, _mOutputTexture.ReleaseAndGetAddressOf()), "Compute output texture creation is failed");
 }
 
 void DXComputeTextureBuffer::CreateUAV()
@@ -187,7 +187,7 @@ void DXComputeTextureBuffer::CreateUAV()
 	uavDesc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2DARRAY;
 	uavDesc.Texture2DArray.ArraySize = _mArraySize;
 
-	CHECK_WIN_MSG(DX_DEVICE->CreateUnorderedAccessView(_mOutputTexture.Get(), &uavDesc, _mOutputUAV.GetAddressOf()), "Compute output UAV creation is failed");
+	CHECK_WIN_MSG(DX_DEVICE->CreateUnorderedAccessView(_mOutputTexture.Get(), &uavDesc, _mOutputUAV.ReleaseAndGetAddressOf()), "Compute output UAV creation is failed");
 }
 
 void DXComputeTextureBuffer::CreateResult()
@@ -202,5 +202,5 @@ void DXComputeTextureBuffer::CreateResult()
 	srvDesc.Texture2DArray.MipLevels = 1;
 	srvDesc.Texture2DArray.ArraySize = _mArraySize;
 
-	CHECK_WIN_MSG(DX_DEVICE->CreateShaderResourceView(_mOutputTexture.Get(), &srvDesc, _mResultSRV.GetAddressOf()), "Compute result SRV creation is failed");
+	CHECK_WIN_MSG(DX_DEVICE->CreateShaderResourceView(_mOutputTexture.Get(), &srvDesc, _mResultSRV.ReleaseAndGetAddressOf()), "Compute result SRV creation is failed");
 }

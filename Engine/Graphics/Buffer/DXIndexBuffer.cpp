@@ -18,7 +18,7 @@ void DXIndexBuffer::Init(std::shared_ptr<IndexBulkData> bulkData, bool canCpuWri
 	Init(indices, canCpuWrite, offset);
 }
 
-void DXIndexBuffer::Init(std::vector<uint32> indices, bool canCpuWrite, uint32 offset)
+void DXIndexBuffer::Init(const std::vector<uint32>& indices, bool canCpuWrite, uint32 offset)
 {
 	_mStride = sizeof(uint32);
 	_mCount = static_cast<uint32>(indices.size());
@@ -53,7 +53,31 @@ void DXIndexBuffer::Init(std::vector<uint32> indices, bool canCpuWrite, uint32 o
 	data.pSysMem = indices.data();
 
 	// 디바이스야! GPU에 메모리 할당 공간 만들어줘~
-	CHECK_WIN_MSG(DX_DEVICE->CreateBuffer(&desc, &data, _mIndexBuffer.GetAddressOf()), "Index buffer creation is failed");
+	CHECK_WIN_MSG(DX_DEVICE->CreateBuffer(&desc, &data, _mIndexBuffer.ReleaseAndGetAddressOf()), "Index buffer creation is failed");
+}
+
+void DXIndexBuffer::Init(uint32 count, uint32 offset)
+{
+	_mStride = sizeof(uint32);
+	_mCount = count;
+
+	_mResourceFlags = DXResourceFlag::Updatable;
+	_mOffset = offset;
+
+	D3D11_BUFFER_DESC desc;
+	memset(&desc, 0, sizeof(desc));
+	//ZeroMemory(&desc, size(desc));
+
+	desc.BindFlags = D3D11_BIND_INDEX_BUFFER;		// 입력 어셈블러(사용자 데이터 정리)에서 인덱스 버퍼
+	desc.ByteWidth = (uint32)(_mStride * _mCount);	// 할당할 메모리 크기
+
+	// GPU는 읽고, CPU가 중간에 Map으로 고침
+
+	desc.Usage = D3D11_USAGE_DYNAMIC; // cpu 쓰기 가능
+	desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+
+	// 디바이스야! GPU에 메모리 할당 공간 만들어줘~
+	CHECK_WIN_MSG(DX_DEVICE->CreateBuffer(&desc, nullptr, _mIndexBuffer.ReleaseAndGetAddressOf()), "Index buffer creation is failed");
 }
 
 void DXIndexBuffer::PushData() const
@@ -63,12 +87,17 @@ void DXIndexBuffer::PushData() const
 
 bool DXIndexBuffer::UpdateData(std::shared_ptr<IndexBulkData> bulkData) const
 {
+	const std::vector<uint32>& indices = bulkData->mValue;
+	return UpdateData(indices);
+}
+
+bool DXIndexBuffer::UpdateData(const std::vector<uint32>& indices) const
+{
 	if (IsUpdatable() == false)
 	{
 		return false;
 	}
 
-	const std::vector<uint32>& indices = bulkData->mValue;
 	std::size_t indicesSize = indices.size() * sizeof(uint32);
 
 	D3D11_MAPPED_SUBRESOURCE subResource;
@@ -96,4 +125,5 @@ bool DXIndexBuffer::UpdateData(std::shared_ptr<IndexBulkData> bulkData) const
 
 	return true;
 }
+
 

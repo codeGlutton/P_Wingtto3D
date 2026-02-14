@@ -1,6 +1,11 @@
 ﻿#pragma once
 
 #include "Graphics/Widget/Type/WidgetTypeInclude.h"
+#include "Utils/Thread/MainThread.h"
+
+class DXTextureBase;
+template<typename T, MainThreadType::Type MainThreadT> requires (MainThreadT == MainThreadType::Game || MainThreadT == MainThreadType::Render)
+struct ThreadSafeRefCountData;
 
 enum class WidgetBrushType
 {
@@ -55,14 +60,17 @@ struct WidgetBrush
 	GEN_MINIMUM_STRUCT_REFLECTION(WidgetBrush)
 
 public:
+	using Proxy = std::shared_ptr<ThreadSafeRefCountData<std::shared_ptr<DXTextureBase>, MainThreadType::Render>>;
+
+public:
 	PROPERTY(mType)
 	WidgetBrushType mType;
 	PROPERTY(mTint)
 	Tint mTint;
 	PROPERTY(mImageSize)
 	Vec2 mImageSize;
-	PROPERTY(mResource)
-	std::shared_ptr<Object> mResource;
+	PROPERTY(mProxy)
+	Proxy mProxy;
 
 	/* Box, Border 모드에서 사용 */
 public:

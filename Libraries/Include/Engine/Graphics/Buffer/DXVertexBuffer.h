@@ -55,12 +55,15 @@ public:
 	void Init(std::shared_ptr<VertexBulkData<T>> bulkData, uint32 slot = 0, bool canCpuWrite = false, uint32 offset = 0);
 	template<typename T>
 	void Init(const std::vector<T>& vertices, uint32 slot = 0, bool canCpuWrite = false, uint32 offset = 0);
+	void Init(uint32 stride, uint32 count, uint32 slot = 0, uint32 offset = 0);
 
 public:
 	void PushData() const;
 
 	template<typename T>
 	bool UpdateData(std::shared_ptr<VertexBulkData<T>> bulkData) const;
+	template<typename T>
+	bool UpdateData(const std::vector<T>& vertices) const;
 
 private:
 	ComPtr<ID3D11Buffer> _mVertexBuffer;
@@ -116,18 +119,24 @@ inline void DXVertexBuffer::Init(const std::vector<T>& vertices, uint32 slot, bo
 	data.pSysMem = vertices.data();
 
 	// 디바이스야! GPU에 메모리 할당 공간 만들어줘~
-	CHECK_WIN_MSG(DX_DEVICE->CreateBuffer(&desc, &data, _mVertexBuffer.GetAddressOf()), "Vertex buffer creation is failed");
+	CHECK_WIN_MSG(DX_DEVICE->CreateBuffer(&desc, &data, _mVertexBuffer.ReleaseAndGetAddressOf()), "Vertex buffer creation is failed");
 }
 
 template<typename T>
 inline bool DXVertexBuffer::UpdateData(std::shared_ptr<VertexBulkData<T>> bulkData) const
+{
+	const std::vector<T>& vertices = bulkData->mValue;
+	return UpdateData(vertices);
+}
+
+template<typename T>
+inline bool DXVertexBuffer::UpdateData(const std::vector<T>& vertices) const
 {
 	if (IsUpdatable() == false)
 	{
 		return false;
 	}
 
-	const std::vector<T>& vertices = bulkData->mValue;
 	std::size_t verticesSize = vertices.size() * sizeof(T);
 
 	D3D11_MAPPED_SUBRESOURCE subResource;

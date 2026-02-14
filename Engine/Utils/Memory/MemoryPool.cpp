@@ -1,4 +1,4 @@
-#include "pch.h"
+ï»¿#include "pch.h"
 #include "MemoryPool.h"
 
 MemoryPool::MemoryPool(int32 allocSize) : _mAllocSize(allocSize)
@@ -17,12 +17,8 @@ MemoryPool::~MemoryPool()
 void MemoryPool::Push(MemoryHeader* ptr)
 {
 	ptr->mAllocSize = 0;
+
 	int32 count = _mReserveCount.load();
-	if (count > Memory::MAX_POOL_SIZE)
-	{
-		::_aligned_free(ptr);
-		return;
-	}
 
 	::InterlockedPushEntrySList(&_mHeader, static_cast<PSLIST_ENTRY>(ptr));
 
@@ -36,12 +32,12 @@ MemoryHeader* MemoryPool::Pop()
 
 	if (memory == nullptr)
 	{
-		// ºÎÁ·ÇÑ °æ¿ì
+		// ë¶€ì¡±í•œ ê²½ìš°
 		memory = reinterpret_cast<MemoryHeader*>(::_aligned_malloc(_mAllocSize, Memory::SLIST_ALIGN));
 	}
 	else
 	{
-		// ¿©ºÐÀÌ ÀÖ´Â °æ¿ì
+		// ì—¬ë¶„ì´ ìžˆëŠ” ê²½ìš°
 		ASSERT_MSG(memory->mAllocSize == 0, "Invalid memory pool reserve");
 		_mReserveCount.fetch_sub(1);
 	}

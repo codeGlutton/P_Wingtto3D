@@ -22,7 +22,7 @@ void DXGraphicSystem::Destroy()
 
 void DXGraphicSystem::SaveRenderTargets()
 {
-	_mDeviceContext->OMGetRenderTargets(1, _mRenderTargetView.GetAddressOf(), _mDepthStencilView.GetAddressOf());
+	_mDeviceContext->OMGetRenderTargets(1, _mRenderTargetView.ReleaseAndGetAddressOf(), _mDepthStencilView.ReleaseAndGetAddressOf());
 }
 
 void DXGraphicSystem::RollbackRenderTargets(bool releaseCache)
@@ -85,18 +85,18 @@ void DXGraphicSystem::CreateDevice()
 		ComPtr<IDXGIDevice> dxgiDevice = nullptr;
 		_mDevice->QueryInterface(
 			__uuidof(IDXGIDevice),	// 타입의 id 가져옴
-			reinterpret_cast<void**>(dxgiDevice.GetAddressOf())
+			reinterpret_cast<void**>(dxgiDevice.ReleaseAndGetAddressOf())
 		);
 
 		ComPtr<IDXGIAdapter> adapter = nullptr;
 		dxgiDevice->GetParent(
 			__uuidof(IDXGIAdapter), 
-			reinterpret_cast<void**>(adapter.GetAddressOf())
+			reinterpret_cast<void**>(adapter.ReleaseAndGetAddressOf())
 		);
 
-		_mFactory->GetParent(
+		adapter->GetParent(
 			__uuidof(IDXGIFactory), 
-			reinterpret_cast<void**>(_mFactory.GetAddressOf())
+			reinterpret_cast<void**>(_mFactory.ReleaseAndGetAddressOf())
 		);
 	}
 }

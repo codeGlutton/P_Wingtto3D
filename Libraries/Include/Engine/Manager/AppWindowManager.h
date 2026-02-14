@@ -76,7 +76,7 @@ public:
 
 public:
 	virtual void RegisterPackage(std::shared_ptr<Package> package) override;
-	virtual void Save() override;
+	virtual void Save() const override;
 	virtual void Load() override;
 
 public:

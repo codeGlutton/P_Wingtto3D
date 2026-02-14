@@ -26,8 +26,6 @@ public:
 			mImg
 		);
 		CHECK_WIN_MSG(hr, "Loading bulk data is failed");
-
-		mValue.clear();
 	}
 
 public:

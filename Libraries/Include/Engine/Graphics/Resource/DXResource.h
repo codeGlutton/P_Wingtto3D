@@ -38,9 +38,9 @@ public:
 	{
 		return _mName;
 	}
-	const std::wstring& GetFullPath() const
+	const std::wstring& GetPath() const
 	{
-		return _mFullPath;
+		return _mPath;
 	}
 
 protected:
@@ -48,7 +48,7 @@ protected:
 
 private:
 	std::wstring _mName;
-	std::wstring _mFullPath;
+	std::wstring _mPath;
 };
 
 

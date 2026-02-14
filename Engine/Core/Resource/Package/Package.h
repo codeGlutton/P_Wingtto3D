@@ -5,6 +5,7 @@
 
 struct ObjectLinker;
 struct BulkData;
+class Resource;
 
 /**
  * 연관 오브젝트의 데이터 패키지
@@ -78,6 +79,15 @@ class ResourcePackage : public Package
 
 private:
 	virtual std::shared_ptr<Object> RequestToCreateObject(const ObjectTypeInfo* typeInfo, ObjectCreateFlag::Type flags) override;
+
+public:
+	std::shared_ptr<Resource> GetResource()
+	{
+		return std::move(_mResource);
+	}
+
+private:
+	std::shared_ptr<Resource> _mResource;
 };
 
 
