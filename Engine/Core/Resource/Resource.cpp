@@ -6,9 +6,9 @@
 
 #include "Manager/PackageManager.h"
 
-void Resource::PostCreate()
+void Resource::PostLoad()
 {
-	Super::PostCreate();
+	Super::PostLoad();
 	RESOURCE_MANAGER->NotifyToAddResource(std::static_pointer_cast<Resource>(shared_from_this()));
 }
 
@@ -16,6 +16,11 @@ void Resource::BeginDestroy()
 {
 	RESOURCE_MANAGER->NotifyToRemoveResource(GetPath());
 	Super::BeginDestroy();
+}
+
+bool Resource::HasBulkData() const
+{
+	return false;
 }
 
 void Resource::Save() const

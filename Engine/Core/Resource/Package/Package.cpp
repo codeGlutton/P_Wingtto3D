@@ -16,6 +16,11 @@
 #include "Manager/ResourceManager.h"
 #include "Core/Resource/ResourceHeader.h"
 
+#include "Manager/WidgetStyleManager.h"
+#include "Graphics/Widget/Type/WidgetStyle.h"
+
+#include "Manager/PathManager.h"
+
 void Package::PostLoad()
 {
 	Super::PostLoad();
@@ -108,6 +113,11 @@ const std::vector<std::wstring>& Package::GetExternalPackagePaths(std::shared_pt
 	return linker->mLinkDataMap[GetPath()].mPackageHeader->mLinkedExternalPackagePaths;
 }
 
+const std::vector<PackageBuildScope>& Package::GetExternalPackageScopes(std::shared_ptr<ObjectLinker> linker) const
+{
+	return linker->mLinkDataMap[GetPath()].mPackageHeader->mLinkedExternalPackageScopes;
+}
+
 void Package::MakeHeader(std::shared_ptr<ObjectLinker> linker) const
 {
 	ASSERT_THREAD(MainThreadType::Game);
@@ -125,7 +135,7 @@ void Package::MakeHeader(std::shared_ptr<ObjectLinker> linker) const
 
 	// 외부 종속 패키지와 벌크 데이터 저장해두기
 	std::shared_ptr<PackageHeader> header = std::make_shared<PackageHeader>();
-	std::unordered_map<std::wstring, std::string> externalPackageDatas;
+	std::unordered_map<std::wstring, std::pair<std::string, PackageBuildScope>> externalPackageDatas;
 	for (auto& childPair : _mChildSharedObjects)
 	{
 		std::shared_ptr<Object> child = childPair.second.lock();
@@ -134,22 +144,55 @@ void Package::MakeHeader(std::shared_ptr<ObjectLinker> linker) const
 		header->mObjectFullPaths.push_back(child->GetFullPath());
 		if (child != nullptr)
 		{
-			child->GetTypeInfo().CollectHeaderDatas(
+			child->CollectHeaderDatas(
 				child.get(), externalPackageDatas,
-				linkData.mPackageHeader->mBulkDatas
+				header->mBulkDatas
 			);
 		}
 	}
 	for (auto& externalPackageDataPair : externalPackageDatas)
 	{
 		header->mLinkedExternalPackagePaths.push_back(externalPackageDataPair.first);
-		header->mLinkedExternalPackageClassNames.push_back(externalPackageDataPair.second);
+		header->mLinkedExternalPackageClassNames.push_back(externalPackageDataPair.second.first);
+		header->mLinkedExternalPackageScopes.push_back(externalPackageDataPair.second.second);
 	}
 	for (auto& bulkData : header->mBulkDatas)
 	{
 		header->mBulkClassNames.push_back(bulkData->GetTypeInfo().GetName());
 	}
 	linkData.mPackageHeader = header;
+}
+
+void Package::CreateLinkData(std::shared_ptr<ObjectLinker> linker) const
+{
+	ASSERT_THREAD(MainThreadType::Game);
+
+	if (linker == nullptr)
+	{
+		return;
+	}
+
+	PackageLinkData& linkData = linker->mLinkDataMap[GetPath()];
+
+	// 모든 객체 가져와 저장
+	std::size_t objectSize = linkData.mPackageHeader->mObjectClassNames.size();
+	for (std::size_t i = 0; i < objectSize; ++i)
+	{
+		const std::wstring& fullPath = linkData.mPackageHeader->mObjectFullPaths[i];
+
+		auto iter = _mChildSharedObjects.find(fullPath);
+		if (iter == _mChildSharedObjects.end())
+		{
+			linkData.mObjectFullPathMap[nullptr] = L"";
+			linkData.mObjectPtrMap[fullPath] = nullptr;
+		}
+		else
+		{
+			std::shared_ptr<Object> existedObject = _mChildSharedObjects.at(fullPath).lock();
+			linkData.mObjectFullPathMap[existedObject.get()] = fullPath;
+			linkData.mObjectPtrMap[fullPath] = existedObject;
+		}
+	}
 }
 
 void Package::CreateEmptyObjects(std::shared_ptr<ObjectLinker> linker)
@@ -167,11 +210,14 @@ void Package::CreateEmptyObjects(std::shared_ptr<ObjectLinker> linker)
 	std::size_t objectSize = linkData.mPackageHeader->mObjectClassNames.size();
 	for (std::size_t i = 0; i < objectSize; ++i)
 	{
-		const std::string& name = linkData.mPackageHeader->mObjectClassNames[i];
+		const std::string& typeName = linkData.mPackageHeader->mObjectClassNames[i];
 		const std::wstring& fullPath = linkData.mPackageHeader->mObjectFullPaths[i];
 
-		const ObjectTypeInfo* typeInfo = BOOT_SYSTEM->GetObjectTypeInfo(name.c_str());
-		std::shared_ptr<Object> object = RequestToCreateObject(typeInfo, ObjectCreateFlag::DeferredLoad);
+		const ObjectTypeInfo* typeInfo = BOOT_SYSTEM->GetObjectTypeInfo(typeName.c_str());
+		
+		std::wstring objectName, packageName;
+		PATH_MANAGER->ExtractFromFullPath(fullPath, objectName, packageName);
+		std::shared_ptr<Object> object = RequestToCreateObject(objectName, typeInfo, ObjectCreateFlag::DeferredLoad);
 
 		linkData.mObjectFullPathMap[object.get()] = fullPath;
 		linkData.mObjectPtrMap[fullPath] = object;
@@ -184,10 +230,9 @@ void Package::CreateEmptyObjects(std::shared_ptr<ObjectLinker> linker)
 	}
 }
 
-std::shared_ptr<Object> Package::RequestToCreateObject(const ObjectTypeInfo* typeInfo, ObjectCreateFlag::Type flags)
+std::shared_ptr<Object> Package::RequestToCreateObject(const std::wstring& objectName, const ObjectTypeInfo* typeInfo, ObjectCreateFlag::Type flags)
 {
-	std::wstring typeName = ConvertUtf8ToWString(typeInfo->GetName());
-	return NewObject(std::static_pointer_cast<Package>(shared_from_this()), typeInfo, typeName, flags);
+	return NewObject(std::static_pointer_cast<Package>(shared_from_this()), typeInfo, objectName, flags);
 }
 
 void AppWindowPackage::RegisterPackage()
@@ -196,17 +241,17 @@ void AppWindowPackage::RegisterPackage()
 	APP_WIN_MANAGER->RegisterPackage(std::static_pointer_cast<Package>(shared_from_this()));
 }
 
-std::shared_ptr<Object> AppWindowPackage::RequestToCreateObject(const ObjectTypeInfo* typeInfo, ObjectCreateFlag::Type flags)
+std::shared_ptr<Object> AppWindowPackage::RequestToCreateObject(const std::wstring& objectName, const ObjectTypeInfo* typeInfo, ObjectCreateFlag::Type flags)
 {
 	if (typeInfo->IsChildOf<AppWindow>() == true)
 	{
-		return APP_WIN_MANAGER->CreateAppWindow(nullptr, typeInfo, flags);
+		return APP_WIN_MANAGER->CreateAppWindow(objectName, nullptr, typeInfo, flags);
 	}
 	else if (typeInfo->IsChildOf<Widget>() == true)
 	{
-		return APP_WIN_MANAGER->CreateAppWindowWidget(nullptr, typeInfo, flags);
+		return APP_WIN_MANAGER->CreateAppWindowWidget(objectName, nullptr, typeInfo, flags);
 	}
-	return Super::RequestToCreateObject(typeInfo, flags);
+	return Super::RequestToCreateObject(objectName, typeInfo, flags);
 }
 
 void ResourcePreviewPackage::RegisterPackage()
@@ -215,13 +260,24 @@ void ResourcePreviewPackage::RegisterPackage()
 	RESOURCE_MANAGER->RegisterPackage(std::static_pointer_cast<Package>(shared_from_this()));
 }
 
-std::shared_ptr<Object> ResourcePreviewPackage::RequestToCreateObject(const ObjectTypeInfo* typeInfo, ObjectCreateFlag::Type flags)
+std::shared_ptr<Object> ResourcePreviewPackage::RequestToCreateObject(const std::wstring& objectName, const ObjectTypeInfo* typeInfo, ObjectCreateFlag::Type flags)
 {
-	return RESOURCE_MANAGER->CreateResourceHeader(nullptr, flags);
+	return RESOURCE_MANAGER->CreateResourceHeader(objectName, nullptr, flags);
 }
 
-std::shared_ptr<Object> ResourcePackage::RequestToCreateObject(const ObjectTypeInfo* typeInfo, ObjectCreateFlag::Type flags)
+std::shared_ptr<Object> ResourcePackage::RequestToCreateObject(const std::wstring& objectName, const ObjectTypeInfo* typeInfo, ObjectCreateFlag::Type flags)
 {
-	_mResource = RESOURCE_MANAGER->CreateResource(std::static_pointer_cast<ResourcePackage>(shared_from_this()), typeInfo, flags);
+	_mResource = RESOURCE_MANAGER->CreateResource(objectName, std::static_pointer_cast<ResourcePackage>(shared_from_this()), typeInfo, flags);
 	return _mResource;
+}
+
+void WidgetStylePackage::RegisterPackage()
+{
+	Super::RegisterPackage();
+	WIDGET_STYLE_MANAGER->RegisterPackage(std::static_pointer_cast<Package>(shared_from_this()));
+}
+
+std::shared_ptr<Object> WidgetStylePackage::RequestToCreateObject(const std::wstring& objectName, const ObjectTypeInfo* typeInfo, ObjectCreateFlag::Type flags)
+{
+	return WIDGET_STYLE_MANAGER->CreateStyle(objectName, typeInfo, flags);
 }

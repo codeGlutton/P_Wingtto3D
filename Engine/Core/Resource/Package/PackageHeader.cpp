@@ -24,8 +24,15 @@ void PackageHeader::Deserialize(Archive& archive)
 	const StructTypeInfo& typeInfo = GetStaticTypeInfo();
 	typeInfo.Deserialize(archive, this);
 
-	for (const std::shared_ptr<BulkData>& bulkData : mBulkDatas)
+	const std::size_t bulkDataSize = mBulkClassNames.size();
+	mBulkDatas.resize(bulkDataSize);
+	for (std::size_t i = 0; i < bulkDataSize; ++i)
 	{
-		bulkData->GetTypeInfo().Deserialize(archive, bulkData.get());
+		const BulkStructTypeInfo& bulkTypeInfo = *static_cast<const BulkStructTypeInfo*>(BOOT_SYSTEM->GetStructTypeInfo(mBulkClassNames[i].c_str()));
+		const std::function<BulkData*()>& constructor = bulkTypeInfo.GetConstructor();
+		mBulkDatas[i] = std::shared_ptr<BulkData>(constructor(), [](BulkData* p) {
+			delete p;
+			});
+		bulkTypeInfo.Deserialize(archive, mBulkDatas[i].get());
 	}
 }

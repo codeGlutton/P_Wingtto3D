@@ -43,7 +43,17 @@ const Color Color::Red = { 1.f, 0.f, 0.f, 1.f };
 const Color Color::Green = { 0.f, 1.f, 0.f, 1.f };
 const Color Color::Blue = { 0.f, 0.f, 1.f, 1.f };
 
-inline bool Matrix2D::operator== (const Matrix2D& M) const noexcept
+Matrix2D::operator Matrix() const noexcept
+{
+    return Matrix(
+        _11, _12, 0.f, _13,
+        _21, _22, 0.f, _23,
+        0.f, 0.f, 1.f, 0.f,
+        _31, _32, 0.f, _33
+    );
+}
+
+bool Matrix2D::operator== (const Matrix2D& M) const noexcept
 {
     using namespace DirectX;
     XMVECTOR x1 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&_11));
@@ -59,7 +69,7 @@ inline bool Matrix2D::operator== (const Matrix2D& M) const noexcept
         && XMVector3Equal(x3, y3)) != 0;
 }
 
-inline bool Matrix2D::operator != (const Matrix2D& M) const noexcept
+bool Matrix2D::operator != (const Matrix2D& M) const noexcept
 {
     using namespace DirectX;
     XMVECTOR x1 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&_11));
@@ -75,7 +85,7 @@ inline bool Matrix2D::operator != (const Matrix2D& M) const noexcept
         || XMVector3NotEqual(x3, y3)) != 0;
 }
 
-inline Matrix2D& Matrix2D::operator= (const DirectX::XMFLOAT3X3& M) noexcept
+Matrix2D& Matrix2D::operator= (const DirectX::XMFLOAT3X3& M) noexcept
 {
     _11 = M._11; _12 = M._12; _13 = M._13;
     _21 = M._21; _22 = M._22; _23 = M._23;
@@ -83,7 +93,7 @@ inline Matrix2D& Matrix2D::operator= (const DirectX::XMFLOAT3X3& M) noexcept
     return *this;
 }
 
-inline Matrix2D& Matrix2D::operator+= (const Matrix2D& M) noexcept
+Matrix2D& Matrix2D::operator+= (const Matrix2D& M) noexcept
 {
     using namespace DirectX;
     XMVECTOR x1 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&_11));
@@ -104,7 +114,7 @@ inline Matrix2D& Matrix2D::operator+= (const Matrix2D& M) noexcept
     return *this;
 }
 
-inline Matrix2D& Matrix2D::operator-= (const Matrix2D& M) noexcept
+Matrix2D& Matrix2D::operator-= (const Matrix2D& M) noexcept
 {
     using namespace DirectX;
     XMVECTOR x1 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&_11));
@@ -125,7 +135,7 @@ inline Matrix2D& Matrix2D::operator-= (const Matrix2D& M) noexcept
     return *this;
 }
 
-inline Matrix2D& Matrix2D::operator*= (const Matrix2D& M) noexcept
+Matrix2D& Matrix2D::operator*= (const Matrix2D& M) noexcept
 {
     using namespace DirectX;
     XMMATRIX M1 = XMLoadFloat3x3(this);
@@ -135,7 +145,7 @@ inline Matrix2D& Matrix2D::operator*= (const Matrix2D& M) noexcept
     return *this;
 }
 
-inline Matrix2D& Matrix2D::operator*= (float S) noexcept
+Matrix2D& Matrix2D::operator*= (float S) noexcept
 {
     using namespace DirectX;
     XMVECTOR x1 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&_11));
@@ -152,7 +162,7 @@ inline Matrix2D& Matrix2D::operator*= (float S) noexcept
     return *this;
 }
 
-inline Matrix2D& Matrix2D::operator/= (float S) noexcept
+Matrix2D& Matrix2D::operator/= (float S) noexcept
 {
     using namespace DirectX;
     assert(S != 0.f);
@@ -172,7 +182,7 @@ inline Matrix2D& Matrix2D::operator/= (float S) noexcept
     return *this;
 }
 
-inline Matrix2D& Matrix2D::operator/= (const Matrix2D& M) noexcept
+Matrix2D& Matrix2D::operator/= (const Matrix2D& M) noexcept
 {
     using namespace DirectX;
     XMVECTOR x1 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&_11));
@@ -193,7 +203,7 @@ inline Matrix2D& Matrix2D::operator/= (const Matrix2D& M) noexcept
     return *this;
 }
 
-inline Matrix2D Matrix2D::operator- () const noexcept
+Matrix2D Matrix2D::operator- () const noexcept
 {
     using namespace DirectX;
     XMVECTOR v1 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&_11));
@@ -211,7 +221,7 @@ inline Matrix2D Matrix2D::operator- () const noexcept
     return R;
 }
 
-inline Matrix2D operator+ (const Matrix2D& M1, const Matrix2D& M2) noexcept
+Matrix2D operator+ (const Matrix2D& M1, const Matrix2D& M2) noexcept
 {
     using namespace DirectX;
     XMVECTOR x1 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&M1._11));
@@ -233,7 +243,7 @@ inline Matrix2D operator+ (const Matrix2D& M1, const Matrix2D& M2) noexcept
     return R;
 }
 
-inline Matrix2D operator- (const Matrix2D& M1, const Matrix2D& M2) noexcept
+Matrix2D operator- (const Matrix2D& M1, const Matrix2D& M2) noexcept
 {
     using namespace DirectX;
     XMVECTOR x1 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&M1._11));
@@ -255,7 +265,7 @@ inline Matrix2D operator- (const Matrix2D& M1, const Matrix2D& M2) noexcept
     return R;
 }
 
-inline Matrix2D operator* (const Matrix2D& M1, const Matrix2D& M2) noexcept
+Matrix2D operator* (const Matrix2D& M1, const Matrix2D& M2) noexcept
 {
     using namespace DirectX;
     XMMATRIX m1 = XMLoadFloat3x3(&M1);
@@ -267,7 +277,7 @@ inline Matrix2D operator* (const Matrix2D& M1, const Matrix2D& M2) noexcept
     return R;
 }
 
-inline Matrix2D operator* (const Matrix2D& M, float S) noexcept
+Matrix2D operator* (const Matrix2D& M, float S) noexcept
 {
     using namespace DirectX;
     XMVECTOR x1 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&M._11));
@@ -285,7 +295,7 @@ inline Matrix2D operator* (const Matrix2D& M, float S) noexcept
     return R;
 }
 
-inline Matrix2D operator/ (const Matrix2D& M, float S) noexcept
+Matrix2D operator/ (const Matrix2D& M, float S) noexcept
 {
     using namespace DirectX;
     assert(S != 0.f);
@@ -307,7 +317,7 @@ inline Matrix2D operator/ (const Matrix2D& M, float S) noexcept
     return R;
 }
 
-inline Matrix2D operator/ (const Matrix2D& M1, const Matrix2D& M2) noexcept
+Matrix2D operator/ (const Matrix2D& M1, const Matrix2D& M2) noexcept
 {
     using namespace DirectX;
     XMVECTOR x1 = XMLoadFloat3(reinterpret_cast<const XMFLOAT3*>(&M1._11));
@@ -329,7 +339,7 @@ inline Matrix2D operator/ (const Matrix2D& M1, const Matrix2D& M2) noexcept
     return R;
 }
 
-inline Matrix2D operator* (float S, const Matrix2D& M) noexcept
+Matrix2D operator* (float S, const Matrix2D& M) noexcept
 {
     using namespace DirectX;
 
@@ -359,7 +369,7 @@ bool Matrix2D::Decompose(Vec2& scale, Vec2& translation) const noexcept
     return scale.x >= FLT_EPSILON && scale.y >= FLT_EPSILON;
 }
 
-inline bool Matrix2D::Decompose(Vec2& scale, float& radians, Vec2& translation) const noexcept
+bool Matrix2D::Decompose(Vec2& scale, float& radians, Vec2& translation) const noexcept
 {
     translation.x = _31;
     translation.y = _32;
@@ -376,28 +386,28 @@ inline bool Matrix2D::Decompose(Vec2& scale, float& radians, Vec2& translation) 
     return true;
 }
 
-inline Matrix2D Matrix2D::Transpose() const noexcept
+Matrix2D Matrix2D::Transpose() const noexcept
 {
     Matrix2D result;
     Transpose(result);
     return result;
 }
 
-inline void Matrix2D::Transpose(Matrix2D& result) const noexcept
+void Matrix2D::Transpose(Matrix2D& result) const noexcept
 {
     using namespace DirectX;
     XMMATRIX M = XMLoadFloat3x3(this);
     XMStoreFloat3x3(&result, XMMatrixTranspose(M));
 }
 
-inline Matrix2D Matrix2D::Invert() const noexcept
+Matrix2D Matrix2D::Invert() const noexcept
 {
     Matrix2D result;
     Invert(result);
     return result;
 }
 
-inline void Matrix2D::Invert(Matrix2D& result) const noexcept
+void Matrix2D::Invert(Matrix2D& result) const noexcept
 {
     float det = Determinant();
     assert(fabsf(det) > FLT_EPSILON);
@@ -417,7 +427,7 @@ inline void Matrix2D::Invert(Matrix2D& result) const noexcept
     result._33 = (_11 * _22 - _12 * _21) * invDet;
 }
 
-inline float Matrix2D::Determinant() const noexcept
+float Matrix2D::Determinant() const noexcept
 {
     return
         _11 * (_22 * _33 - _23 * _32) -
@@ -536,6 +546,24 @@ Matrix2D Matrix2D::Transform(const Matrix2D& M, float radians) noexcept
     return result;
 }
 
+Matrix::Matrix(const Matrix2D& other)
+{
+    _11 = other._11;	_12 = other._12;	_13 = 0.f;			_14 = other._13;
+    _21 = other._21;	_22 = other._22;	_23 = 0.f;			_24 = other._23;
+    _31 = 0.f;			_32 = 0.f;			_33 = 1.f;			_34 = 0.f;
+    _41 = other._31;	_42 = other._32;	_43 = 0.f;			_44 = other._33;
+}
+
+Matrix& Matrix::operator=(const Matrix2D& other) noexcept
+{
+    _11 = other._11;	_12 = other._12;	_13 = 0.f;			_14 = other._13;
+    _21 = other._21;	_22 = other._22;	_23 = 0.f;			_24 = other._23;
+    _31 = 0.f;			_32 = 0.f;			_33 = 1.f;			_34 = 0.f;
+    _41 = other._31;	_42 = other._32;	_43 = 0.f;			_44 = other._33;
+
+    return *this;
+}
+
 Vec3 Quat::ToYawPitchRoll()
 {
     Vec3 angles;
@@ -558,17 +586,17 @@ Vec3 Quat::ToYawPitchRoll()
     return angles;
 }
 
-inline bool Plane::Contains(const Vec3& point) const noexcept
+bool Plane::Contains(const Vec3& point) const noexcept
 {
     return IsNearlyZero(point.Dot(Normal()) + D());
 }
 
-inline bool Plane::Intersects(const Triangle& triangle) const noexcept
+bool Plane::Intersects(const Triangle& triangle) const noexcept
 {
     return triangle.Intersects(*this);
 }
 
-inline bool Plane::Intersects(const Line& line) const noexcept
+bool Plane::Intersects(const Line& line) const noexcept
 {
     Vec3 dir = line.end - line.start;
     float dot = dir.Dot(Normal());
@@ -579,7 +607,7 @@ inline bool Plane::Intersects(const Line& line) const noexcept
     return true;
 }
 
-inline bool Plane::Intersects(const Plane& plane) const noexcept
+bool Plane::Intersects(const Plane& plane) const noexcept
 {
     Vec3 cross = Normal().Cross(plane.Normal());
     if (IsNearlyZero(std::fabs(cross.Dot(cross))) == false)
@@ -656,23 +684,23 @@ bool Triangle::Contains(const Vec3& point) const noexcept
     return true;
 }
 
-inline bool Triangle::Intersects(const Triangle& triangle) const noexcept
+bool Triangle::Intersects(const Triangle& triangle) const noexcept
 {
     return DirectX::TriangleTests::Intersects(a, b, c, triangle.a, triangle.b, triangle.c);
 }
 
-inline bool Triangle::Intersects(const Plane& plane) const noexcept
+bool Triangle::Intersects(const Plane& plane) const noexcept
 {
     return DirectX::TriangleTests::Intersects(a, b, c, plane);
 }
 
-inline bool BoundingAABB2D::Contains(const BoundingOBB2D& obb) const noexcept
+bool BoundingAABB2D::Contains(const BoundingOBB2D& obb) const noexcept
 {
     obb.Contains(*this);
     return false;
 }
 
-inline bool BoundingAABB2D::Intersects(const BoundingOBB2D& obb) const noexcept
+bool BoundingAABB2D::Intersects(const BoundingOBB2D& obb) const noexcept
 {
     obb.Intersects(*this);
     return false;
@@ -698,7 +726,7 @@ void BoundingAABB2D::GetCorners(OUT std::vector<Vec2>& c) const
     GetCorners(c.data());
 }
 
-inline Vec2 BoundingOBB2D::Location() const noexcept
+Vec2 BoundingOBB2D::Location() const noexcept
 {
     Vec2 hx = axisX * (float)halfWidth;
     Vec2 hy = axisY * (float)halfHeight;
@@ -706,7 +734,7 @@ inline Vec2 BoundingOBB2D::Location() const noexcept
     return Center() - hx - hy;
 }
 
-inline Vec2 BoundingOBB2D::Center() const noexcept
+Vec2 BoundingOBB2D::Center() const noexcept
 {
     return Vec2((float)centerX, (float)centerY);
 }
@@ -728,7 +756,7 @@ void BoundingOBB2D::GetCorners(OUT std::vector<Vec2>& c) const
     GetCorners(c.data());
 }
 
-inline bool BoundingOBB2D::Contains(const Vec2& point) const noexcept
+bool BoundingOBB2D::Contains(const Vec2& point) const noexcept
 {
     Vec2 local = point - Center();
     float x = local.Dot(axisX);
@@ -785,7 +813,7 @@ bool BoundingOBB2D::Contains(const BoundingOBB2D& obb) const noexcept
     return true;
 }
 
-inline void BoundingOBB2D::Inflate(long horizAmount, long vertAmount) noexcept
+void BoundingOBB2D::Inflate(long horizAmount, long vertAmount) noexcept
 {
     halfWidth += horizAmount;
     halfHeight += vertAmount;
@@ -818,7 +846,7 @@ bool BoundingOBB2D::Intersects(const BoundingAABB2D& r) const noexcept
     return true;
 }
 
-inline bool BoundingOBB2D::Intersects(const RECT& rct) const noexcept
+bool BoundingOBB2D::Intersects(const RECT& rct) const noexcept
 {
     BoundingAABB2D aabb = BoundingAABB2D(rct);
     return Intersects(aabb);

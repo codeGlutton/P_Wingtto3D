@@ -81,7 +81,7 @@ public:
 };
 
 template<typename SlotType>
-ChildAlignmentResult AlignChildAxisX(float allottedSize, const SlotType& childSlot, const Margin& childPadding)
+ChildAlignmentResult AlignChildAxisX(float allottedSize, const SlotType& childSlot, const Margin& childPadding, float contentScale = 1.f)
 {
 	const float paddingSum = childPadding.mLeft + childPadding.mRight;
 	const SlotAlignmentType alignmentType = childSlot.GetHorizonAlignment();
@@ -89,7 +89,7 @@ ChildAlignmentResult AlignChildAxisX(float allottedSize, const SlotType& childSl
 	if (alignmentType != SlotAlignmentType::Fill)
 	{
 		// 채우기 말고 다른 옵션 일시, 내부 위젯의 DesiredSize과 패딩에 의존
-		const float childDesiredSize = childSlot.GetWidgetRef()->GetDesiredSize().x;
+		const float childDesiredSize = childSlot.GetWidgetRef()->GetDesiredSize().x * contentScale;
 		const float childSize = std::max<float>(std::min<float>(childDesiredSize, allottedSize - paddingSum), 0.f);
 
 		// 사이즈는 동일하나, 오프셋만 변동
@@ -105,11 +105,11 @@ ChildAlignmentResult AlignChildAxisX(float allottedSize, const SlotType& childSl
 	}
 
 	// 채우기 옵션 일시, 오프셋과 크기를 패딩에 거의 의존하여 반영
-	return ChildAlignmentResult(childPadding.mLeft, std::max<float>((allottedSize - paddingSum), 0.f));
+	return ChildAlignmentResult(childPadding.mLeft, std::max<float>((allottedSize - paddingSum) * contentScale, 0.f));
 }
 
 template<typename SlotType>
-ChildAlignmentResult AlignChildAxisY(float allottedSize, const SlotType& childSlot, const Margin& childPadding)
+ChildAlignmentResult AlignChildAxisY(float allottedSize, const SlotType& childSlot, const Margin& childPadding, float contentScale = 1.f)
 {
 	const float paddingSum = childPadding.mUp + childPadding.mDown;
 	const SlotAlignmentType alignmentType = childSlot.GetVerticalAlignment();
@@ -117,7 +117,7 @@ ChildAlignmentResult AlignChildAxisY(float allottedSize, const SlotType& childSl
 	if (alignmentType != SlotAlignmentType::Fill)
 	{
 		// 채우기 말고 다른 옵션 일시, 내부 위젯의 DesiredSize과 패딩에 의존
-		const float childDesiredSize = childSlot.GetWidgetRef()->GetDesiredSize().y;
+		const float childDesiredSize = childSlot.GetWidgetRef()->GetDesiredSize().y * contentScale;
 		const float childSize = std::max<float>(std::min<float>(childDesiredSize, allottedSize - paddingSum), 0.f);
 
 		// 사이즈는 동일하나, 오프셋만 변동
@@ -133,6 +133,6 @@ ChildAlignmentResult AlignChildAxisY(float allottedSize, const SlotType& childSl
 	}
 
 	// 채우기 옵션 일시, 오프셋과 크기를 패딩에 거의 의존하여 반영
-	return ChildAlignmentResult(childPadding.mUp, std::max<float>((allottedSize - paddingSum), 0.f));
+	return ChildAlignmentResult(childPadding.mUp, std::max<float>((allottedSize - paddingSum) * contentScale, 0.f));
 }
 

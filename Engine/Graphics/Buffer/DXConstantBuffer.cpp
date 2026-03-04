@@ -70,7 +70,7 @@ void DXConstantBuffer::Init(std::size_t stride, uint32 slot, DXResourceUsageFlag
 	CHECK_WIN_MSG(DX_DEVICE->CreateBuffer(&desc, nullptr, _mConstantBuffer.ReleaseAndGetAddressOf()), "Constant buffer creation is failed");
 }
 
-inline void DXConstantBuffer::Init(const void* initData, std::size_t stride, uint32 slot, DXResourceUsageFlag::Type usageFlags, bool canCpuWrite)
+void DXConstantBuffer::Init(const void* initData, std::size_t stride, uint32 slot, DXResourceUsageFlag::Type usageFlags, bool canCpuWrite)
 {
 	_mSlot = slot;
 	_mUsageFlags = usageFlags;
@@ -105,7 +105,7 @@ inline void DXConstantBuffer::Init(const void* initData, std::size_t stride, uin
 	CHECK_WIN_MSG(DX_DEVICE->CreateBuffer(&desc, &data, _mConstantBuffer.ReleaseAndGetAddressOf()), "Constant buffer creation is failed");
 }
 
-inline bool DXConstantBuffer::UpdateData(const void* data, std::size_t stride) const
+bool DXConstantBuffer::UpdateData(const void* data, std::size_t stride) const
 {
 	if (IsUpdatable() == false)
 	{
@@ -127,7 +127,7 @@ inline bool DXConstantBuffer::UpdateData(const void* data, std::size_t stride) c
 	::memcpy(
 		subResource.pData,
 		data,
-		sizeof(stride)
+		stride
 	);
 
 	DX_DEVICE_CONTEXT->Unmap(

@@ -55,7 +55,12 @@ void ResourceManager::Load()
 std::shared_ptr<ResourceHeader> ResourceManager::CreateResourceHeader(std::shared_ptr<Resource> target, ObjectCreateFlag::Type flags)
 {
 	std::wstring typeName = ConvertUtf8ToWString(ResourceHeader::GetStaticTypeInfo().GetName());
-	std::shared_ptr<ResourceHeader> resourceHeader = NewObject<ResourceHeader>(_mPackage, typeName, flags);
+	return CreateResourceHeader(typeName, target, flags);
+}
+
+std::shared_ptr<ResourceHeader> ResourceManager::CreateResourceHeader(const std::wstring& objectName, std::shared_ptr<Resource> target, ObjectCreateFlag::Type flags)
+{
+	std::shared_ptr<ResourceHeader> resourceHeader = NewObject<ResourceHeader>(_mPackage, objectName, flags);
 	resourceHeader->_mTarget = target;
 
 	return resourceHeader;
@@ -72,13 +77,13 @@ std::shared_ptr<Resource> ResourceManager::LoadOrGetResource(const std::wstring&
 	
 	std::shared_ptr<ResourcePackage> package = PACKAGE_MANAGER->LoadPackage<ResourcePackage>(resourcePath);
 #ifdef _EDITOR
-	if (package == nullptr)
+	if (package->IsValid() == false)
 	{
 		DEBUG_LOG("Try to load non existent resource");
 		return nullptr;
 	}
 #else
-	ASSERT_MSG(package != nullptr, "Try to load non existent resource")
+	ASSERT_MSG(package->IsValid() == true, "Try to load non existent resource");
 #endif
 	return package->GetResource();
 }
@@ -93,21 +98,28 @@ void ResourceManager::LoadOrGetResourceAsync(const std::wstring& resourcePath, c
 
 	ASSERT_MSG(typeInfo->IsChildOf<Resource>() == true, "GetResource func is not allowed to create non Resource class");
 
-	PACKAGE_MANAGER->LoadPackageAsync<ResourcePackage>(resourcePath, [callback](std::shared_ptr<Package> package) {
+	PACKAGE_MANAGER->LoadPackageAsync<ResourcePackage>(resourcePath, [callback, typeInfo](std::shared_ptr<Package> package) {
 #ifdef _EDITOR
-		if (package == nullptr)
+		if (package->IsValid() == false)
 		{
-			DEBUG_LOG("Try to load non existent resource");
-			callback(nullptr);
+			DEBUG_LOG("Try to load non existent resource. So create new package");
+			std::shared_ptr<Resource> resource = RESOURCE_MANAGER->CreateResource(std::static_pointer_cast<ResourcePackage>(package), typeInfo, ObjectCreateFlag::DeferredLoad);
+			callback(resource);
 		}
 #else
-		ASSERT_MSG(package != nullptr, "Try to load non existent resource")
+		ASSERT_MSG(package->IsValid() == true, "Try to load non existent resource");
 #endif
 		callback(std::static_pointer_cast<ResourcePackage>(package)->GetResource());
 		});
 }
 
 std::shared_ptr<Resource> ResourceManager::CreateResource(std::shared_ptr<ResourcePackage> outer, const ObjectTypeInfo* typeInfo, ObjectCreateFlag::Type flags)
+{
+	std::wstring typeName = ConvertUtf8ToWString(typeInfo->GetName());
+	return CreateResource(typeName, outer, typeInfo, flags);
+}
+
+std::shared_ptr<Resource> ResourceManager::CreateResource(const std::wstring& objectName, std::shared_ptr<ResourcePackage> outer, const ObjectTypeInfo* typeInfo, ObjectCreateFlag::Type flags)
 {
 	ASSERT_MSG(typeInfo->IsChildOf<Resource>() == true, "GetResource func is not allowed to create non Resource class");
 

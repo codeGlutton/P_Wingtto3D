@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Core/Object.h"
-#include "Graphics/Widget/CompoundWidget.h"
+#include "Graphics/Widget/VirtualWindowContent.h"
 
 struct ViewportDesc
 {
@@ -16,11 +16,9 @@ struct ViewportDesc
 /**
  * 특정 랜더 타겟 창을 표기할 viewport 베이스 클래스 (렌더 스레드에서 드로우콜)
  */
-class Viewport abstract : public CompoundWidget
+class Viewport : public VirtualWindowContent
 {
-	GEN_ABSTRACT_REFLECTION(Viewport)
-
-	friend class AppWindow;
+	GEN_REFLECTION(Viewport)
 
 public:
 	Viewport();
@@ -36,7 +34,7 @@ protected:
 	virtual void OnResize(const RECT& windowSize);
 
 private:
-	virtual void Render() = 0;
+	virtual void Render();
 
 private:
 	PROPERTY(_mDesc)

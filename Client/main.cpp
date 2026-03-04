@@ -16,6 +16,10 @@
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)
 {
+#ifdef _EDITOR
 	APP->Run<Editor>(hInstance);
+#else
+	APP->Run<Game>(hInstance);
+#endif // _EDITOR
 	return 0;
 }

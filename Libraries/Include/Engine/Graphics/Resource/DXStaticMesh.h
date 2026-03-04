@@ -40,7 +40,7 @@ struct StaticMeshLODInfo
 
 struct StaticMeshBulkData : public BulkData
 {
-	GEN_STRUCT_REFLECTION(StaticMeshBulkData)
+	GEN_BULK_STRUCT_REFLECTION(StaticMeshBulkData)
 
 	bool operator==(const StaticMeshBulkData&) const = default;
 

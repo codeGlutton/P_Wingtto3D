@@ -31,8 +31,9 @@ void AppModeBase::Init()
 	{
 		// 패키징 로드 요구
 
-		APP_WIN_MANAGER->Init();
 		RESOURCE_MANAGER->Init();
+		WIDGET_STYLE_MANAGER->Init();
+		APP_WIN_MANAGER->Init();
 	}
 
 	{
@@ -73,8 +74,9 @@ void AppModeBase::End()
 	{
 		// 패키징 로드 요구
 
-		RESOURCE_MANAGER->Destroy();
 		APP_WIN_MANAGER->Destroy();
+		WIDGET_STYLE_MANAGER->Destroy();
+		RESOURCE_MANAGER->Destroy();
 	}
 
 	{
@@ -102,8 +104,11 @@ void AppModeBase::OnPressKey(std::shared_ptr<KeyEvent>& event)
 	}
 
 	// 버블 검사
-	const auto iterEnd = event->mPath->mWidgets.rend();
-	for (auto iter = event->mPath->mWidgets.rbegin(); iter != iterEnd; ++iter)
+	WidgetPath path = _mFocusWeakPath.Lock();
+	event->mPath = &path;
+
+	const auto iterEnd = path.mWidgets.end();
+	for (auto iter = path.mWidgets.begin(); iter != iterEnd; ++iter)
 	{
 		std::shared_ptr<Widget> curWidget = iter->mWidget;
 		if (curWidget != nullptr && curWidget->IsValid() == true)
@@ -127,8 +132,11 @@ void AppModeBase::OnReleaseKey(std::shared_ptr<KeyEvent>& event)
 	}
 
 	// 버블 검사
-	const auto iterEnd = event->mPath->mWidgets.end();
-	for (auto iter = event->mPath->mWidgets.begin(); iter != iterEnd; ++iter)
+	WidgetPath path = _mFocusWeakPath.Lock();
+	event->mPath = &path;
+
+	const auto iterEnd = path.mWidgets.end();
+	for (auto iter = path.mWidgets.begin(); iter != iterEnd; ++iter)
 	{
 		std::shared_ptr<Widget> curWidget = iter->mWidget;
 		if (curWidget != nullptr && curWidget->IsValid() == true)
@@ -152,8 +160,11 @@ void AppModeBase::OnChangeAnalogValue(std::shared_ptr<AnalogInputEvent>& event)
 	}
 
 	// 버블 검사
-	const auto iterEnd = event->mPath->mWidgets.end();
-	for (auto iter = event->mPath->mWidgets.begin(); iter != iterEnd; ++iter)
+	WidgetPath path = _mFocusWeakPath.Lock();
+	event->mPath = &path;
+
+	const auto iterEnd = path.mWidgets.end();
+	for (auto iter = path.mWidgets.begin(); iter != iterEnd; ++iter)
 	{
 		std::shared_ptr<Widget> curWidget = iter->mWidget;
 		if (curWidget != nullptr && curWidget->IsValid() == true)
@@ -177,8 +188,11 @@ void AppModeBase::OnPressChar(std::shared_ptr<CharEvent>& event)
 	}
 
 	// 버블 검사
-	const auto iterEnd = event->mPath->mWidgets.end();
-	for (auto iter = event->mPath->mWidgets.begin(); iter != iterEnd; ++iter)
+	WidgetPath path = _mFocusWeakPath.Lock();
+	event->mPath = &path;
+
+	const auto iterEnd = path.mWidgets.end();
+	for (auto iter = path.mWidgets.begin(); iter != iterEnd; ++iter)
 	{
 		std::shared_ptr<Widget> curWidget = iter->mWidget;
 		if (curWidget != nullptr && curWidget->IsValid() == true)
@@ -198,26 +212,51 @@ void AppModeBase::OnPressMouse(std::shared_ptr<AppWindow> target, std::shared_pt
 
 	// 경로 찾기
 	WidgetPath path;
-	target->GetWidgetPathUnderScreenPos(event->mCurrentMouseScreenPos, path);
-
 	event->mPath = &path;
 
 	if (HasDownEvent() == false)
 	{
-		_mMouseDownWeakPath = path;
+		_mIsMouseDown = true;
 
-		// 버블 검사
-		const auto iterEnd = event->mPath->mWidgets.end();
-		for (auto iter = event->mPath->mWidgets.begin(); iter != iterEnd; ++iter)
+		if (HasCaptureEvent() == true)
 		{
-			std::shared_ptr<Widget> curWidget = iter->mWidget;
-			if (curWidget != nullptr && curWidget->IsValid() == true)
+			// 버블 검사
+			path = _mCaptureWeakPath.Lock();
+			_mMouseDownWeakPath = _mCaptureWeakPath;
+
+			const auto iterEnd = path.mWidgets.end();
+			for (auto iter = path.mWidgets.begin(); iter != iterEnd; ++iter)
 			{
-				reply = curWidget->OnPressMouse(iter->mGeometry, event);
-				if (reply.IsHandle() == true)
+				std::shared_ptr<Widget> curWidget = iter->mWidget;
+				if (curWidget != nullptr && curWidget->IsValid() == true)
 				{
-					ProcessReplyData(reply, event);
-					break;
+					reply = curWidget->OnPressMouse(iter->mGeometry, event);
+					if (reply.IsHandle() == true)
+					{
+						ProcessReplyData(reply, event);
+						break;
+					}
+				}
+			}
+		}
+		else
+		{
+			// 버블 검사
+			target->GetWidgetPathUnderScreenPos(event->mCurrentMouseScreenPos, path);
+			_mMouseDownWeakPath = path;
+
+			const auto iterEnd = event->mPath->mWidgets.end();
+			for (auto iter = event->mPath->mWidgets.begin(); iter != iterEnd; ++iter)
+			{
+				std::shared_ptr<Widget> curWidget = iter->mWidget;
+				if (curWidget != nullptr && curWidget->IsValid() == true)
+				{
+					reply = curWidget->OnPressMouse(iter->mGeometry, event);
+					if (reply.IsHandle() == true)
+					{
+						ProcessReplyData(reply, event);
+						break;
+					}
 				}
 			}
 		}
@@ -227,61 +266,86 @@ void AppModeBase::OnPressMouse(std::shared_ptr<AppWindow> target, std::shared_pt
 void AppModeBase::OnReleaseMouse(std::shared_ptr<PointEvent>& event)
 {
 	ReplyData reply = ReplyData::Unhandled();
+	
+	// 경로 찾기
+	WidgetPath path;
+	event->mPath = &path;
 
-	if (HasDownEvent() == false)
+	if (HasDownEvent() == true)
 	{
-		_mMouseDownWeakPath.Clear();
-		_mDragDropWeakPath.Clear();
+		_mIsMouseDown = false;
 
-		return;
-	}
-
-	// 릴리즈 버블 검사
-	WidgetPath path = _mMouseDownWeakPath.Lock();
-	const auto iterEnd = path.mWidgets.end();
-	for (auto iter = path.mWidgets.begin(); iter != iterEnd; ++iter)
-	{
-		std::shared_ptr<Widget> curWidget = iter->mWidget;
-		if (curWidget != nullptr && curWidget->IsValid() == true)
+		if (HasDragEvent() == true)
 		{
-			reply = curWidget->OnReleaseMouse(iter->mGeometry, event);
-			if (reply.IsHandle() == true)
+			_mIsDrag = false;
+
+			// 경로 찾기
+			std::shared_ptr<AppWindow> window = APP_WIN_MANAGER->GetAppWindow(event->mHWnd);
+			if (window == nullptr || window->IsValid() == false || window->IsContainScreenPos(event->mCurrentMouseScreenPos) == false)
 			{
-				ProcessReplyData(reply, event);
-				break;
+				HWND hWnd = ::WindowFromPoint(event->mCurrentMouseScreenPos);
+				window = APP_WIN_MANAGER->GetAppWindow(hWnd);
+			}
+
+			if (window != nullptr || window->IsValid() == true)
+			{
+				WidgetPath dropPath;
+				window->GetWidgetPathUnderScreenPos(event->mCurrentMouseScreenPos, dropPath);
+				std::shared_ptr<DragDropEvent> dragDropEvent = ObjectPool<DragDropEvent>::MakeShared(*event.get());
+				dragDropEvent->mPath = &dropPath;
+				dragDropEvent->mPayload = _mDragDropPayload;
+
+				// 드랍 버블 검사
+				const auto iterEnd = dragDropEvent->mPath->mWidgets.end();
+				for (auto iter = dragDropEvent->mPath->mWidgets.begin(); iter != iterEnd; ++iter)
+				{
+					std::shared_ptr<Widget> curWidget = iter->mWidget;
+					if (curWidget != nullptr && curWidget->IsValid() == true)
+					{
+						reply = curWidget->OnDrop(iter->mGeometry, dragDropEvent);
+						if (reply.IsHandle() == true)
+						{
+							ProcessReplyData(reply, dragDropEvent);
+							break;
+						}
+					}
+				}
 			}
 		}
-	}
 
-	if (HasDragEvent() == true)
-	{
-		// 경로 찾기
-		std::shared_ptr<AppWindow> window = APP_WIN_MANAGER->GetAppWindow(event->mHWnd);
-		if (window == nullptr || window->IsValid() == false || window->IsContainScreenPos(event->mCurrentMouseScreenPos) == false)
+		if (HasCaptureEvent() == true)
 		{
-			HWND hWnd = ::WindowFromPoint(event->mCurrentMouseScreenPos);
-			window = APP_WIN_MANAGER->GetAppWindow(hWnd);
-		}
-
-		if (window != nullptr || window->IsValid() == true)
-		{
-			WidgetPath path;
-			window->GetWidgetPathUnderScreenPos(event->mCurrentMouseScreenPos, path);
-			std::shared_ptr<DragDropEvent> dragDropEvent = ObjectPool<DragDropEvent>::MakeShared(*event.get());
-			dragDropEvent->mPath = &path;
-			dragDropEvent->mPayload = _mDragDropPayload;
-
-			// 드랍 버블 검사
-			const auto iterEnd = dragDropEvent->mPath->mWidgets.end();
-			for (auto iter = dragDropEvent->mPath->mWidgets.begin(); iter != iterEnd; ++iter)
+			// 릴리즈 버블 검사
+			path = _mCaptureWeakPath.Lock();
+			const auto iterEnd = path.mWidgets.end();
+			for (auto iter = path.mWidgets.begin(); iter != iterEnd; ++iter)
 			{
 				std::shared_ptr<Widget> curWidget = iter->mWidget;
 				if (curWidget != nullptr && curWidget->IsValid() == true)
 				{
-					reply = curWidget->OnDrop(iter->mGeometry, dragDropEvent);
+					reply = curWidget->OnReleaseMouse(iter->mGeometry, event);
 					if (reply.IsHandle() == true)
 					{
-						ProcessReplyData(reply, dragDropEvent);
+						ProcessReplyData(reply, event);
+						break;
+					}
+				}
+			}
+		}
+		else
+		{
+			// 릴리즈 버블 검사
+			path = _mMouseDownWeakPath.Lock();
+			const auto iterEnd = path.mWidgets.end();
+			for (auto iter = path.mWidgets.begin(); iter != iterEnd; ++iter)
+			{
+				std::shared_ptr<Widget> curWidget = iter->mWidget;
+				if (curWidget != nullptr && curWidget->IsValid() == true)
+				{
+					reply = curWidget->OnReleaseMouse(iter->mGeometry, event);
+					if (reply.IsHandle() == true)
+					{
+						ProcessReplyData(reply, event);
 						break;
 					}
 				}
@@ -291,6 +355,7 @@ void AppModeBase::OnReleaseMouse(std::shared_ptr<PointEvent>& event)
 
 	_mMouseDownWeakPath.Clear();
 	_mDragDropWeakPath.Clear();
+	_mDragDropPayload.reset();
 }
 
 void AppModeBase::OnDoubleClickMouse(std::shared_ptr<AppWindow> target, std::shared_ptr<PointEvent>& event)
@@ -299,22 +364,46 @@ void AppModeBase::OnDoubleClickMouse(std::shared_ptr<AppWindow> target, std::sha
 
 	// 경로 찾기
 	WidgetPath path;
-	target->GetWidgetPathUnderScreenPos(event->mCurrentMouseScreenPos, path);
-
 	event->mPath = &path;
 
-	// 버블 검사
-	const auto iterEnd = event->mPath->mWidgets.end();
-	for (auto iter = event->mPath->mWidgets.begin(); iter != iterEnd; ++iter)
+	if (HasDownEvent() == true)
 	{
-		std::shared_ptr<Widget> curWidget = iter->mWidget;
-		if (curWidget != nullptr && curWidget->IsValid() == true)
+		if (HasCaptureEvent() == true)
 		{
-			reply = curWidget->OnDoubleClickMouse(iter->mGeometry, event);
-			if (reply.IsHandle() == true)
+			// 버블 검사
+			path = _mCaptureWeakPath.Lock();
+			const auto iterEnd = path.mWidgets.end();
+			for (auto iter = path.mWidgets.begin(); iter != iterEnd; ++iter)
 			{
-				ProcessReplyData(reply, event);
-				break;
+				std::shared_ptr<Widget> curWidget = iter->mWidget;
+				if (curWidget != nullptr && curWidget->IsValid() == true)
+				{
+					reply = curWidget->OnDoubleClickMouse(iter->mGeometry, event);
+					if (reply.IsHandle() == true)
+					{
+						ProcessReplyData(reply, event);
+						break;
+					}
+				}
+			}
+		}
+		else
+		{
+			// 버블 검사
+			path = _mMouseDownWeakPath.Lock();
+			const auto iterEnd = path.mWidgets.end();
+			for (auto iter = path.mWidgets.begin(); iter != iterEnd; ++iter)
+			{
+				std::shared_ptr<Widget> curWidget = iter->mWidget;
+				if (curWidget != nullptr && curWidget->IsValid() == true)
+				{
+					reply = curWidget->OnDoubleClickMouse(iter->mGeometry, event);
+					if (reply.IsHandle() == true)
+					{
+						ProcessReplyData(reply, event);
+						break;
+					}
+				}
 			}
 		}
 	}
@@ -322,98 +411,215 @@ void AppModeBase::OnDoubleClickMouse(std::shared_ptr<AppWindow> target, std::sha
 
 void AppModeBase::OnMoveMouse(std::shared_ptr<PointEvent>& event)
 {
+	ReplyData reply = ReplyData::Unhandled();
+
 	// 경로 찾기
 	std::shared_ptr<AppWindow> window = APP_WIN_MANAGER->GetAppWindow(event->mHWnd);
-	if (window == nullptr || window->IsValid() == false || window->IsContainScreenPos(event->mCurrentMouseScreenPos) == false)
+	if (window->IsContainScreenPos(event->mCurrentMouseScreenPos) == false)
 	{
 		HWND hWnd = ::WindowFromPoint(event->mCurrentMouseScreenPos);
 		window = APP_WIN_MANAGER->GetAppWindow(hWnd);
 	}
 
+	WidgetPath hoverPath;
+	event->mPath = &hoverPath;
+
+	// 마우스 움직임
 	if (window != nullptr && window->IsValid() == true)
 	{
-		std::shared_ptr<Widget> preWidget = _mPreHoverWidget.lock();
-		ArrangedWidget curArrangedWidget;
-		window->GetWidgetUnderScreenPos(event->mCurrentMouseScreenPos, curArrangedWidget);
+		// 버블 검사
+		window->GetWidgetPathUnderScreenPos(event->mCurrentMouseScreenPos, hoverPath);
 
-		if (preWidget != curArrangedWidget.mWidget)
+		if (HasDragEvent() == true)
 		{
-			// 드래그 시
-			if (HasDragEvent() == true)
-			{
-				std::shared_ptr<DragDropEvent> dragDropEvent = ObjectPool<DragDropEvent>::MakeShared(*event.get());
-				dragDropEvent->mPayload = _mDragDropPayload;
+			std::shared_ptr<DragDropEvent> dragDropEvent = ObjectPool<DragDropEvent>::MakeShared(*event.get());
+			dragDropEvent->mPayload = _mDragDropPayload;
 
-				if (preWidget != nullptr)
+			const auto iterEnd = dragDropEvent->mPath->mWidgets.end();
+			for (auto iter = dragDropEvent->mPath->mWidgets.begin(); iter != iterEnd; ++iter)
+			{
+				std::shared_ptr<Widget> curWidget = iter->mWidget;
+				if (curWidget != nullptr && curWidget->IsValid() == true)
 				{
-					preWidget->OnLeaveDragMouse(dragDropEvent);
-				}
-				_mPreHoverWidget = curArrangedWidget.mWidget;
-				if (curArrangedWidget.mWidget != nullptr)
-				{
-					curArrangedWidget.mWidget->OnEnterDragMouse(curArrangedWidget.mGeometry, dragDropEvent);
+					reply = curWidget->OnDragMouse(iter->mGeometry, dragDropEvent);
+					if (reply.IsHandle() == true)
+					{
+						ProcessReplyData(reply, dragDropEvent);
+						break;
+					}
 				}
 			}
-			// 드래그 아닐 시
-			else
+		}
+		else
+		{
+			const auto iterEnd = event->mPath->mWidgets.end();
+			for (auto iter = event->mPath->mWidgets.begin(); iter != iterEnd; ++iter)
 			{
-				if (preWidget != nullptr)
+				std::shared_ptr<Widget> curWidget = iter->mWidget;
+				if (curWidget != nullptr && curWidget->IsValid() == true)
 				{
-					preWidget->OnLeaveMouse(event);
-				}
-				_mPreHoverWidget = curArrangedWidget.mWidget;
-				if (curArrangedWidget.mWidget != nullptr)
-				{
-					curArrangedWidget.mWidget->OnEnterMouse(curArrangedWidget.mGeometry, event);
+					reply = curWidget->OnMoveMouse(iter->mGeometry, event);
+					if (reply.IsHandle() == true)
+					{
+						ProcessReplyData(reply, event);
+						break;
+					}
 				}
 			}
 		}
 	}
-	else
+
+	// 이전과 비교해서 공통 경로 탐색
+	WidgetPath preHoverPath = _mPreHoverWeakPath.Lock();
+	const int32 checkSize = std::min<int32>(static_cast<int32>(preHoverPath.mWidgets.size()), static_cast<int32>(hoverPath.mWidgets.size()));
+	int32 changedIndexStart = 0;
+	for (changedIndexStart = 0; changedIndexStart < checkSize; ++changedIndexStart)
 	{
-		_mPreHoverWidget.reset();
+		if (preHoverPath.mWidgets[changedIndexStart].mWidget != hoverPath.mWidgets[changedIndexStart].mWidget)
+		{
+			break;
+		}
 	}
+
+	// 마우스 탈출 이벤트
+	for (int32 i = static_cast<int32>(preHoverPath.mWidgets.size()) - 1; i >= changedIndexStart; --i)
+	{
+		// 드래그 시
+		if (HasDragEvent() == true)
+		{
+			std::shared_ptr<DragDropEvent> dragDropEvent = ObjectPool<DragDropEvent>::MakeShared(*event.get());
+			dragDropEvent->mPayload = _mDragDropPayload;
+
+			preHoverPath.mWidgets[i].mWidget->OnLeaveDragMouse(dragDropEvent);
+		}
+		// 드래그 아닐 시
+		else
+		{
+			preHoverPath.mWidgets[i].mWidget->OnLeaveMouse(event);
+		}
+	}
+	// 마우스 진입 이벤트
+	for (int32 i = static_cast<int32>(hoverPath.mWidgets.size()) - 1; i >= changedIndexStart; --i)
+	{
+		// 드래그 시
+		if (HasDragEvent() == true)
+		{
+			std::shared_ptr<DragDropEvent> dragDropEvent = ObjectPool<DragDropEvent>::MakeShared(*event.get());
+			dragDropEvent->mPayload = _mDragDropPayload;
+
+			hoverPath.mWidgets[i].mWidget->OnEnterDragMouse(hoverPath.mWidgets[i].mGeometry, dragDropEvent);
+		}
+		// 드래그 아닐 시
+		else
+		{
+			hoverPath.mWidgets[i].mWidget->OnEnterMouse(hoverPath.mWidgets[i].mGeometry, event);
+		}
+	}
+
+	_mPreHoverWeakPath = hoverPath;
+}
+
+void AppModeBase::OnChangeFocus(std::shared_ptr<Widget>& focusWidget)
+{
+	std::shared_ptr<AppWindow> preFocusWindow = nullptr;
+	if (_mFocusWeakPath.mWidgets.empty() == false)
+	{
+		std::shared_ptr<Widget> preFocusWidget = _mFocusWeakPath.mWidgets.back().lock();
+		preFocusWidget->OnEndFocus();
+		preFocusWindow = preFocusWidget->GetRootWindow();
+	}
+
+	// 윈도우 간의 포커스 변경 알림
+	std::shared_ptr<AppWindow> nextFocusWindow = nullptr;
+	HWND nextFocusWindowHWnd = 0;
+	if (focusWidget != nullptr)
+	{
+		nextFocusWindow = focusWidget->GetRootWindow();
+		nextFocusWindowHWnd = focusWidget->GetRootWindow()->GetDesc().mHWndRef->mData;
+	}
+	if (preFocusWindow != nextFocusWindow)
+	{
+		APP_WIN_MANAGER->NotifyToChangeFocus(nextFocusWindowHWnd);
+	}
+
+	_mFocusWeakPath = WidgetPath::GetPathDownTo(focusWidget);
+	if (focusWidget != nullptr)
+	{
+		focusWidget->OnBeginFocus();
+	}
+}
+
+void AppModeBase::OnDropFile(const wchar_t* fileFullPath)
+{
 }
 
 void AppModeBase::ProcessReplyData(const ReplyData& reply, const std::shared_ptr<KeyEvent>& event)
 {
+	if (HasCaptureEvent() == true && reply.mNeedToReleaseCapture == true)
+	{
+		_mIsCapture = false;
+		_mCaptureWeakPath.Clear();
+	}
+	
+	if (HasCaptureEvent() == false && reply.mCaptureWidget != nullptr)
+	{
+		_mIsCapture = true;
+		_mCaptureWeakPath = WidgetPath::GetPathDownTo(reply.mCaptureWidget);
+	}
+
 	if (reply.mFocusWidget != nullptr)
 	{
-		APP_WIN_MANAGER->NotifyToChangeFocus(reply.mFocusWidget);
+		std::shared_ptr<Widget> nextFocusWidget = reply.mFocusWidget;
+		OnChangeFocus(nextFocusWidget);
 	}
 }
 
 void AppModeBase::ProcessReplyData(const ReplyData& reply, const std::shared_ptr<PointEvent>& event)
 {
-	if (reply.mNeedToDragEvent == true && HasDragEvent() == false && HasDownEvent() == true)
+	if (HasCaptureEvent() == true && reply.mNeedToReleaseCapture == true)
 	{
-		ReplyData reply = ReplyData::Unhandled();
+		_mIsCapture = false;
+		_mCaptureWeakPath.Clear();
+	}
 
-		std::shared_ptr<DragDropEvent> dragDropEvent = ObjectPool<DragDropEvent>::MakeShared(*event.get());
-		dragDropEvent->mPayload = reply.mDragPayload;
-
-		// 버블 검사
-		const auto iterEnd = event->mPath->mWidgets.end();
-		for (auto iter = event->mPath->mWidgets.begin(); iter != iterEnd; ++iter)
+	if (HasDragEvent() == false)
+	{
+		if (reply.mNeedToDragEvent == true && HasDownEvent() == true)
 		{
-			std::shared_ptr<Widget> curWidget = iter->mWidget;
-			if (curWidget != nullptr && curWidget->IsValid() == true)
+			ReplyData reply = ReplyData::Unhandled();
+
+			std::shared_ptr<DragDropEvent> dragDropEvent = ObjectPool<DragDropEvent>::MakeShared(*event.get());
+			dragDropEvent->mPayload = reply.mDragPayload;
+
+			// 버블 검사
+			const auto iterEnd = event->mPath->mWidgets.end();
+			for (auto iter = event->mPath->mWidgets.begin(); iter != iterEnd; ++iter)
 			{
-				reply = curWidget->OnDetectDrag(iter->mGeometry, dragDropEvent);
-				if (reply.IsHandle() == true)
+				std::shared_ptr<Widget> curWidget = iter->mWidget;
+				if (curWidget != nullptr && curWidget->IsValid() == true)
 				{
-					break;
+					reply = curWidget->OnDetectDrag(iter->mGeometry, dragDropEvent);
+					if (reply.IsHandle() == true)
+					{
+						_mIsDrag = true;
+						_mDragDropWeakPath = WidgetPath::GetPathDownTo(curWidget);
+						_mDragDropPayload = reply.mDragPayload;
+						break;
+					}
 				}
 			}
 		}
-
-		_mDragDropWeakPath = *event->mPath;
-		_mDragDropPayload = reply.mDragPayload;
+		else if (HasCaptureEvent() == false && reply.mCaptureWidget != nullptr)
+		{
+			_mIsCapture = true;
+			_mCaptureWeakPath = WidgetPath::GetPathDownTo(reply.mCaptureWidget);
+		}
 	}
 
 	if (reply.mFocusWidget != nullptr)
 	{
-		APP_WIN_MANAGER->NotifyToChangeFocus(reply.mFocusWidget);
+		std::shared_ptr<Widget> nextFocusWidget = reply.mFocusWidget;
+		OnChangeFocus(nextFocusWidget);
 	}
 }
 
@@ -469,7 +675,12 @@ void AppModeBase::UnregisterDefaultResources()
 
 void AppModeBase::ClearUserData()
 {
-	_mPreHoverWidget.reset();
+	_mFocusWeakPath.Clear();
+	_mPreHoverWeakPath.Clear();
+	_mCaptureWeakPath.Clear();
+	_mMouseDownWeakPath.Clear();
+	_mDragDropWeakPath.Clear();
+
 	_mDragDropPayload.reset();
 }
 

@@ -118,9 +118,9 @@ void HitTestGrid::AddWidget(std::shared_ptr<Widget> widget, uint32 layerId)
 	const uint32 widgetIndex = static_cast<uint32>(_mWidgets.size());
 	_mWidgetMap[widget.get()] = widgetIndex;
 	_mWidgets.push_back(WidgetData{ widget, leftTopCell, rightBottomCell, layerId });
-	for (uint32 x = leftTopCell.mX; x <= leftTopCell.mX; ++x)
+	for (uint32 x = leftTopCell.mX; x <= rightBottomCell.mX; ++x)
 	{
-		for (uint32 y = rightBottomCell.mY; y <= rightBottomCell.mY; ++y)
+		for (uint32 y = leftTopCell.mY; y <= rightBottomCell.mY; ++y)
 		{
 			GetCell(x, y).mWidgetIndexes.push_back(widgetIndex);
 		}
@@ -149,9 +149,9 @@ void HitTestGrid::RemoveWidget(std::shared_ptr<Widget> widget)
 			std::max<uint32>(widgetData.mRightBottomCell.mY, static_cast<uint32>(_mClientSize.y) - 1)
 		);
 
-		for (uint32 x = leftTopCell.mX; x <= leftTopCell.mX; ++x)
+		for (uint32 x = leftTopCell.mX; x <= rightBottomCell.mX; ++x)
 		{
-			for (uint32 y = rightBottomCell.mY; y <= rightBottomCell.mY; ++y)
+			for (uint32 y = leftTopCell.mY; y <= rightBottomCell.mY; ++y)
 			{
 				SwapAndRemove(GetCell(x, y).mWidgetIndexes, widgetIndex);
 			}
@@ -185,7 +185,7 @@ void HitTestGrid::GetWidgetUnderScreenPos(POINT pos, OUT ArrangedWidget& arrange
 	const Cell& cell = GetCell(cellIndex);
 
 	auto iterEnd = cell.mWidgetIndexes.rend();
-	for (auto iter = cell.mWidgetIndexes.rbegin(); iter != iterEnd; --iter)
+	for (auto iter = cell.mWidgetIndexes.rbegin(); iter != iterEnd; ++iter)
 	{
 		uint32 widgetIndex = cell.mWidgetIndexes[*iter];
 		if (_mWidgets.size() <= widgetIndex)
@@ -202,6 +202,7 @@ void HitTestGrid::GetWidgetUnderScreenPos(POINT pos, OUT ArrangedWidget& arrange
 		if (widget->GetScreenGeometry().GetRenderBoundingBox().Contains(pos.x, pos.y) == true)
 		{
 			arrangedWidget = ArrangedWidget(widget, widget->GetScreenGeometry());
+			break;
 		}
 	}
 }
@@ -216,10 +217,10 @@ void HitTestGrid::GetWidgetPathUnderScreenPos(POINT pos, OUT WidgetPath& path) c
 	IntPoint<uint32> cellIndex = GetCellIndex(pos);
 	const Cell& cell = GetCell(cellIndex);
 	
-	auto iterEnd = cell.mWidgetIndexes.rend();
-	for (auto iter = cell.mWidgetIndexes.rbegin(); iter != iterEnd; --iter)
+	const auto iterEnd = cell.mWidgetIndexes.rend();
+	for (auto iter = cell.mWidgetIndexes.rbegin(); iter != iterEnd; ++iter)
 	{
-		uint32 widgetIndex = cell.mWidgetIndexes[*iter];
+		uint32 widgetIndex = *iter;
 		if (_mWidgets.size() <= widgetIndex)
 		{
 			continue;
@@ -233,7 +234,7 @@ void HitTestGrid::GetWidgetPathUnderScreenPos(POINT pos, OUT WidgetPath& path) c
 
 		if (widget->GetScreenGeometry().GetRenderBoundingBox().Contains(pos.x, pos.y) == true)
 		{
-			while (widget != nullptr && widget->IsValid() == false)
+			while (widget != nullptr && widget->IsValid() == true)
 			{
 				path.mWidgets.push_back(ArrangedWidget(widget, widget->GetScreenGeometry()));
 				widget = widget->GetParent();

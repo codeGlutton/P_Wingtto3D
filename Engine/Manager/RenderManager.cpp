@@ -12,6 +12,7 @@
 #include "Utils/Memory/ObjectPool.h"
 
 #include "Graphics/DXSwapChain.h"
+#include "Graphics/Buffer/DXConstantBuffer.h"
 #include "Graphics/Viewport/DXViewport.h"
 #include "Graphics/Resource/DXTexture.h"
 #include "Graphics/Resource/DXMaterial.h"
@@ -33,7 +34,9 @@ void RenderManager::Init()
 
 void RenderManager::Destroy()
 {
-	mWidgetMesh.reset();
+	_mWidgetMesh.reset();
+	_mWidgetCBuffer.reset();
+	_mCameraCBuffer.reset();
 }
 
 void RenderManager::DrawWindow(std::shared_ptr<WindowRenderElementContainer> container)
@@ -59,7 +62,7 @@ void RenderManager::DrawWindow(std::shared_ptr<WindowRenderElementContainer> con
 
 	for (const auto& layer : container->mElementLayers)
 	{
-		DXTextureBase* currentTexture = nullptr;
+		DXTextureBase* currentTexture = reinterpret_cast<DXTextureBase*>(&container);
 		for (const std::unique_ptr<WidgetRenderElement>& element : layer)
 		{
 			switch (element->mType)
@@ -74,7 +77,7 @@ void RenderManager::DrawWindow(std::shared_ptr<WindowRenderElementContainer> con
 					// 새로운 배처 데이터 생성
 					currentTexture = box.mResource.get();
 					container->mBatches.push_back(
-						WidgetRenderBatch(box.mResource, static_cast<uint32>(container->mIndices.size()))
+						WidgetRenderBatch(box.mResource, false, static_cast<uint32>(container->mIndices.size()))
 					);
 				}
 
@@ -86,10 +89,10 @@ void RenderManager::DrawWindow(std::shared_ptr<WindowRenderElementContainer> con
 				PushQuad(
 					container->mVertices,
 					container->mIndices,
-					(-0.5f + box.mMargin.mLeft) * box.mBoxSize.x,
-					(0.5f - box.mMargin.mRight) * box.mBoxSize.x,
-					(-0.5f + box.mMargin.mUp) * box.mBoxSize.y,
-					(0.5f - box.mMargin.mDown) * box.mBoxSize.y,
+					box.mMargin.mLeft * box.mBoxSize.x,
+					(1.f - box.mMargin.mRight) * box.mBoxSize.x,
+					box.mMargin.mUp * box.mBoxSize.y,
+					(1.f - box.mMargin.mDown) * box.mBoxSize.y,
 					box.mTint
 				);
 				for (std::size_t i = 0; i < 4; ++i)
@@ -106,7 +109,46 @@ void RenderManager::DrawWindow(std::shared_ptr<WindowRenderElementContainer> con
 			}
 			case WidgetRenderElementType::Text:
 			{
-				// TODO
+				WidgetRenderTextElement& text = *static_cast<WidgetRenderTextElement*>(element.get());
+
+				// 자신에 맞는 배처 탐색
+				if (text.mResource.get() != currentTexture)
+				{
+					// 새로운 배처 데이터 생성
+					currentTexture = text.mResource.get();
+					container->mBatches.push_back(
+						WidgetRenderBatch(text.mResource, false, static_cast<uint32>(container->mIndices.size()))
+					);
+				}
+
+				WidgetRenderBatch& batch = container->mBatches.back();
+				const FontAtlasData& fontAtlas = text.mAtlasData.GetAtlasData();
+
+				for (const WidgetCharRenderCache& cache : text.mRenderCaches)
+				{
+					const std::size_t preVBSize = container->mVertices.size();
+					batch.mIndexCount += 6;
+
+					const GlyphData& glyph = fontAtlas.mGlyphs.at(cache.mChar);
+
+					// 배처에 추가적인 정점과 인덱스 데이터 덧불이기
+					PushQuad(
+						container->mVertices,
+						container->mIndices,
+						cache.mScaleOffset.x,
+						cache.mScaleSize.x + cache.mScaleOffset.x,
+						cache.mScaleOffset.y,
+						cache.mScaleSize.y + cache.mScaleOffset.y,
+						glyph.mUVStart,
+						glyph.mUVSize,
+						text.mTint
+					);
+					for (std::size_t i = 0; i < 4; ++i)
+					{
+						UIVertexData& vertex = container->mVertices[preVBSize + i];
+						vertex.mPosition = Vec3::Transform(vertex.mPosition, text.mRenderMat);
+					}
+				}
 				break;
 			}
 			}
@@ -122,28 +164,68 @@ void RenderManager::DrawWindow_Internal(const WindowDrawInputs& drawInputs)
 {
 	ASSERT_THREAD(MainThreadType::Render);
 	
-	if (mWidgetMesh == nullptr)
+	if (_mWidgetMesh == nullptr)
 	{
-		mWidgetMesh = std::make_shared<DXWidgetBatchMesh>();
-		mWidgetMesh->Init();
+		_mWidgetMesh = std::make_shared<DXWidgetBatchMesh>();
+		_mWidgetMesh->Init();
+	}
+	if (_mWidgetCBuffer == nullptr)
+	{
+		_mWidgetCBuffer = std::make_shared<DXConstantBufferTemplate<WidgetConstantData>>();
+		_mWidgetCBuffer->Init();
+	}
+	if (_mScreenCBuffer == nullptr)
+	{
+		_mScreenCBuffer = std::make_shared<DXConstantBufferTemplate<ScreenConstantData>>();
+		_mScreenCBuffer->Init();
+	}
+	if (_mCameraCBuffer == nullptr)
+	{
+		_mCameraCBuffer = std::make_shared<DXConstantBufferTemplate<CameraConstantData>>();
+		_mCameraCBuffer->Init();
 	}
 
 	static const std::string textureBindName = "widgetResourceTB";
-	const std::wstring matPath = PATH_MANAGER->GetEngineResourceFolderName() + L"\\M_UI";;
+	static const std::string widgetCBufferBindName = "M_WidgetTypeCB";
+	static const std::string screenCBufferBindName = "F_ScreenCB";
+	const std::wstring matPath = PATH_MANAGER->GetEngineResourceFolderName() + L"\\M_UI";
+
 	std::shared_ptr<DXMaterial> matUI = RESOURCE_MANAGER->GetRenderResource<DXMaterial>(matPath, DXSharedResourceType::Material);
 	{
 		drawInputs.mSwapChain->BeginRender(drawInputs.mViewport);
-
+		
 		// 동적으로 데이터 Mapping
-		mWidgetMesh->UpdateData(drawInputs.mContainer->mVertices, drawInputs.mContainer->mIndices);
+		_mWidgetMesh->UpdateData(drawInputs.mContainer->mVertices, drawInputs.mContainer->mIndices);
+		_mScreenCBuffer->UpdateData(ScreenConstantData(drawInputs.mContainer->mWindowClientSize));
 
-		mWidgetMesh->PushData();														// 배칭 메시 넣고
+		_mWidgetMesh->PushData();														// 배칭 메시 넣고
 		matUI->PushData();																// 머테리얼 넣고
+		matUI->PushTransientData(widgetCBufferBindName, _mWidgetCBuffer);
+		matUI->PushTransientData(screenCBufferBindName, _mScreenCBuffer);
 
 		const std::vector<WidgetRenderBatch>& batches = drawInputs.mContainer->mBatches;
+		WidgetConstantData preCBuffer(false);
+		if (batches.empty() == false)
+		{
+			preCBuffer.SetIsText(!(batches[0].mIsText));
+		}
+
 		for (const WidgetRenderBatch& batch : batches)
 		{
-			matUI->PushTransientData(textureBindName, batch.mTexture);					// 텍스처 SRV 넣고
+			if (preCBuffer.IsText() != batch.mIsText)
+			{
+				preCBuffer.SetIsText(batch.mIsText);
+				_mWidgetCBuffer->UpdateData(preCBuffer);
+			}
+			if (batch.mTexture == nullptr)
+			{
+				std::shared_ptr<DXTextureBase> defaultWhiteTexture = RESOURCE_MANAGER->CreateOrGetRuntimeRenderResource<DXConstTexture2D>(L"White", DXSharedResourceType::Texture);
+				matUI->PushTransientData(textureBindName, defaultWhiteTexture);
+			}
+			else
+			{
+				matUI->PushTransientData(textureBindName, batch.mTexture);
+			}
 			DX_DEVICE_CONTEXT->DrawIndexed(batch.mIndexCount, batch.mStartIndex, 0);	// 인덱스로 드로잉
 		}
 

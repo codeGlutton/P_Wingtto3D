@@ -11,8 +11,11 @@ class Resource abstract : public Object
 	friend class ResourceManager;
 
 protected:
-	virtual void PostCreate() override;
+	virtual void PostLoad() override;
 	virtual void BeginDestroy() override;
+
+public:
+	virtual bool HasBulkData() const;
 
 public:
 	virtual void Save() const;

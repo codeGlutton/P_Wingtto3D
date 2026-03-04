@@ -8,6 +8,9 @@ class AppWindow;
 class WidgetPath
 {
 public:
+	static WidgetPath GetPathDownTo(std::shared_ptr<Widget> widget);
+
+public:
 	std::vector<ArrangedWidget> mWidgets;
 	std::weak_ptr<AppWindow> mRootWindow;
 };

@@ -2,6 +2,7 @@
 
 #include "Core/Object.h"
 #include "Utils/Thread/Lock.h"
+#include "Core/Resource/Package/PackageInclude.h"
 
 struct ObjectLinker;
 struct BulkData;
@@ -30,14 +31,26 @@ public:
 	void NotifyToAddChild(std::shared_ptr<Object> object);
 	void NotifyToRemoveChild(const std::wstring& objectFullPath);
 
+public:
+	PackageBuildScope GetScope() const
+	{
+		return _mScope;
+	}
+
 protected:
 	const std::vector<std::string>& GetExternalPackageClassNames(std::shared_ptr<ObjectLinker> linker) const;
 	const std::vector<std::wstring>& GetExternalPackagePaths(std::shared_ptr<ObjectLinker> linker) const;
+	const std::vector<PackageBuildScope>& GetExternalPackageScopes(std::shared_ptr<ObjectLinker> linker) const;
 	/**
 	 * 저장 시, 스레드에게 헤더 부분을 작성하도록 시키기위해서 링커 안에 해당 패키지 Header 객체 생성
 	 * \param linker 여러 패키지에 대한 정보가 담긴 링커 객체
 	 */
 	void MakeHeader(std::shared_ptr<ObjectLinker> linker) const;
+	/**
+	 * 연관 패키징 로드 시, 이미 로드된 패키징 내 오브젝트 데이터를 수집
+	 * \param linker 여러 패키지에 대한 정보가 담긴 링커 객체
+	 */
+	void CreateLinkData(std::shared_ptr<ObjectLinker> linker) const;
 	/**
 	 * 로드 시, 전달받은 헤더 데이터로 빈 객체들 우선 생성
 	 * \param linker 여러 패키지에 대한 정보가 담긴 링커 객체
@@ -45,10 +58,14 @@ protected:
 	void CreateEmptyObjects(std::shared_ptr<ObjectLinker> linker);
 
 protected:
-	virtual std::shared_ptr<Object> RequestToCreateObject(const ObjectTypeInfo* typeInfo, ObjectCreateFlag::Type flags);
+	virtual std::shared_ptr<Object> RequestToCreateObject(const std::wstring& objectName, const ObjectTypeInfo* typeInfo, ObjectCreateFlag::Type flags);
 
 protected:
 	std::unordered_map<std::wstring, std::weak_ptr<Object>> _mChildSharedObjects;
+
+private:
+	PROPERTY(_mScope)
+	PackageBuildScope _mScope;
 };
 
 class AppWindowPackage : public Package
@@ -59,7 +76,7 @@ protected:
 	virtual void RegisterPackage() override;
 
 protected:
-	virtual std::shared_ptr<Object> RequestToCreateObject(const ObjectTypeInfo* typeInfo, ObjectCreateFlag::Type flags) override;
+	virtual std::shared_ptr<Object> RequestToCreateObject(const std::wstring& objectName, const ObjectTypeInfo* typeInfo, ObjectCreateFlag::Type flags) override;
 };
 
 class ResourcePreviewPackage : public Package
@@ -70,7 +87,7 @@ protected:
 	virtual void RegisterPackage() override;
 
 protected:
-	virtual std::shared_ptr<Object> RequestToCreateObject(const ObjectTypeInfo* typeInfo, ObjectCreateFlag::Type flags) override;
+	virtual std::shared_ptr<Object> RequestToCreateObject(const std::wstring& objectName, const ObjectTypeInfo* typeInfo, ObjectCreateFlag::Type flags) override;
 };
 
 class ResourcePackage : public Package
@@ -78,16 +95,29 @@ class ResourcePackage : public Package
 	GEN_REFLECTION(ResourcePackage)
 
 private:
-	virtual std::shared_ptr<Object> RequestToCreateObject(const ObjectTypeInfo* typeInfo, ObjectCreateFlag::Type flags) override;
+	virtual std::shared_ptr<Object> RequestToCreateObject(const std::wstring& objectName, const ObjectTypeInfo* typeInfo, ObjectCreateFlag::Type flags) override;
 
 public:
 	std::shared_ptr<Resource> GetResource()
 	{
 		return std::move(_mResource);
 	}
+	bool IsValid() const
+	{
+		return _mResource != nullptr;
+	}
 
 private:
 	std::shared_ptr<Resource> _mResource;
 };
 
+class WidgetStylePackage : public Package
+{
+	GEN_REFLECTION(WidgetStylePackage)
 
+protected:
+	virtual void RegisterPackage() override;
+
+protected:
+	virtual std::shared_ptr<Object> RequestToCreateObject(const std::wstring& objectName, const ObjectTypeInfo* typeInfo, ObjectCreateFlag::Type flags) override;
+};

@@ -152,7 +152,6 @@ void InputManager::ProcessWinKeyMessagesForWinInput()
             event->mUseAlt = _mState->mUseAlt;
             event->mUseCtrl = _mState->mUseCtrl;
             event->mUseShift = _mState->mUseShift;
-            event->mPath = &_mFocusWidgetPath;
 
             APP->OnPressChar(event);
             break;
@@ -195,7 +194,6 @@ void InputManager::ProcessWinKeyMessagesForWinInput()
             event->mUseAlt = _mState->mUseAlt;
             event->mUseCtrl = _mState->mUseCtrl;
             event->mUseShift = _mState->mUseShift;
-            event->mPath = &_mFocusWidgetPath;
 
             APP->OnPressKey(event);
             break;
@@ -231,7 +229,6 @@ void InputManager::ProcessWinKeyMessagesForWinInput()
             event->mUseAlt = _mState->mUseAlt;
             event->mUseCtrl = _mState->mUseCtrl;
             event->mUseShift = _mState->mUseShift;
-            event->mPath = &_mFocusWidgetPath;
 
             APP->OnReleaseKey(event);
             break;
@@ -584,7 +581,6 @@ void InputManager::ProcessWinKeyMessagesForDInput()
             event->mUseAlt = _mState->mUseAlt;
             event->mUseCtrl = _mState->mUseCtrl;
             event->mUseShift = _mState->mUseShift;
-            event->mPath = &_mFocusWidgetPath;
 
             APP->OnPressChar(event);
             break;
@@ -791,7 +787,6 @@ void InputManager::UpdateDInputState()
                     event->mUseAlt = _mState->mUseAlt;
                     event->mUseCtrl = _mState->mUseCtrl;
                     event->mUseShift = _mState->mUseShift;
-                    event->mPath = &_mFocusWidgetPath;
 
                     APP->OnPressKey(event);
                 }
@@ -810,7 +805,6 @@ void InputManager::UpdateDInputState()
                         event->mUseAlt = _mState->mUseAlt;
                         event->mUseCtrl = _mState->mUseCtrl;
                         event->mUseShift = _mState->mUseShift;
-                        event->mPath = &_mFocusWidgetPath;
 
                         APP->OnReleaseKey(event);
                     }
@@ -952,7 +946,6 @@ void InputManager::UpdateXInputState()
             event->mUseAlt = _mState->mUseAlt;
             event->mUseCtrl = _mState->mUseCtrl;
             event->mUseShift = _mState->mUseShift;
-            event->mPath = &_mFocusWidgetPath;
 
             APP->OnPressKey(event);
         }
@@ -971,7 +964,6 @@ void InputManager::UpdateXInputState()
                 event->mUseAlt = _mState->mUseAlt;
                 event->mUseCtrl = _mState->mUseCtrl;
                 event->mUseShift = _mState->mUseShift;
-                event->mPath = &_mFocusWidgetPath;
 
                 APP->OnReleaseKey(event);
             }
@@ -1032,7 +1024,6 @@ void InputManager::UpdateXInputState()
             event->mUseAlt = _mState->mUseAlt;
             event->mUseCtrl = _mState->mUseCtrl;
             event->mUseShift = _mState->mUseShift;
-            event->mPath = &_mFocusWidgetPath;
 
             APP->OnChangeAnalogValue(event);
         }
@@ -1054,7 +1045,6 @@ void InputManager::UpdateXInputState()
             event->mUseAlt = _mState->mUseAlt;
             event->mUseCtrl = _mState->mUseCtrl;
             event->mUseShift = _mState->mUseShift;
-            event->mPath = &_mFocusWidgetPath;
 
             APP->OnChangeAnalogValue(event);
         }
@@ -1080,7 +1070,6 @@ void InputManager::UpdateXInputState()
             event->mUseAlt = _mState->mUseAlt;
             event->mUseCtrl = _mState->mUseCtrl;
             event->mUseShift = _mState->mUseShift;
-            event->mPath = &_mFocusWidgetPath;
 
             APP->OnChangeAnalogValue(event);
         }
@@ -1105,7 +1094,6 @@ void InputManager::UpdateXInputState()
             event->mUseAlt = _mState->mUseAlt;
             event->mUseCtrl = _mState->mUseCtrl;
             event->mUseShift = _mState->mUseShift;
-            event->mPath = &_mFocusWidgetPath;
 
             APP->OnChangeAnalogValue(event);
         }

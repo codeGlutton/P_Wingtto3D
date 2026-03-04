@@ -44,6 +44,11 @@ void Object::SetName(const std::wstring& name)
 	OBJECT_MANAGER->NotifyToAddObject(GetFullPath());
 }
 
+void Object::CollectHeaderDatas(const void* inst, OUT std::unordered_map<std::wstring, std::pair<std::string, PackageBuildScope>>& externalPackageDatas, OUT std::vector<std::shared_ptr<BulkData>>& bulkDatas) const
+{
+	GetTypeInfo().CollectHeaderDatas(inst, externalPackageDatas, bulkDatas);
+}
+
 void Object::Serialize(Archive& archive) const
 {
 	GetTypeInfo().Serialize(archive, this);

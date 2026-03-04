@@ -56,6 +56,7 @@
     <ClInclude Include="Core\ObjectLinker.h" />
     <ClInclude Include="Core\Resource\BulkData.h" />
     <ClInclude Include="Core\Resource\ConstantData.h" />
+    <ClInclude Include="Core\Resource\Font.h" />
     <ClInclude Include="Core\Resource\Level.h" />
     <ClInclude Include="Core\Resource\Material.h" />
     <ClInclude Include="Core\Resource\Package\Package.h" />
@@ -78,6 +79,7 @@
     <ClInclude Include="Graphics\Buffer\DXInstancingBuffer.h" />
     <ClInclude Include="Graphics\Buffer\DXVertexBuffer.h" />
     <ClInclude Include="Graphics\Buffer\DXStructureBuffer.h" />
+    <ClInclude Include="Graphics\DXConstantData.h" />
     <ClInclude Include="Graphics\DXDefaultVertexData.h" />
     <ClInclude Include="Graphics\DXReflectionMetaData.h" />
     <ClInclude Include="Graphics\Render\DXWidgetBatchMesh.h" />
@@ -96,23 +98,32 @@
     <ClInclude Include="Graphics\State\DXRasterizerState.h" />
     <ClInclude Include="Graphics\State\DXSamplerState.h" />
     <ClInclude Include="Graphics\Viewport\DXViewport.h" />
-    <ClInclude Include="Graphics\Viewport\DXSceneViewport.h" />
     <ClInclude Include="Graphics\Viewport\Viewport.h" />
-    <ClInclude Include="Graphics\VirtualWindow\LogVirtualWindow.h" />
-    <ClInclude Include="Graphics\VirtualWindow\VirtualWindow.h" />
-    <ClInclude Include="Graphics\VirtualWindow\VirtualWindowContent.h" />
-    <ClInclude Include="Graphics\VirtualWindow\VirtualWindowSplitter.h" />
+    <ClInclude Include="Graphics\Widget\Border.h" />
+    <ClInclude Include="Graphics\Widget\BoxPanelWidget.h" />
     <ClInclude Include="Graphics\Widget\CompoundWidget.h" />
+    <ClInclude Include="Graphics\Widget\Image.h" />
     <ClInclude Include="Graphics\Widget\PanelWidget.h" />
     <ClInclude Include="Graphics\Widget\Slot\WidgetSlot.h" />
     <ClInclude Include="Graphics\Widget\Slot\WidgetSlotOption.h" />
+    <ClInclude Include="Graphics\Widget\Slot\WidgetSlotSizeParams.h" />
+    <ClInclude Include="Graphics\Widget\Spacer.h" />
+    <ClInclude Include="Graphics\Widget\Splitter.h" />
+    <ClInclude Include="Graphics\Widget\TextBlock.h" />
     <ClInclude Include="Graphics\Widget\Type\ArrangedWidget.h" />
+    <ClInclude Include="Graphics\Widget\Type\Attribute.h" />
     <ClInclude Include="Graphics\Widget\Type\HitTestGrid.h" />
     <ClInclude Include="Graphics\Widget\Type\PaintArgs.h" />
     <ClInclude Include="Graphics\Widget\Type\WidgetBrush.h" />
+    <ClInclude Include="Graphics\Widget\Type\WidgetFontData.h" />
     <ClInclude Include="Graphics\Widget\Type\WidgetGeometry.h" />
     <ClInclude Include="Graphics\Widget\Type\WidgetPath.h" />
+    <ClInclude Include="Graphics\Widget\Type\WidgetStyle.h" />
+    <ClInclude Include="Graphics\Widget\Type\WidgetTextCache.h" />
     <ClInclude Include="Graphics\Widget\Type\WidgetTypeInclude.h" />
+    <ClInclude Include="Graphics\Widget\VirtualWindow.h" />
+    <ClInclude Include="Graphics\Widget\VirtualWindowContent.h" />
+    <ClInclude Include="Graphics\Widget\VirtualWindowSplitter.h" />
     <ClInclude Include="Graphics\Widget\Widget.h" />
     <ClInclude Include="Input\InputAction.h" />
     <ClInclude Include="Input\InputBinding.h" />
@@ -133,6 +144,7 @@
     <ClInclude Include="Manager\ThreadManager.h" />
     <ClInclude Include="Manager\TimeManager.h" />
     <ClInclude Include="Manager\AppWindowManager.h" />
+    <ClInclude Include="Manager\WidgetStyleManager.h" />
     <ClInclude Include="Manager\WorldGameInputManager.h" />
     <ClInclude Include="Manager\WorldManagerBase.h" />
     <ClInclude Include="pch.h" />
@@ -148,7 +160,6 @@
     <ClInclude Include="Reflection\TypeTrait.h" />
     <ClInclude Include="TLS.h" />
     <ClInclude Include="Types.h" />
-    <ClInclude Include="Utils\Debugger\Logger.h" />
     <ClInclude Include="Utils\GeometryUtils.h" />
     <ClInclude Include="Utils\InputUtils.h" />
     <ClInclude Include="Utils\MathUtils.h" />
@@ -167,6 +178,7 @@
     <ClInclude Include="Utils\Thread\SceneJobQueue.h" />
     <ClInclude Include="Utils\Thread\Thread.h" />
     <ClInclude Include="Utils\TypeUtils.h" />
+    <ClInclude Include="Utils\WidgetUtils.h" />
     <ClInclude Include="Utils\Wrapper\SimpleMathWrapper.h" />
   </ItemGroup>
   <ItemGroup>
@@ -189,6 +201,7 @@
     <ClCompile Include="Core\ObjectLinker.cpp" />
     <ClCompile Include="Core\Resource\BulkData.cpp" />
     <ClCompile Include="Core\Resource\ConstantData.cpp" />
+    <ClCompile Include="Core\Resource\Font.cpp" />
     <ClCompile Include="Core\Resource\Level.cpp" />
     <ClCompile Include="Core\Resource\Material.cpp" />
     <ClCompile Include="Core\Resource\Package\Package.cpp" />
@@ -207,6 +220,7 @@
     <ClCompile Include="Graphics\Buffer\DXInstancingBuffer.cpp" />
     <ClCompile Include="Graphics\Buffer\DXVertexBuffer.cpp" />
     <ClCompile Include="Graphics\Buffer\DXStructureBuffer.cpp" />
+    <ClCompile Include="Graphics\DXConstantData.cpp" />
     <ClCompile Include="Graphics\DXDefaultVertexData.cpp" />
     <ClCompile Include="Graphics\DXReflectionMetaData.cpp" />
     <ClCompile Include="Graphics\Render\DXWidgetBatchMesh.cpp" />
@@ -223,23 +237,32 @@
     <ClCompile Include="Graphics\State\DXRasterizerState.cpp" />
     <ClCompile Include="Graphics\State\DXSamplerState.cpp" />
     <ClCompile Include="Graphics\Viewport\DXViewport.cpp" />
-    <ClCompile Include="Graphics\Viewport\DXSceneViewport.cpp" />
     <ClCompile Include="Graphics\Viewport\Viewport.cpp" />
-    <ClCompile Include="Graphics\VirtualWindow\LogVirtualWindow.cpp" />
-    <ClCompile Include="Graphics\VirtualWindow\VirtualWindow.cpp" />
-    <ClCompile Include="Graphics\VirtualWindow\VirtualWindowContent.cpp" />
-    <ClCompile Include="Graphics\VirtualWindow\VirtualWindowSplitter.cpp" />
+    <ClCompile Include="Graphics\Widget\Border.cpp" />
+    <ClCompile Include="Graphics\Widget\BoxPanelWidget.cpp" />
     <ClCompile Include="Graphics\Widget\CompoundWidget.cpp" />
+    <ClCompile Include="Graphics\Widget\Image.cpp" />
     <ClCompile Include="Graphics\Widget\PanelWidget.cpp" />
     <ClCompile Include="Graphics\Widget\Slot\WidgetSlot.cpp" />
     <ClCompile Include="Graphics\Widget\Slot\WidgetSlotOption.cpp" />
+    <ClCompile Include="Graphics\Widget\Slot\WidgetSlotSizeParams.cpp" />
+    <ClCompile Include="Graphics\Widget\Spacer.cpp" />
+    <ClCompile Include="Graphics\Widget\Splitter.cpp" />
+    <ClCompile Include="Graphics\Widget\TextBlock.cpp" />
     <ClCompile Include="Graphics\Widget\Type\ArrangedWidget.cpp" />
+    <ClCompile Include="Graphics\Widget\Type\Attribute.cpp" />
     <ClCompile Include="Graphics\Widget\Type\HitTestGrid.cpp" />
     <ClCompile Include="Graphics\Widget\Type\PaintArgs.cpp" />
     <ClCompile Include="Graphics\Widget\Type\WidgetBrush.cpp" />
+    <ClCompile Include="Graphics\Widget\Type\WidgetFontData.cpp" />
     <ClCompile Include="Graphics\Widget\Type\WidgetGeometry.cpp" />
     <ClCompile Include="Graphics\Widget\Type\WidgetPath.cpp" />
+    <ClCompile Include="Graphics\Widget\Type\WidgetStyle.cpp" />
+    <ClCompile Include="Graphics\Widget\Type\WidgetTextCache.cpp" />
     <ClCompile Include="Graphics\Widget\Type\WidgetTypeInclude.cpp" />
+    <ClCompile Include="Graphics\Widget\VirtualWindow.cpp" />
+    <ClCompile Include="Graphics\Widget\VirtualWindowContent.cpp" />
+    <ClCompile Include="Graphics\Widget\VirtualWindowSplitter.cpp" />
     <ClCompile Include="Graphics\Widget\Widget.cpp" />
     <ClCompile Include="Input\InputAction.cpp" />
     <ClCompile Include="Input\InputBinding.cpp" />
@@ -258,6 +281,7 @@
     <ClCompile Include="Manager\ThreadManager.cpp" />
     <ClCompile Include="Manager\TimeManager.cpp" />
     <ClCompile Include="Manager\AppWindowManager.cpp" />
+    <ClCompile Include="Manager\WidgetStyleManager.cpp" />
     <ClCompile Include="Manager\WorldGameInputManager.cpp" />
     <ClCompile Include="Manager\WorldManagerBase.cpp" />
     <ClCompile Include="pch.cpp">
@@ -279,7 +303,6 @@
     <ClCompile Include="Reflection\StructTypeInfo.cpp" />
     <ClCompile Include="Reflection\TypeInfo.cpp" />
     <ClCompile Include="TLS.cpp" />
-    <ClCompile Include="Utils\Debugger\Logger.cpp" />
     <ClCompile Include="Utils\GeometryUtils.cpp" />
     <ClCompile Include="Utils\InputUtils.cpp" />
     <ClCompile Include="Utils\MathUtils.cpp" />
@@ -302,6 +325,7 @@
     <ClCompile Include="Utils\Thread\SceneJobQueue.cpp" />
     <ClCompile Include="Utils\Thread\Thread.cpp" />
     <ClCompile Include="Utils\TypeUtils.cpp" />
+    <ClCompile Include="Utils\WidgetUtils.cpp" />
     <ClCompile Include="Utils\Wrapper\SimpleMathWrapper.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -323,6 +347,32 @@
     <None Include="..\Resources\Engine\HLSL\ShaderCommon.hlsli" />
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="..\Resources\Engine\HLSL\TestQuadRender.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='EditorDebug|x64'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='EditorDebug|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='EditorRelease|x64'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='EditorRelease|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='EditorRelease|Win32'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='EditorRelease|Win32'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='EditorDebug|Win32'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='EditorDebug|Win32'">5.0</ShaderModel>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">VS</EntryPointName>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='EditorRelease|Win32'">VS</EntryPointName>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">VS</EntryPointName>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='EditorDebug|Win32'">VS</EntryPointName>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">VS</EntryPointName>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='EditorRelease|x64'">VS</EntryPointName>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">VS</EntryPointName>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='EditorDebug|x64'">VS</EntryPointName>
+    </FxCompile>
     <FxCompile Include="..\Resources\Engine\HLSL\UIRender.hlsl">
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">VS</EntryPointName>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">5.0</ShaderModel>

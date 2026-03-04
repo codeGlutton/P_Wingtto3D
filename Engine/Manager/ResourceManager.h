@@ -40,6 +40,7 @@ public:
 
 public:
 	std::shared_ptr<ResourceHeader> CreateResourceHeader(std::shared_ptr<Resource> target = nullptr, ObjectCreateFlag::Type flags = ObjectCreateFlag::None);
+	std::shared_ptr<ResourceHeader> CreateResourceHeader(const std::wstring& objectName, std::shared_ptr<Resource> target = nullptr, ObjectCreateFlag::Type flags = ObjectCreateFlag::None);
 
 	/* 게임 스레드 Only */
 public:
@@ -70,6 +71,9 @@ public:
 	template<typename T> requires std::is_base_of_v<Resource, T>
 	std::shared_ptr<T> CreateResource(std::shared_ptr<ResourcePackage> outer, ObjectCreateFlag::Type flags = ObjectCreateFlag::None);
 	std::shared_ptr<Resource> CreateResource(std::shared_ptr<ResourcePackage> outer, const ObjectTypeInfo* typeInfo, ObjectCreateFlag::Type flags = ObjectCreateFlag::None);
+	template<typename T> requires std::is_base_of_v<Resource, T>
+	std::shared_ptr<T> CreateResource(const std::wstring& objectName, std::shared_ptr<ResourcePackage> outer, ObjectCreateFlag::Type flags = ObjectCreateFlag::None);
+	std::shared_ptr<Resource> CreateResource(const std::wstring& objectName, std::shared_ptr<ResourcePackage> outer, const ObjectTypeInfo* typeInfo, ObjectCreateFlag::Type flags = ObjectCreateFlag::None);
 	/**
 	 * 렌더 스레드 리소스 생성 (생성 이후에는 랜더에서만 조작 가능)
 	 * \param resourceName 리소스 이름
@@ -156,6 +160,12 @@ template<typename T> requires std::is_base_of_v<Resource, T>
 inline std::shared_ptr<T> ResourceManager::CreateResource(std::shared_ptr<ResourcePackage> outer, ObjectCreateFlag::Type flags)
 {
 	return std::static_pointer_cast<T>(CreateResource(outer, &T::GetStaticTypeInfo(), flags));
+}
+
+template<typename T> requires std::is_base_of_v<Resource, T>
+inline std::shared_ptr<T> ResourceManager::CreateResource(const std::wstring& objectName, std::shared_ptr<ResourcePackage> outer, ObjectCreateFlag::Type flags)
+{
+	return std::static_pointer_cast<T>(CreateResource(objectName, outer, &T::GetStaticTypeInfo(), flags));
 }
 
 template<typename T> requires std::is_base_of_v<DXSharedResource, T>

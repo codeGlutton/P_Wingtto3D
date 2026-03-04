@@ -2,6 +2,7 @@
 #include "App.h"
 
 #include <windowsx.h>
+#include <shellapi.h>
 
 #include "Manager/InputManager.h"
 
@@ -56,12 +57,14 @@ LRESULT App::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	}
 	case WM_SETFOCUS:
 	{
-		APP_WIN_MANAGER->NotifyToChangeFocus(hWnd);
+		std::shared_ptr<Widget> widget = APP_WIN_MANAGER->GetAppWindow(hWnd);
+		APP->OnChangeFocus(widget);
 		break;
 	}
 	case WM_KILLFOCUS:
 	{
-		APP_WIN_MANAGER->NotifyToChangeFocus(NULL);
+		std::shared_ptr<Widget> widget = nullptr;
+		APP->OnChangeFocus(widget);
 		break;
 	}
 
@@ -88,6 +91,23 @@ LRESULT App::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		APP_WIN_MANAGER->NotifyToCloseAppWindow(hWnd);
 		break;
 	}
+
+		/* 외부 파일 드랍 */
+	case WM_DROPFILES:
+	{
+		HDROP hDrop = reinterpret_cast<HDROP>(wParam);
+
+		uint32 dropFileCount = DragQueryFile(hDrop, 0xFFFFFFFF, NULL, 0);
+		for (uint32 i = 0; i < dropFileCount; ++i)
+		{
+			wchar_t filePath[MAX_PATH] = {};
+			DragQueryFile(hDrop, i, filePath, MAX_PATH);
+			APP->OnDropFile(filePath);
+		}
+
+		DragFinish(hDrop);
+	}
+	break;
 
 	default:
 	{

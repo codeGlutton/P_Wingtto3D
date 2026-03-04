@@ -93,20 +93,8 @@ public:
 		return _mObject.lock();
 	}
 
-	void LoadSync();
-	void LoadASync();
-
 private:
 	std::wstring _mFullPath;
 	std::weak_ptr<T> _mObject;
 };
 
-template<typename T>
-void SoftObjectPtr<T>::LoadSync()
-{
-}
-
-template<typename T>
-void SoftObjectPtr<T>::LoadASync()
-{
-}

@@ -41,6 +41,9 @@ struct Interval
 template<typename T> requires std::is_integral_v<T>
 struct IntPoint
 {
+	GEN_MINIMUM_STRUCT_REFLECTION(IntPoint<T>)
+
+public:
 	using IntType = T;
 
 public:
@@ -62,13 +65,7 @@ public:
 	{
 	}
 
-	IntPoint(IntPoint&&) = default;
-	IntPoint(const IntPoint&) = default;
-
 public:
-	IntPoint& operator=(IntPoint&&) = default;
-	IntPoint& operator=(const IntPoint&) = default;
-
 	bool operator==(const IntPoint& other) const
 	{
 		return mX == other.mX && mY == other.mY;
@@ -160,6 +157,9 @@ public:
 		};
 		IntType mXY[2];
 	};
+
+	PROPERTY(mX)
+	PROPERTY(mY)
 };
 
 struct Manifold

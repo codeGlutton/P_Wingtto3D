@@ -79,3 +79,14 @@ void PathManager::Init()
 void PathManager::Destroy()
 {
 }
+
+void PathManager::ExtractFromFullPath(const std::wstring& fullPath, OUT std::wstring& name, OUT std::wstring& packagePath) const
+{
+	std::filesystem::path path(fullPath);
+	name = path.extension().wstring();
+	if (name.empty() == false && name.front() == L'.')
+	{
+		name.erase(0, 1);
+	}
+	packagePath = path.replace_extension().wstring();
+}

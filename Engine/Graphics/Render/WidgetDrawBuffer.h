@@ -5,8 +5,12 @@
 #include "Graphics/Render/RenderInclude.h"
 #include "Graphics/Widget/Type/WidgetGeometry.h"
 #include "Graphics/Widget/Type/WidgetBrush.h"
+#include "Graphics/Widget/Type/WidgetFontData.h"
+#include "Graphics/Widget/Type/WidgetTextCache.h"
 
 #include "Graphics/DXDefaultVertexData.h"
+
+#include "Core/Resource/Font.h"
 
 class AppWindow;
 class DXTextureBase;
@@ -56,16 +60,32 @@ public:
 	WidgetBrushType mBrushType;
 };
 
+struct WidgetRenderTextElement : public WidgetRenderElement, public WidgetRenderTintElement
+{
+public:
+	WidgetRenderTextElement()
+	{
+		mType = WidgetRenderElementType::Text;
+	}
+
+public:
+	std::shared_ptr<DXFontTexture> mResource;
+	FontAtlasDataRef mAtlasData;
+	std::vector<WidgetCharRenderCache> mRenderCaches;
+};
+
 struct WidgetRenderBatch
 {
-	WidgetRenderBatch(const std::shared_ptr<DXTextureBase>& texture, uint32 startIndex) :
+	WidgetRenderBatch(const std::shared_ptr<DXTextureBase>& texture, bool isText, uint32 startIndex) :
 		mTexture(texture),
+		mIsText(isText),
 		mStartIndex(startIndex),
 		mIndexCount(0u)
 	{
 	}
 
 	const std::shared_ptr<DXTextureBase>& mTexture;
+	bool mIsText;
 	uint32 mStartIndex;
 	uint32 mIndexCount;
 };
@@ -77,7 +97,7 @@ struct WindowRenderElementContainer
 public:
 	void CreateBoxElement(uint32 layerId, const WidgetGeometry& paintGeometry, const WidgetBrush& brush, const Color& color, WidgetDrawOptionFlag::Type drawOpt);
 	//void CreateLineElement();
-	//void CreateTextElement();
+	void CreateTextElement(uint32 layerId, const WidgetGeometry& paintGeometry, const WidgetFontData& fontData, const std::vector<WidgetCharRenderCache>& renderCaches, const Color& color, WidgetDrawOptionFlag::Type drawOpt);
 
 public:
 	void ResetElements();
@@ -85,10 +105,11 @@ public:
 private:
 	bool IsCulling(const WidgetGeometry& paintGeometry);
 	bool IsCulling(const WidgetBrush& brush, const Color& color);
+	bool IsCulling(const WidgetFontData& fontData, const Color& color, const std::vector<WidgetCharRenderCache>& renderCaches);
 
 public:
 	std::weak_ptr<AppWindow> mWindow;
-	Vec2 mWindowSize;
+	Vec2 mWindowClientSize;
 
 public:
 	std::vector<WidgetRenderBatch> mBatches;

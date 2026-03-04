@@ -5,6 +5,9 @@ struct Transform2D
 	GEN_MINIMUM_STRUCT_REFLECTION(Transform2D)
 
 public:
+	bool operator==(const Transform2D& other) const = default;
+
+public:
 	Transform2D() : 
 		_mLocalScale(1.f)
 	{

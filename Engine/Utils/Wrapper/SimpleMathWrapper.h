@@ -2,6 +2,9 @@
 
 #include "SimpleMath/SimpleMath.h"
 
+struct Matrix;
+struct Matrix2D;
+
 /* 단위 */
 
 struct Vec2 : public DirectX::SimpleMath::Vector2
@@ -10,6 +13,18 @@ struct Vec2 : public DirectX::SimpleMath::Vector2
 
 	using DirectX::SimpleMath::Vector2::Vector2;
 
+public:
+	float& operator[](std::size_t i)
+	{
+		return *(reinterpret_cast<float*>(this) + i);
+	}
+
+	const float& operator[](std::size_t i) const
+	{
+		return *(reinterpret_cast<const float*>(this) + i);
+	}
+
+public:
 	PROPERTY(x)
 	PROPERTY(y)
 
@@ -25,6 +40,18 @@ struct Vec3 : public DirectX::SimpleMath::Vector3
 
 	using DirectX::SimpleMath::Vector3::Vector3;
 
+public:
+	float& operator[](std::size_t i)
+	{
+		return *(reinterpret_cast<float*>(this) + i);
+	}
+
+	const float& operator[](std::size_t i) const
+	{
+		return *(reinterpret_cast<const float*>(this) + i);
+	}
+
+public:
 	PROPERTY(x)
 	PROPERTY(y)
 	PROPERTY(z)
@@ -48,6 +75,18 @@ struct Vec4 : public DirectX::SimpleMath::Vector4
 
 	using DirectX::SimpleMath::Vector4::Vector4;
 
+public:
+	float& operator[](std::size_t i)
+	{
+		return *(reinterpret_cast<float*>(this) + i);
+	}
+
+	const float& operator[](std::size_t i) const
+	{
+		return *(reinterpret_cast<const float*>(this) + i);
+	}
+
+public:
 	PROPERTY(x)
 	PROPERTY(y)
 	PROPERTY(z)
@@ -129,15 +168,7 @@ public:
 	Matrix2D& operator=(Matrix2D&&) = default;
 
 public:
-	operator DirectX::XMMATRIX() const noexcept 
-	{
-		return DirectX::XMMATRIX(
-			_11, _12, 0.f, 0.f,
-			_21, _22, 0.f, 0.f,
-			0.f, 0.f, 1.f, 0.f,
-			_31, _32, 0.f, 1.f
-		);
-	}
+	operator Matrix() const noexcept;
 
 public:
 	bool operator == (const Matrix2D& M) const noexcept;
@@ -254,8 +285,14 @@ struct Matrix : public DirectX::SimpleMath::Matrix
 {
 	GEN_MINIMUM_STRUCT_REFLECTION(Matrix)
 	
+public:
 	using DirectX::SimpleMath::Matrix::Matrix;
 
+public:
+	explicit Matrix(const Matrix2D& other);
+	Matrix& operator=(const Matrix2D& other) noexcept;
+
+public:
 	PROPERTY(_11)
 	PROPERTY(_12)
 	PROPERTY(_13)
@@ -367,7 +404,6 @@ public:
 		end(e)
 	{
 	}
-	~Line() = default;
 
 public:
 	bool Contains(const Vec3& point) const noexcept;
@@ -509,7 +545,6 @@ public:
 
 public:
 	bool operator==(const BoundingOBB2D& r) const noexcept = default;
-	bool operator!=(const BoundingOBB2D& r) const noexcept = default;
 
 public:
 	Vec2 Location() const noexcept;

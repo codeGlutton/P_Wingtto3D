@@ -36,6 +36,23 @@ void Texture2D::PostLoad()
 	// 이후에 게임 스레드 업데이트 과정에서 해당 프록시를 GetProxy()를 통해 접근하는 경우, Init() 일감 큐로 등록  
 }
 
+bool Texture2D::HasBulkData() const
+{
+	return _mBulkData->mIsLoad;
+}
+
+#ifdef _EDITOR
+
+void Texture2D::PushBulkData(std::shared_ptr<Texture2DBulkData> bulkData)
+{
+	ASSERT_MSG(HasBulkData() == false, "Already bulk data is existed");
+
+	_mBulkData = bulkData;
+	PostLoad();
+}
+
+#endif
+
 const Texture2D::ProxyType& Texture2D::GetProxy() const
 {
 	if (_mNeedInitProxy == true)

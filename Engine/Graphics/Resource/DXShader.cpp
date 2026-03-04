@@ -46,9 +46,9 @@ ComPtr<ID3D11ShaderReflection> DXShader::Reflect() const
 void DXShader::Load(const wchar_t* path, const char* entryName, const char* version)
 {
 	std::wstring fullPath = (PATH_MANAGER->GetEngineResourcePath() / L"HLSL" / path).wstring();
-	const uint32 compileFlag = 0;
+	uint32 compileFlag = 0;
 
-#ifdef DEBUG
+#ifdef _DEBUG
 
 	// 디버그 모드이며, 최적화는 스킵
 	compileFlag  = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
@@ -499,6 +499,7 @@ void DXMinimumGraphicShader::PushData() const
 {
 	_mShaders[DXResourceUsageBit::VertexBit]->PushData();
 	_mShaders[DXResourceUsageBit::PixelBit]->PushData();
+	_mLayout.PushData();
 }
 
 void DXMinimumGraphicShader::MakeMetaData()
@@ -595,7 +596,11 @@ void DXGraphicShader::PushData() const
 {
 	for (const std::shared_ptr<DXShader>& shader : _mShaders)
 	{
-		shader->PushData();
+		if (shader != nullptr)
+		{
+			shader->PushData();
+		}
 	}
+	_mLayout.PushData();
 }
 

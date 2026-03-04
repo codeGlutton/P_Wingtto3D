@@ -236,12 +236,21 @@ void PointerTypeInfo<T>::Serialize(OUT Archive& archive, const void* inst) const
 {
 	const T* const& instRef = *reinterpret_cast<const T* const*>(inst);
 
+	const std::wstring* packagePath;
+	const std::wstring* objectFullPath;
+	if (instRef == nullptr)
+	{
+		std::wstring nullPath = L"";
+		packagePath = objectFullPath = &nullPath;
+	}
+	else
+	{
+		packagePath = GetObjectPath(reinterpret_cast<Object*>(GetInstancePackage(inst).get()));
+		objectFullPath = GetObjectFullPath(reinterpret_cast<const Object*>(instRef));
+	}
 	// 패키징 명 쓰기
-	const std::wstring* packagePath = GetObjectPath(reinterpret_cast<Object*>(GetInstancePackage(inst).get()));
 	TypeInfoResolver<std::wstring>::Get().Serialize(archive, packagePath);
-
 	// 풀 주소 쓰기
-	const std::wstring* objectFullPath = GetObjectFullPath(reinterpret_cast<const Object*>(instRef));
 	TypeInfoResolver<std::wstring>::Get().Serialize(archive, objectFullPath);
 }
 
@@ -258,9 +267,17 @@ void PointerTypeInfo<T>::Deserialize(Archive& archive, OUT void* inst) const
 	std::wstring objectFullPath;
 	TypeInfoResolver<std::wstring>::Get().Deserialize(archive, &objectFullPath);
 
-	// 리소스에 대입
-	std::shared_ptr<Object> objectPtr = archive.GetObjectLinker()->mLinkDataMap[packagePath].mObjectPtrMap[objectFullPath];
-	instRef = objectPtr.get();
+	if (packagePath.empty() == true || objectFullPath.empty() == true)
+	{
+		// 리소스에 대입
+		instRef = nullptr;
+	}
+	else
+	{
+		// 리소스에 대입
+		std::shared_ptr<Object> objectPtr = archive.GetObjectLinker()->mLinkDataMap[packagePath].mObjectPtrMap[objectFullPath];
+		instRef = objectPtr.get();
+	}
 }
 
 template<typename T>
@@ -290,12 +307,21 @@ void SharedPointerTypeInfo<T>::Serialize(OUT Archive& archive, const void* inst)
 {
 	const std::shared_ptr<T>& instRef = *reinterpret_cast<const std::shared_ptr<T>*>(inst);
 
+	const std::wstring* packagePath;
+	const std::wstring* objectFullPath;
+	if (instRef == nullptr)
+	{
+		std::wstring nullPath = L"";
+		packagePath = objectFullPath = &nullPath;
+	}
+	else
+	{
+		packagePath = GetObjectPath(reinterpret_cast<Object*>(GetInstancePackage(inst).get()));
+		objectFullPath = GetObjectFullPath(reinterpret_cast<const Object*>(instRef.get()));
+	}
 	// 패키징 명 쓰기
-	const std::wstring* packagePath = GetObjectPath(reinterpret_cast<Object*>(GetInstancePackage(inst).get()));
 	TypeInfoResolver<std::wstring>::Get().Serialize(archive, packagePath);
-
 	// 풀 주소 쓰기
-	const std::wstring* objectFullPath = GetObjectFullPath(reinterpret_cast<const Object*>(instRef.get()));
 	TypeInfoResolver<std::wstring>::Get().Serialize(archive, objectFullPath);
 }
 
@@ -312,9 +338,17 @@ void SharedPointerTypeInfo<T>::Deserialize(Archive& archive, OUT void* inst) con
 	std::wstring objectFullPath;
 	TypeInfoResolver<std::wstring>::Get().Deserialize(archive, &objectFullPath);
 
-	// 리소스에 대입
-	std::shared_ptr<Object> objectPtr = archive.GetObjectLinker()->mLinkDataMap[packagePath].mObjectPtrMap[objectFullPath];
-	instRef = std::reinterpret_pointer_cast<T>(objectPtr);
+	if (packagePath.empty() == true || objectFullPath.empty() == true)
+	{
+		// 리소스에 대입
+		instRef = nullptr;
+	}
+	else
+	{
+		// 리소스에 대입
+		std::shared_ptr<Object> objectPtr = archive.GetObjectLinker()->mLinkDataMap[packagePath].mObjectPtrMap[objectFullPath];
+		instRef = std::reinterpret_pointer_cast<T>(objectPtr);
+	}
 }
 
 template<typename T>
@@ -344,12 +378,21 @@ void WeakPointerTypeInfo<T>::Serialize(OUT Archive& archive, const void* inst) c
 {
 	const std::shared_ptr<T> sharedInstRef = (*reinterpret_cast<const std::weak_ptr<T>*>(inst)).lock();
 
+	const std::wstring* packagePath;
+	const std::wstring* objectFullPath;
+	if (sharedInstRef == nullptr)
+	{
+		std::wstring nullPath = L"";
+		packagePath = objectFullPath = &nullPath;
+	}
+	else
+	{
+		packagePath = GetObjectPath(reinterpret_cast<Object*>(GetInstancePackage(inst).get()));
+		objectFullPath = GetObjectFullPath(reinterpret_cast<const Object*>(sharedInstRef.get()));
+	}
 	// 패키징 명 쓰기
-	const std::wstring* packagePath = GetObjectPath(reinterpret_cast<Object*>(GetInstancePackage(inst).get()));
 	TypeInfoResolver<std::wstring>::Get().Serialize(archive, packagePath);
-
 	// 풀 주소 쓰기
-	const std::wstring* objectFullPath = GetObjectFullPath(reinterpret_cast<Object*>(sharedInstRef.get()));
 	TypeInfoResolver<std::wstring>::Get().Serialize(archive, objectFullPath);
 }
 
@@ -366,9 +409,17 @@ void WeakPointerTypeInfo<T>::Deserialize(Archive& archive, OUT void* inst) const
 	std::wstring objectFullPath;
 	TypeInfoResolver<std::wstring>::Get().Deserialize(archive, &objectFullPath);
 
-	// 리소스에 대입
-	std::shared_ptr<Object> objectPtr = archive.GetObjectLinker()->mLinkDataMap[packagePath].mObjectPtrMap[objectFullPath];
-	instRef = std::reinterpret_pointer_cast<T>(objectPtr);
+	if (packagePath.empty() == true || objectFullPath.empty() == true)
+	{
+		// 리소스에 대입
+		instRef.reset();
+	}
+	else
+	{
+		// 리소스에 대입
+		std::shared_ptr<Object> objectPtr = archive.GetObjectLinker()->mLinkDataMap[packagePath].mObjectPtrMap[objectFullPath];
+		instRef = std::reinterpret_pointer_cast<T>(objectPtr);
+	}
 }
 
 template<typename T>

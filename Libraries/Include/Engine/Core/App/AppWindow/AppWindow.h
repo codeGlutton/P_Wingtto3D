@@ -20,23 +20,26 @@ struct AppWindowDesc
 	GEN_STRUCT_REFLECTION(AppWindowDesc)
 
 	ThreadSafeRefCounting<HWND> mHWndRef = nullptr;
-	PROPERTY(mWidth)
-	float mWidth = 1280.f;
-	PROPERTY(mHeight)
-	float mHeight = 720.f;
+	PROPERTY(mClientWidth)
+	float mClientWidth = 1280.f;
+	PROPERTY(mClientHeight)
+	float mClientHeight = 720.f;
 	PROPERTY(mVsync)
 	bool mVsync = false;
 	PROPERTY(mWindowed)
 	bool mWindowed = true;
 
-	PROPERTY(mOffsetX)
-	uint32 mOffsetX = CW_USEDEFAULT;
-	PROPERTY(mOffsetY)
-	uint32 mOffsetY = 0;
+	PROPERTY(mWindowOffsetX)
+	uint32 mWindowOffsetX = CW_USEDEFAULT;
+	PROPERTY(mWindowOffsetY)
+	uint32 mWindowOffsetY = 0;
 
 	std::wstring mName = L"";
-	float mClientWidth;
-	float mClientHeight;
+	float mWindowWidth;
+	float mWindowHeight;
+
+	uint32 mToolbarSizeX = 0;
+	uint32 mToolbarSizeY = 0;
 };
 
 /**
@@ -77,8 +80,8 @@ protected:
 	void PaintWindow(OUT std::shared_ptr<WindowRenderElementContainer> container, float deltaTime);
 
 protected:
-	virtual void OnMove();
-	virtual void OnResize(bool isWindowed, const RECT& clientSize);
+	void OnMoveWindow();
+	void OnResizeWindow(bool isWindowed, const RECT& clientSize);
 
 public:
 	const AppWindowDesc& GetDesc() const 
@@ -99,17 +102,6 @@ public:
 	}
 
 public:
-	std::shared_ptr<Widget> GetFocusWidget() const
-	{
-		return _mFocusWidget.lock();
-	}
-	void ChangeFocusWidget(std::shared_ptr<Widget> widget);
-
-public:
-	virtual void OnBeginFocus() override;
-	virtual void OnEndFocus() override;
-
-public:
 	bool IsContainScreenPos(POINT pos) const;
 	void GetWidgetUnderScreenPos(POINT pos, OUT ArrangedWidget& arrangedWidget) const;
 	void GetWidgetPathUnderScreenPos(POINT pos, OUT WidgetPath& path) const;
@@ -118,7 +110,7 @@ private:
 	PROPERTY(_mDesc)
 	AppWindowDesc _mDesc;
 
-	// 부모 객체
+	// 메인 윈도우를 의미
 	PROPERTY(_mOwner)
 	std::weak_ptr<AppWindow> _mOwner;
 
@@ -130,7 +122,6 @@ private:
 	mutable bool _mNeedInitProxy = false;
 
 private:
-	std::weak_ptr<Widget> _mFocusWidget;
 	std::unique_ptr<HitTestGrid> _mHitTestGrid;
 };
 

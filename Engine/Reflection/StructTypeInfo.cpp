@@ -22,7 +22,7 @@ bool StructTypeInfo::IsChildOf(const StructTypeInfo& other) const
 	return false;
 }
 
-void StructTypeInfo::CollectHeaderDatas(const void* inst, OUT std::unordered_map<std::wstring, std::string> externalPackageDatas, OUT std::vector<std::shared_ptr<BulkData>>& bulkDatas) const
+void StructTypeInfo::CollectHeaderDatas(const void* inst, OUT std::unordered_map<std::wstring, std::pair<std::string, PackageBuildScope>>& externalPackageDatas, OUT std::vector<std::shared_ptr<BulkData>>& bulkDatas) const
 {
 	// 부모를 거쳐가면서 패키징 헤더에 필요한 데이터 추출
 	for (const StructTypeInfo* currentInfo = this; currentInfo != nullptr; currentInfo = currentInfo->GetSuper())
@@ -36,7 +36,7 @@ void StructTypeInfo::CollectHeaderDatas(const void* inst, OUT std::unordered_map
 				std::shared_ptr<Package> instPackage = hardRefTypeInfo->GetInstancePackage(propertyPair.second->GetRawPtr(inst));
 				if (instPackage != nullptr)
 				{
-					externalPackageDatas[instPackage->GetPath()] = instPackage->GetTypeInfo().GetName();
+					externalPackageDatas[instPackage->GetPath()] = {instPackage->GetTypeInfo().GetName(), instPackage->GetScope()};
 				}
 			}
 			else

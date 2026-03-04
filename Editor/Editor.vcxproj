@@ -19,8 +19,10 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="App\AppWindow\EditorAppWindow.cpp" />
     <ClCompile Include="App\Editor.cpp" />
     <ClCompile Include="Convertor\Convertor.cpp" />
+    <ClCompile Include="Graphics\Widget\ConsoleView.cpp" />
     <ClCompile Include="Input\DefaultEditorAction.cpp" />
     <ClCompile Include="Input\DefaultEditorInputMappingContext.cpp" />
     <ClCompile Include="pch.cpp">
@@ -29,15 +31,23 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='EditorDebug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='EditorDebug|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Tool\FontAtlasGenerator.cpp" />
     <ClCompile Include="Tool\LODGenerator.cpp" />
+    <ClCompile Include="Tool\Logger.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="App\AppWindow\EditorAppWindow.h" />
     <ClInclude Include="App\Editor.h" />
     <ClInclude Include="Convertor\Convertor.h" />
+    <ClInclude Include="EditorDefine.h" />
+    <ClInclude Include="EditorPch.h" />
+    <ClInclude Include="Graphics\Widget\ConsoleView.h" />
     <ClInclude Include="Input\DefaultEditorAction.h" />
     <ClInclude Include="Input\DefaultEditorInputMappingContext.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="Tool\FontAtlasGenerator.h" />
     <ClInclude Include="Tool\LODGenerator.h" />
+    <ClInclude Include="Tool\Logger.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
@@ -117,6 +127,7 @@
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)Libraries\Include\;$(SolutionDir)Libraries\Include\Engine;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -143,6 +154,7 @@
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)Libraries\Include\;$(SolutionDir)Libraries\Include\Engine;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -167,6 +179,7 @@
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)Libraries\Include\;$(SolutionDir)Libraries\Include\Engine;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -193,6 +206,7 @@
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)Libraries\Include\;$(SolutionDir)Libraries\Include\Engine;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>

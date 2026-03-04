@@ -40,16 +40,27 @@ void DXMaterial::Init(std::shared_ptr<MaterialBulkData> bulkData, std::vector<Co
 		_mBoundSamplerStates.push_back({ samplerData.first, sampler });
 	}
 
-	_mRasterizerState = RESOURCE_MANAGER->CreateOrGetRuntimeRenderResource<DXRasterizerState>(bulkData->mRasterizerStateName, DXSharedResourceType::RasterizerState);
-	ASSERT_MSG(_mRasterizerState != nullptr, "Can't find target resource");
-	_mBlendState = RESOURCE_MANAGER->CreateOrGetRuntimeRenderResource<DXBlendState>(bulkData->mBlendStateName, DXSharedResourceType::BlendState);
-	ASSERT_MSG(_mBlendState != nullptr, "Can't find target resource");
-	_mShader = RESOURCE_MANAGER->CreateOrGetRuntimeRenderResource<DXMinimumGraphicShader>(bulkData->mShaderName, DXSharedResourceType::Shader);
-	ASSERT_MSG(_mShader != nullptr, "Can't find target resource");
+	if (bulkData->mRasterizerStateName.empty() == false)
+	{
+		_mRasterizerState = RESOURCE_MANAGER->CreateOrGetRuntimeRenderResource<DXRasterizerState>(bulkData->mRasterizerStateName, DXSharedResourceType::RasterizerState);
+		ASSERT_MSG(_mRasterizerState != nullptr, "Can't find target resource");
+	}
+	if (bulkData->mBlendStateName.empty() == false)
+	{
+		_mBlendState = RESOURCE_MANAGER->CreateOrGetRuntimeRenderResource<DXBlendState>(bulkData->mBlendStateName, DXSharedResourceType::BlendState);
+		ASSERT_MSG(_mBlendState != nullptr, "Can't find target resource");
+	}
+	if (bulkData->mShaderName.empty() == false)
+	{
+		_mShader = RESOURCE_MANAGER->CreateOrGetRuntimeRenderResource<DXMinimumGraphicShader>(bulkData->mShaderName, DXSharedResourceType::Shader);
+		ASSERT_MSG(_mShader != nullptr, "Can't find target resource");
+	}
 }
 
 void DXMaterial::PushData() const
 {
+	_mShader->PushData();
+
 	for (auto& pair : _mBoundMatCBuffers)
 	{
 		_mShader->Bind(pair.first, pair.second);
@@ -63,6 +74,12 @@ void DXMaterial::PushData() const
 		_mShader->Bind(pair.first, pair.second);
 	}
 	
-	_mRasterizerState->PushData();
-	_mBlendState->PushData();
+	if (_mRasterizerState != nullptr)
+	{
+		_mRasterizerState->PushData();
+	}
+	if (_mBlendState != nullptr)
+	{
+		_mBlendState->PushData();
+	}
 }

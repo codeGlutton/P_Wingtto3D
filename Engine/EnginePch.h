@@ -60,6 +60,7 @@ using namespace Microsoft::WRL;
 
 #pragma comment(lib, "DirectXTex/DirectXTex.lib")
 #pragma comment(lib, "Assimp/assimp-vc143-mt.lib")
+#pragma comment(lib, "FreeType/freetype.lib")
 
 
 /* Headers */
@@ -88,7 +89,6 @@ using namespace Microsoft::WRL;
 #include "Utils/TypeUtils.h"
 #include "Utils/Wrapper/SimpleMathWrapper.h"
 #include "Utils/StringUtils.h"
-#include "Utils/Debugger/Logger.h"
 
 /* CommonType */
 

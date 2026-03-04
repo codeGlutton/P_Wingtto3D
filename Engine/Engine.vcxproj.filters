@@ -37,9 +37,6 @@
     <Filter Include="Reflection\TypeInfo">
       <UniqueIdentifier>{ba2a2fc2-7daa-4d0f-8afc-2866ebbb70d9}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Utils\Debugger">
-      <UniqueIdentifier>{715d1f54-8438-4207-a4f5-62b03ce96dca}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Graphics\Viewport">
       <UniqueIdentifier>{da77c887-8236-4598-9eb1-c7ae338d01f1}</UniqueIdentifier>
     </Filter>
@@ -111,9 +108,6 @@
     </Filter>
     <Filter Include="Graphics\Render">
       <UniqueIdentifier>{fedca82e-7803-4c74-9a3a-4f9705c0f2ce}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Graphics\VirtualWindow">
-      <UniqueIdentifier>{4b5ea240-5a2d-4ad8-9626-9cefce0d1e83}</UniqueIdentifier>
     </Filter>
     <Filter Include="Graphics\State">
       <UniqueIdentifier>{972f80e1-a820-4464-849a-052d198a06fa}</UniqueIdentifier>
@@ -192,9 +186,6 @@
     <ClInclude Include="Manager\ObjectManager.h">
       <Filter>Manager\Factory</Filter>
     </ClInclude>
-    <ClInclude Include="Graphics\Viewport\DXSceneViewport.h">
-      <Filter>Graphics\Viewport</Filter>
-    </ClInclude>
     <ClInclude Include="Graphics\Viewport\Viewport.h">
       <Filter>Graphics\Viewport</Filter>
     </ClInclude>
@@ -230,9 +221,6 @@
     </ClInclude>
     <ClInclude Include="Utils\Memory\ObjectPool.h">
       <Filter>Utils\Memory</Filter>
-    </ClInclude>
-    <ClInclude Include="Utils\Debugger\Logger.h">
-      <Filter>Utils\Debugger</Filter>
     </ClInclude>
     <ClInclude Include="Core\App\AppWindow\AppWindow.h">
       <Filter>Core\App\AppWindow</Filter>
@@ -468,18 +456,6 @@
     <ClInclude Include="Graphics\Widget\Type\WidgetBrush.h">
       <Filter>Graphics\Widget\Type</Filter>
     </ClInclude>
-    <ClInclude Include="Graphics\VirtualWindow\VirtualWindow.h">
-      <Filter>Graphics\VirtualWindow</Filter>
-    </ClInclude>
-    <ClInclude Include="Graphics\VirtualWindow\LogVirtualWindow.h">
-      <Filter>Graphics\VirtualWindow</Filter>
-    </ClInclude>
-    <ClInclude Include="Graphics\VirtualWindow\VirtualWindowSplitter.h">
-      <Filter>Graphics\VirtualWindow</Filter>
-    </ClInclude>
-    <ClInclude Include="Graphics\VirtualWindow\VirtualWindowContent.h">
-      <Filter>Graphics\VirtualWindow</Filter>
-    </ClInclude>
     <ClInclude Include="Graphics\Widget\PanelWidget.h">
       <Filter>Graphics\Widget</Filter>
     </ClInclude>
@@ -534,6 +510,60 @@
     <ClInclude Include="Utils\Thread\DeadLockProfiler.h">
       <Filter>Utils\Thread\Lock</Filter>
     </ClInclude>
+    <ClInclude Include="Graphics\Widget\VirtualWindowContent.h">
+      <Filter>Graphics\Widget</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\Widget\VirtualWindow.h">
+      <Filter>Graphics\Widget</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\Widget\VirtualWindowSplitter.h">
+      <Filter>Graphics\Widget</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\Widget\Splitter.h">
+      <Filter>Graphics\Widget</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\WidgetUtils.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\Widget\Type\Attribute.h">
+      <Filter>Graphics\Widget\Type</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\Widget\Type\WidgetStyle.h">
+      <Filter>Graphics\Widget\Type</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\Widget\BoxPanelWidget.h">
+      <Filter>Graphics\Widget</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\Widget\Slot\WidgetSlotSizeParams.h">
+      <Filter>Graphics\Widget\Slot</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\Widget\Border.h">
+      <Filter>Graphics\Widget</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\Widget\Spacer.h">
+      <Filter>Graphics\Widget</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\Widget\Image.h">
+      <Filter>Graphics\Widget</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\Widget\TextBlock.h">
+      <Filter>Graphics\Widget</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Resource\Font.h">
+      <Filter>Core\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\DXConstantData.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\Widget\Type\WidgetFontData.h">
+      <Filter>Graphics\Widget\Type</Filter>
+    </ClInclude>
+    <ClInclude Include="Manager\WidgetStyleManager.h">
+      <Filter>Manager\Factory</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\Widget\Type\WidgetTextCache.h">
+      <Filter>Graphics\Widget\Type</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\Object.cpp">
@@ -581,9 +611,6 @@
     <ClCompile Include="Manager\ObjectManager.cpp">
       <Filter>Manager\Factory</Filter>
     </ClCompile>
-    <ClCompile Include="Graphics\Viewport\DXSceneViewport.cpp">
-      <Filter>Graphics\Viewport</Filter>
-    </ClCompile>
     <ClCompile Include="Graphics\Viewport\Viewport.cpp">
       <Filter>Graphics\Viewport</Filter>
     </ClCompile>
@@ -619,9 +646,6 @@
     </ClCompile>
     <ClCompile Include="Utils\Memory\ObjectPool.cpp">
       <Filter>Utils\Memory</Filter>
-    </ClCompile>
-    <ClCompile Include="Utils\Debugger\Logger.cpp">
-      <Filter>Utils\Debugger</Filter>
     </ClCompile>
     <ClCompile Include="Core\App\AppWindow\AppWindow.cpp">
       <Filter>Core\App\AppWindow</Filter>
@@ -833,18 +857,6 @@
     <ClCompile Include="Graphics\Widget\Type\WidgetBrush.cpp">
       <Filter>Graphics\Widget\Type</Filter>
     </ClCompile>
-    <ClCompile Include="Graphics\VirtualWindow\VirtualWindow.cpp">
-      <Filter>Graphics\VirtualWindow</Filter>
-    </ClCompile>
-    <ClCompile Include="Graphics\VirtualWindow\LogVirtualWindow.cpp">
-      <Filter>Graphics\VirtualWindow</Filter>
-    </ClCompile>
-    <ClCompile Include="Graphics\VirtualWindow\VirtualWindowSplitter.cpp">
-      <Filter>Graphics\VirtualWindow</Filter>
-    </ClCompile>
-    <ClCompile Include="Graphics\VirtualWindow\VirtualWindowContent.cpp">
-      <Filter>Graphics\VirtualWindow</Filter>
-    </ClCompile>
     <ClCompile Include="Graphics\Widget\PanelWidget.cpp">
       <Filter>Graphics\Widget</Filter>
     </ClCompile>
@@ -899,6 +911,60 @@
     <ClCompile Include="Utils\Thread\DeadLockProfiler.cpp">
       <Filter>Utils\Thread\Lock</Filter>
     </ClCompile>
+    <ClCompile Include="Graphics\Widget\VirtualWindow.cpp">
+      <Filter>Graphics\Widget</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\Widget\VirtualWindowContent.cpp">
+      <Filter>Graphics\Widget</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\Widget\VirtualWindowSplitter.cpp">
+      <Filter>Graphics\Widget</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\Widget\Splitter.cpp">
+      <Filter>Graphics\Widget</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\WidgetUtils.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\Widget\Type\Attribute.cpp">
+      <Filter>Graphics\Widget\Type</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\Widget\Type\WidgetStyle.cpp">
+      <Filter>Graphics\Widget\Type</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\Widget\BoxPanelWidget.cpp">
+      <Filter>Graphics\Widget</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\Widget\Slot\WidgetSlotSizeParams.cpp">
+      <Filter>Graphics\Widget\Slot</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\Widget\Border.cpp">
+      <Filter>Graphics\Widget</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\Widget\Spacer.cpp">
+      <Filter>Graphics\Widget</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\Widget\Image.cpp">
+      <Filter>Graphics\Widget</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\Widget\TextBlock.cpp">
+      <Filter>Graphics\Widget</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Resource\Font.cpp">
+      <Filter>Core\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\DXConstantData.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\Widget\Type\WidgetFontData.cpp">
+      <Filter>Graphics\Widget\Type</Filter>
+    </ClCompile>
+    <ClCompile Include="Manager\WidgetStyleManager.cpp">
+      <Filter>Manager\Factory</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\Widget\Type\WidgetTextCache.cpp">
+      <Filter>Graphics\Widget\Type</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Resources\Engine\HLSL\AnimationCommon.hlsli">
@@ -919,6 +985,9 @@
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\Resources\Engine\HLSL\UIRender.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Engine\HLSL\TestQuadRender.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
   </ItemGroup>

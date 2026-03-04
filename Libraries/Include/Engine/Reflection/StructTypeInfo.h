@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Reflection/TypeInfo.h"
+#include "Core/Resource/Package/PackageInclude.h"
 
 class Object;
 class StructTypeInfo;
@@ -15,7 +16,7 @@ struct StructTypeInfoInitializer : public TypeInfoInitializer<T>
 {
 	StructTypeInfoInitializer(const char* name) :
 		TypeInfoInitializer<T>(),
-		mName(name)
+		mName(typeid(T).name())
 	{
 		if constexpr (HasSuper<T> == true && std::same_as<typename T::Super, void> == false)
 		{
@@ -88,7 +89,7 @@ public:
 	bool IsA() const;
 
 public:
-	void CollectHeaderDatas(const void* inst, OUT std::unordered_map<std::wstring, std::string> externalPackageDatas, OUT std::vector<std::shared_ptr<BulkData>>& bulkDatas) const;
+	void CollectHeaderDatas(const void* inst, OUT std::unordered_map<std::wstring, std::pair<std::string, PackageBuildScope>>& externalPackageDatas, OUT std::vector<std::shared_ptr<BulkData>>& bulkDatas) const;
 
 public:
 	virtual bool IsInstanceValueEqual(const void* lhsInst, const void* rhsInst) const override;
@@ -137,3 +138,40 @@ inline bool StructTypeInfo::IsA() const
 {
 	return IsA(T::GetStaticTypeInfo());
 }
+
+template<typename T>
+struct BulkStructTypeInfoInitializer : public StructTypeInfoInitializer<T>
+{
+	BulkStructTypeInfoInitializer(const char* name, std::function<BulkData*()> constructor) :
+		StructTypeInfoInitializer<T>(name),
+		mConstructor(constructor)
+	{
+	}
+
+public:
+	std::function<BulkData*()> mConstructor = nullptr;
+};
+
+class BulkStructTypeInfo : public StructTypeInfo
+{
+	GEN_STRUCT_REFLECTION(BulkStructTypeInfo)
+
+	friend class Property;
+
+public:
+	template <typename T>
+	explicit BulkStructTypeInfo(const BulkStructTypeInfoInitializer<T>& initializer) :
+		StructTypeInfo(initializer),
+		_mConstructor(initializer.mConstructor)
+	{
+	}
+
+public:
+	const std::function<BulkData*()>& GetConstructor() const
+	{
+		return _mConstructor;
+	}
+
+private:
+	std::function<BulkData*()> _mConstructor = nullptr;
+};

@@ -11,7 +11,7 @@
 
 struct ConstantBufferBulkData : public BulkData
 {
-	GEN_STRUCT_REFLECTION(ConstantBufferBulkData)
+	GEN_BULK_STRUCT_REFLECTION(ConstantBufferBulkData)
 
 public:
 	PROPERTY(mSize)
@@ -95,9 +95,9 @@ public:
 	}
 
 public:
-	void Init(std::shared_ptr<ConstantBufferBulkData> bulkData, uint32 slot = 0, DXResourceUsageFlag::Type usageFlags = DXResourceUsageFlag::None, bool canCpuWrite = false);
-	void Init(uint32 slot = 0, DXResourceUsageFlag::Type usageFlags = DXResourceUsageFlag::None, bool canCpuWrite = false);
-	void Init(const T& initData, uint32 slot = 0, DXResourceUsageFlag::Type usageFlags = DXResourceUsageFlag::None, bool canCpuWrite = false);
+	void Init(std::shared_ptr<ConstantBufferBulkData> bulkData, uint32 slot = 0, DXResourceUsageFlag::Type usageFlags = DXResourceUsageFlag::None, bool canCpuWrite = true);
+	void Init(uint32 slot = 0, DXResourceUsageFlag::Type usageFlags = DXResourceUsageFlag::None, bool canCpuWrite = true);
+	void Init(const T& initData, uint32 slot = 0, DXResourceUsageFlag::Type usageFlags = DXResourceUsageFlag::None, bool canCpuWrite = true);
 	bool UpdateData(const T& data) const;
 };
 

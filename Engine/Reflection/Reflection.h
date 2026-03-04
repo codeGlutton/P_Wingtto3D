@@ -126,6 +126,60 @@ private:														\
 																\
 public:
 
+#define GEN_BULK_STRUCT_REFLECTION_INTERNAL(type, virtual_type)	\
+public:															\
+	using Super = SuperDefineType<type>;						\
+	using This = type;											\
+	DECLARE_STRUCT_TYPE(type)									\
+																\
+public:															\
+	virtual_type const StructTypeInfo& GetTypeInfo() const		\
+	{															\
+		return *_mTypeInfo;										\
+	}															\
+																\
+	static const StructTypeInfo& GetStaticTypeInfo()			\
+	{															\
+		return GetMutableStaticTypeInfo();						\
+	}															\
+																\
+private:														\
+	static StructTypeInfo& GetMutableStaticTypeInfo()			\
+	{															\
+		if (_mTypeInfo == nullptr)								\
+		{														\
+			static BulkStructTypeInfo typeInfo					\
+			{													\
+				BulkStructTypeInfoInitializer<This>(			\
+					#type,										\
+					[]() {										\
+					return new type;							\
+					}											\
+				)												\
+			};													\
+			_mTypeInfo = &typeInfo;								\
+		}														\
+		return *_mTypeInfo;										\
+	}															\
+																\
+private:														\
+	inline static StructTypeInfo* _mTypeInfo = nullptr;			\
+																\
+private:														\
+	inline static struct StructTypeReflector					\
+	{															\
+		StructTypeReflector()									\
+		{														\
+			BOOT_SYSTEM->AddType(								\
+				[]() {											\
+					return &type::GetStaticTypeInfo();			\
+				}												\
+			);													\
+		}														\
+	} _mTypeReflector;											\
+																\
+public:
+
 #define DECLARE_OBJECT_TYPE(type)	\
 	friend class Package;			\
 	friend class ObjectManager;		\
@@ -241,6 +295,8 @@ private:
 #define GEN_MINIMUM_STRUCT_REFLECTION(...) GEN_STRUCT_REFLECTION_INTERNAL(__VA_ARGS__, )
 #define GEN_STRUCT_REFLECTION(...) GEN_STRUCT_REFLECTION_INTERNAL(__VA_ARGS__, DECLARE_VIRTUAL_TYPE)
 
+#define GEN_BULK_STRUCT_REFLECTION(...) GEN_BULK_STRUCT_REFLECTION_INTERNAL(__VA_ARGS__, DECLARE_VIRTUAL_TYPE)
+
 #pragma endregion
 // 타입 정보 매크로
 
@@ -264,19 +320,19 @@ private:
 		}																										\
 	} mMethodReflector_##name;
 
-#define PROPERTY(name)																							\
-	inline static struct PropertyReflector_##name																\
-	{																											\
-		PropertyReflector_##name()																				\
-		{																										\
-			BOOT_SYSTEM->AddTypeMember([](){																	\
-				static PropertyRegister<This, decltype(name), decltype(&This::##name), &This::##name> mRegister	\
-				(																								\
-					#name,																						\
-					This::GetMutableStaticTypeInfo()															\
-				);																								\
-			});																									\
-		}																										\
+#define PROPERTY(name)																									\
+	inline static struct PropertyReflector_##name																		\
+	{																													\
+		PropertyReflector_##name()																						\
+		{																												\
+			BOOT_SYSTEM->AddTypeMember([](){																			\
+				static PropertyRegister<This, decltype(This::##name), decltype(&This::##name), &This::##name> mRegister	\
+				(																										\
+					#name,																								\
+					This::GetMutableStaticTypeInfo()																	\
+				);																										\
+			});																											\
+		}																												\
 	} mPropertyReflector_##name;
 
 #pragma endregion

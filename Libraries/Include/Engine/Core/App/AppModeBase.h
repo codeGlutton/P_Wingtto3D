@@ -6,6 +6,7 @@
 #include "Graphics/Widget/Type/WidgetPath.h"
 
 class Resource;
+struct DragDropPayload;
 
 class AppModeBase : public IExecute
 {
@@ -26,6 +27,10 @@ public:
 	virtual void OnDoubleClickMouse(std::shared_ptr<AppWindow> target, std::shared_ptr<PointEvent>& event) override;
 
 	virtual void OnMoveMouse(std::shared_ptr<PointEvent>& event) override;
+
+	virtual void OnChangeFocus(std::shared_ptr<Widget>& focusWidget) override;
+
+	virtual void OnDropFile(const wchar_t* fileFullPath) override;
 	
 protected:
 	void ProcessReplyData(const ReplyData& reply, const std::shared_ptr<KeyEvent>& event);
@@ -43,22 +48,36 @@ protected:
 	void ClearUserData();
 
 public:
-	bool HasDragEvent() const
+	bool HasCaptureEvent() const
 	{
-		return _mMouseDownWeakPath.IsValid();
+		return _mIsCapture;
 	}
 	bool HasDownEvent() const
 	{
-		return _mDragDropWeakPath.IsValid();
+		return _mIsMouseDown;
+	}
+	bool HasDragEvent() const
+	{
+		return _mIsDrag;
 	}
 
 	/* 유저 정보 (엔진이 커지면 분리 필요) */
 protected:
-	std::weak_ptr<Widget> _mPreHoverWidget;
-
+	// 이전에 호버 중인 위젯 경로
+	WidgetWeakPath _mPreHoverWeakPath;
+	// 포커스 중인 위젯 경로
+	WidgetWeakPath _mFocusWeakPath;
+	// 캡처 중인 위젯 경로 (마우스 버튼 이벤트 독점)
+	WidgetWeakPath _mCaptureWeakPath;
+	bool _mIsCapture = false;
+	// 이전에 클릭한 위젯 경로
 	WidgetWeakPath _mMouseDownWeakPath;
+	bool _mIsMouseDown = false;
+	// 드래그 중인 위젯 경로
 	WidgetWeakPath _mDragDropWeakPath;
-	std::shared_ptr<Object> _mDragDropPayload;
+	bool _mIsDrag = false;
+
+	std::shared_ptr<DragDropPayload> _mDragDropPayload;
 
 	/* 게임 스레드 기본 엔진 리소스 */
 protected:

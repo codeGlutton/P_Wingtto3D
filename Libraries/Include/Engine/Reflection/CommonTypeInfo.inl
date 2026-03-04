@@ -93,13 +93,24 @@ inline void BulkTypeInfo<T>::Serialize(OUT Archive& archive, const void* inst) c
 {
 	// 헤더에 쓰여질 대상이 자신임을 알리기
 
-	// 패키징 명 쓰기
-	const std::wstring& packagePath = archive.GetPackagePath();
-	TypeInfoResolver<std::wstring>::Get().Serialize(archive, &packagePath);
-
-	// 인덱스 쓰기
 	const std::shared_ptr<BulkData>& instRef = *reinterpret_cast<const std::shared_ptr<BulkData>*>(inst);
-	std::size_t index = archive.GetLinkData().mBulkDataIndexMap[instRef.get()];
+
+	std::wstring packagePath;
+	std::size_t index;
+	if (instRef == nullptr)
+	{
+		packagePath = L"";
+		index = 0ull;
+	}
+	else
+	{
+		packagePath = archive.GetPackagePath().wstring();
+		index = archive.GetLinkData().mBulkDataIndexMap[instRef.get()];
+	}
+
+	// 패키징 명 쓰기
+	TypeInfoResolver<std::wstring>::Get().Serialize(archive, &packagePath);
+	// 인덱스 쓰기
 	TypeInfoResolver<std::size_t>::Get().Serialize(archive, &index);
 }
 
@@ -107,6 +118,7 @@ template<typename T> requires IsBulk<T>
 inline void BulkTypeInfo<T>::Deserialize(Archive& archive, OUT void* inst) const
 {
 	// 헤더로 생성된 실제 데이터를 가져오기
+	std::shared_ptr<BulkData>& instRef = *reinterpret_cast<std::shared_ptr<BulkData>*>(inst);
 
 	// 패키징 명 읽기
 	std::wstring packagePath;
@@ -117,7 +129,15 @@ inline void BulkTypeInfo<T>::Deserialize(Archive& archive, OUT void* inst) const
 	TypeInfoResolver<std::size_t>::Get().Deserialize(archive, &index);
 
 	// 리소스에 대입
-	std::shared_ptr<BulkData> bulkData = archive.GetBulkDatas()[index];
-	std::shared_ptr<BulkData>& instRef = *reinterpret_cast<std::shared_ptr<BulkData>*>(inst);
-	instRef = bulkData;
+	if (packagePath.empty() == true)
+	{
+		// 리소스에 대입
+		instRef = nullptr;
+	}
+	else
+	{
+		// 리소스에 대입
+		std::shared_ptr<BulkData> bulkData = archive.GetBulkDatas()[index];
+		instRef = bulkData;
+	}
 }

@@ -56,9 +56,11 @@ std::shared_ptr<Package> PackageManager::GetLoadedPackage(const std::wstring& pa
 
 std::shared_ptr<Package> PackageManager::LoadPackage(const std::wstring& packagePath, const ObjectTypeInfo* packageTypeinfo, PackageBuildScope scope, std::shared_ptr<ObjectLinker> linker)
 {
+	bool needLinkData = true;
 	std::shared_ptr<Package> result = nullptr;
 	if (linker == nullptr)
 	{
+		needLinkData = false;
 		linker = std::make_shared<ObjectLinker>();
 	}
 
@@ -67,7 +69,11 @@ std::shared_ptr<Package> PackageManager::LoadPackage(const std::wstring& package
 		result = GetLoadedPackage(packagePath);
 		if (result != nullptr)
 		{
-			result->MakeHeader(linker);
+			if (needLinkData == true)
+			{
+				result->MakeHeader(linker);
+				result->CreateLinkData(linker);
+			}
 			return result;
 		}
 	}
@@ -88,7 +94,11 @@ std::shared_ptr<Package> PackageManager::LoadPackage(const std::wstring& package
 				THREAD_MANAGER->DoGameJob();
 			}
 
-			result->MakeHeader(linker);
+			if (needLinkData == true)
+			{
+				result->MakeHeader(linker);
+				result->CreateLinkData(linker);
+			}
 			return result;
 		}
 	}
@@ -100,11 +110,13 @@ std::shared_ptr<Package> PackageManager::LoadPackage(const std::wstring& package
 
 	// 빈 객체 생성
 	result = std::static_pointer_cast<Package>(NewObject(packageTypeinfo, ConvertUtf8ToWString(packageTypeinfo->GetName()), packagePath));
+	result->_mScope = scope;
 	result->CreateEmptyObjects(linker);
 
 	// 외부 종속 패키지 확인
 	const std::vector<std::string>& otherPackageClassNames = result->GetExternalPackageClassNames(linker);
 	const std::vector<std::wstring>& otherPackagePaths = result->GetExternalPackagePaths(linker);
+	const std::vector<PackageBuildScope>& otherPackageScopes = result->GetExternalPackageScopes(linker);
 	for (std::size_t i = 0; i < otherPackageClassNames.size(); ++i)
 	{
 		if (linker->mLinkDataMap[otherPackagePaths[i]].mPackageHeader != nullptr)
@@ -113,7 +125,7 @@ std::shared_ptr<Package> PackageManager::LoadPackage(const std::wstring& package
 		}
 
 		const ObjectTypeInfo* typeInfo = BOOT_SYSTEM->GetObjectTypeInfo(otherPackageClassNames[i].c_str());
-		LoadPackage(otherPackagePaths[i], typeInfo, scope, linker);
+		LoadPackage(otherPackagePaths[i], typeInfo, otherPackageScopes[i], linker);
 	}
 
 	// 리소스 로드
@@ -123,14 +135,24 @@ std::shared_ptr<Package> PackageManager::LoadPackage(const std::wstring& package
 
 void PackageManager::LoadPackageAsync(const std::wstring& packagePath, const ObjectTypeInfo* typeinfo, std::function<void(std::shared_ptr<Package>)> callback, PackageBuildScope scope, std::shared_ptr<ObjectLinker> linker)
 {
+	bool needLinkData = true;
 	std::shared_ptr<Package> result = nullptr;
+	if (linker == nullptr)
+	{
+		needLinkData = false;
+		linker = std::make_shared<ObjectLinker>();
+	}
 
 	// 이미 있는 리소스면 반환
 	{
 		result = GetLoadedPackage(packagePath);
 		if (result != nullptr)
 		{
-			result->MakeHeader(linker);
+			if (needLinkData == true)
+			{
+				result->MakeHeader(linker);
+				result->CreateLinkData(linker);
+			}
 			callback(result);
 			return;
 		}
@@ -150,10 +172,6 @@ void PackageManager::LoadPackageAsync(const std::wstring& packagePath, const Obj
 
 	// 리소스 로드
 	std::shared_ptr<Archive> archive = std::make_shared<Archive>(packagePath, scope);
-	if (linker == nullptr)
-	{
-		linker = std::make_shared<ObjectLinker>();
-	}
 	archive->BindObjectLinker(linker);
 
 	// 파일 로드 비동기 처리
@@ -203,6 +221,7 @@ void PackageManager::SavePackage(const std::wstring& packagePath, PackageBuildSc
 
 	// 외부 종속 패키지 수집
 	const std::vector<std::wstring>& otherPackagePaths = package->GetExternalPackagePaths(linker);
+	const std::vector<PackageBuildScope>& otherPackageScopes = package->GetExternalPackageScopes(linker);
 	for (std::size_t i = 0; i < otherPackagePaths.size(); ++i)
 	{
 		if (linker->mLinkDataMap[otherPackagePaths[i]].mPackageHeader != nullptr)
@@ -210,7 +229,7 @@ void PackageManager::SavePackage(const std::wstring& packagePath, PackageBuildSc
 			continue;
 		}
 
-		SavePackage(otherPackagePaths[i], scope, linker);
+		SavePackage(otherPackagePaths[i], otherPackageScopes[i], linker);
 	}
 
 	// 리소스 저장
@@ -255,6 +274,7 @@ void PackageManager::SavePackageAsync(const std::wstring& packagePath, std::func
 
 	// 외부 종속 패키지 수집
 	const std::vector<std::wstring>& otherPackagePaths = package->GetExternalPackagePaths(linker);
+	const std::vector<PackageBuildScope>& otherPackageScopes = package->GetExternalPackageScopes(linker);
 	for (std::size_t i = 0; i < otherPackagePaths.size(); ++i)
 	{
 		if (linker->mLinkDataMap[otherPackagePaths[i]].mPackageHeader != nullptr)
@@ -262,7 +282,7 @@ void PackageManager::SavePackageAsync(const std::wstring& packagePath, std::func
 			continue;
 		}
 
-		SavePackage(otherPackagePaths[i], scope, linker);
+		SavePackage(otherPackagePaths[i], otherPackageScopes[i], linker);
 	}
 
 	// 리소스 저장
@@ -297,6 +317,7 @@ void PackageManager::NotifyToRemovePackage(const std::wstring& packagePath)
 void PackageManager::ResponseToLoadPackageAsync(std::shared_ptr<Archive> archive)
 {
 	std::wstring packagePath = archive->GetPackagePath().wstring();
+	PackageBuildScope scope = archive->GetScope();
 	auto iter = _mWaitPackages.find(packagePath);
 	ASSERT_MSG(iter != _mWaitPackages.end() && (*iter).second != nullptr, "Async package callback can't find context");
 	const std::shared_ptr<PackageAsyncContext>& context = (*iter).second;
@@ -304,6 +325,7 @@ void PackageManager::ResponseToLoadPackageAsync(std::shared_ptr<Archive> archive
 
 	// 빈 객체 생성
 	std::shared_ptr<Package> result = std::static_pointer_cast<Package>(NewObject(context->mPackageTypeinfo, ConvertUtf8ToWString(context->mPackageTypeinfo->GetName()), packagePath));
+	result->_mScope = scope;
 	result->CreateEmptyObjects(linker);
 
 	CheckToLoadPackageAsync(result, archive);
@@ -322,6 +344,7 @@ void PackageManager::CheckToLoadPackageAsync(std::shared_ptr<Package> package, s
 	bool isLoadOtherPackageAsync = false;
 	const std::vector<std::string>& otherPackageClassNames = package->GetExternalPackageClassNames(linker);
 	const std::vector<std::wstring>& otherPackagePaths = package->GetExternalPackagePaths(linker);
+	const std::vector<PackageBuildScope>& otherPackageScopes = package->GetExternalPackageScopes(linker);
 	for (std::size_t i = 0; i < otherPackageClassNames.size(); ++i)
 	{
 		if (linker->mLinkDataMap[otherPackagePaths[i]].mPackageHeader != nullptr)
@@ -332,14 +355,14 @@ void PackageManager::CheckToLoadPackageAsync(std::shared_ptr<Package> package, s
 		const ObjectTypeInfo* typeInfo = BOOT_SYSTEM->GetObjectTypeInfo(otherPackageClassNames[i].c_str());
 		if (context->mForcedSync == true)
 		{
-			LoadPackage(otherPackagePaths[i], typeInfo, scope, linker);
+			LoadPackage(otherPackagePaths[i], typeInfo, otherPackageScopes[i], linker);
 		}
 		else
 		{
 			isLoadOtherPackageAsync = true;
 			LoadPackageAsync(otherPackagePaths[i], typeInfo, [package, archive](std::shared_ptr<Package> otherPackage) {
 				PACKAGE_MANAGER->CheckToLoadPackageAsync(package, archive);
-				}, scope, linker);
+				}, otherPackageScopes[i], linker);
 		}
 	}
 

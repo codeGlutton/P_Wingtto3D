@@ -21,7 +21,23 @@ protected:
 	virtual void PostLoad() override;
 
 public:
+	virtual bool HasBulkData() const override;
+
+#ifdef _EDITOR
+
+public:
+	void PushBulkData(std::shared_ptr<Texture2DBulkData> bulkData);
+
+#endif
+
+public:
 	const ProxyType& GetProxy() const;
+
+public:
+	Vec2 GetSize() const
+	{
+		return Vec2(static_cast<float>(_mBulkData->mMetaData.width), static_cast<float>(_mBulkData->mMetaData.height));
+	}
 
 private:
 	PROPERTY(_mBulkData)

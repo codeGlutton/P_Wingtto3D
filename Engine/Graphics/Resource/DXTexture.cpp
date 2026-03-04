@@ -77,7 +77,7 @@ void DXTexture2DBase::InitImmutableTex(const void* initData, uint32 width, uint3
 		desc.BindFlags = _mBindFlags;
 
 		std::size_t pitch, slice;
-		DirectX::ComputePitch(format, width, height, pitch, slice);
+		CHECK_WIN_MSG(DirectX::ComputePitch(format, width, height, pitch, slice), "Texture pitch cal error");
 
 		D3D11_SUBRESOURCE_DATA data;
 		::memset(&data, 0, sizeof(data));
@@ -94,6 +94,8 @@ void DXTexture2DBase::InitImmutableTex(const void* initData, uint32 width, uint3
 
 		desc.Format = format;
 		desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+		desc.Texture2D.MipLevels = 1;
+		desc.Texture2D.MostDetailedMip = 0;
 
 		CHECK_WIN_MSG(DX_DEVICE->CreateShaderResourceView(_mTexture.Get(), &desc, _mSRV.ReleaseAndGetAddressOf()), "Texture SRV creation is failed");
 	}
@@ -155,7 +157,7 @@ void DXTexture2DBase::InitDefaultTex(const void* initData, uint32 width, uint32 
 		else
 		{
 			std::size_t pitch, slice;
-			DirectX::ComputePitch(format, width, height, pitch, slice);
+			CHECK_WIN_MSG(DirectX::ComputePitch(format, width, height, pitch, slice), "Texture pitch cal error");
 
 			D3D11_SUBRESOURCE_DATA data;
 			::memset(&data, 0, sizeof(data));
@@ -173,6 +175,8 @@ void DXTexture2DBase::InitDefaultTex(const void* initData, uint32 width, uint32 
 
 		desc.Format = format;
 		desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+		desc.Texture2D.MipLevels = 1;
+		desc.Texture2D.MostDetailedMip = 0;
 
 		CHECK_WIN_MSG(DX_DEVICE->CreateShaderResourceView(_mTexture.Get(), &desc, _mSRV.ReleaseAndGetAddressOf()), "Texture SRV creation is failed");
 	}
@@ -272,6 +276,8 @@ void DXTexture2D::Init(ComPtr<ID3D11ShaderResourceView> initSRVData, D3D11_BIND_
 
 		desc.Format = srcDesc.Format;
 		desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+		desc.Texture2D.MipLevels = 1;
+		desc.Texture2D.MostDetailedMip = 0;
 
 		CHECK_WIN_MSG(DX_DEVICE->CreateShaderResourceView(_mTexture.Get(), &desc, _mSRV.ReleaseAndGetAddressOf()), "Texture SRV creation is failed");
 	}
@@ -324,7 +330,7 @@ void DXTexture2DArrayBase::InitImmutableTex(const void* initData, uint32 arraySi
 		desc.BindFlags = _mBindFlags;
 
 		std::size_t pitch, slice;
-		DirectX::ComputePitch(format, width, height, pitch, slice);
+		CHECK_WIN_MSG(DirectX::ComputePitch(format, width, height, pitch, slice), "Texture pitch cal error");
 
 		std::vector<D3D11_SUBRESOURCE_DATA> datas(arraySize);
 		for (uint32 i = 0; i < arraySize; ++i)
@@ -412,7 +418,7 @@ void DXTexture2DArrayBase::InitDefaultTex(const void* initData, uint32 arraySize
 		else
 		{
 			std::size_t pitch, slice;
-			DirectX::ComputePitch(format, width, height, pitch, slice);
+			CHECK_WIN_MSG(DirectX::ComputePitch(format, width, height, pitch, slice), "Texture pitch cal error");
 
 			std::vector<D3D11_SUBRESOURCE_DATA> datas(arraySize);
 			for (uint32 i = 0; i < arraySize; ++i)
@@ -557,4 +563,20 @@ void DXConstTexture2DArray::Init(std::shared_ptr<Texture2DBulkData> bulkData, ui
 	_mSRVUsageFlags = usageFlags;
 	DXTexture2DArrayBase::InitImmutableTex(bulkData);
 }
+
+DXFontTexture::DXFontTexture()
+{
+}
+
+DXFontTexture::~DXFontTexture()
+{
+}
+
+void DXFontTexture::Init(std::shared_ptr<FontAtlasBulkData> bulkData, std::size_t bulkIndex, uint32 slot, DXResourceUsageFlag::Type usageFlags)
+{
+	_mSRVSlot = slot;
+	_mSRVUsageFlags = usageFlags;
+	DXTexture2DBase::InitImmutableTex(bulkData->mValue[bulkIndex].mData.data(), bulkData->mValue[bulkIndex].mWidth, bulkData->mValue[bulkIndex].mHeight, DXGI_FORMAT_R8_UNORM);
+}
+
 

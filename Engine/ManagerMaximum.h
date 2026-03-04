@@ -9,6 +9,7 @@
 #include "Manager/PathManager.h"
 #include "Manager/TimeManager.h"
 #include "Manager/InputManager.h"
+#include "Manager/WidgetStyleManager.h"
 #include "Manager/WorldGameInputManager.h"
 #include "Manager/DXGraphicSystem.h"
 

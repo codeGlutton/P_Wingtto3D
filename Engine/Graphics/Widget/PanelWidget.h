@@ -14,6 +14,8 @@ public:
 
 private:
 	uint32 OnPaint(OUT WindowRenderElementContainer& drawElements, uint32 accLayerId, const PaintArgs& args, const WidgetGeometry& allottedGeometry, const BoundingAABB2D& currentCulling, const WidgetInheritedColor& contentInheritedColor) override;
+
+protected:
 	uint32 PaintArrangedChildren(OUT WindowRenderElementContainer& drawElements, const ArrangedChildren& children, uint32 accLayerId, const PaintArgs& args, const WidgetGeometry& allottedGeometry, const BoundingAABB2D& currentCulling, const WidgetInheritedColor& contentInheritedColor);
 };
 

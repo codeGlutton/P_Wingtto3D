@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include "Core/Resource/Package/PackageInclude.h"
+
 class Archive;
 class Package;
 
@@ -77,6 +79,9 @@ public:
 		return IsA(T::GetStaticTypeInfo());
 	}
 
+public:
+	virtual void CollectHeaderDatas(const void* inst, OUT std::unordered_map<std::wstring, std::pair<std::string, PackageBuildScope>>& externalPackageDatas, OUT std::vector<std::shared_ptr<BulkData>>& bulkDatas) const;
+
 protected:
 	virtual void Serialize(Archive& archive) const;
 	virtual void Deserialize(Archive& archive);
@@ -96,7 +101,5 @@ private:
 	bool _mIsAlive = true;
 	PROPERTY(_mIsReplicated)
 	bool _mIsReplicated = false;
-
-	
 };
 

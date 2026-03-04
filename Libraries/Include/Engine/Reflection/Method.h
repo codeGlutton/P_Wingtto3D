@@ -176,8 +176,8 @@ public:
 	}
 
 public:
-	template<typename Ret = void, typename... InputArgs>
-	Ret Invoke(void* object, InputArgs&&... args) const;
+	template<class C, typename Ret = void, typename... InputArgs>
+	Ret Invoke(C* object, InputArgs&&... args) const;
 
 public:
 	const char* GetName() const
@@ -255,8 +255,8 @@ inline MethodRegister<C>::MethodRegister(const char* name, ObjectTypeInfo& owner
 	static Method method(ownerTypeInfo, initializer);
 }
 
-template<typename Ret, typename... InputArgs>
-inline Ret Method::Invoke(void* object, InputArgs&&... args) const
+template<class C, typename Ret, typename... InputArgs>
+inline Ret Method::Invoke(C* object, InputArgs&&... args) const
 {
 	if (_mCaller.GetTypeInfo().IsChildOf<IMethodCaller<Ret, std::remove_reference_t<InputArgs>...>>() == true)
 	{

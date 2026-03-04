@@ -33,7 +33,7 @@ public:
 
 	Transform2D GetRootToScreenTransform2D() const
 	{
-		return Transform2D(_mWindowOffset, 0.f, Vec2());
+		return Transform2D(_mWindowOffset, 0.f, Vec2(1.f));
 	}
 
 	float GetDeltaTime() const

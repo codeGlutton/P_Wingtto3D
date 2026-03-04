@@ -2,6 +2,16 @@
 
 struct DXInputElementList;
 
+struct NullVertexData
+{
+	GEN_MINIMUM_STRUCT_REFLECTION(NullVertexData)
+
+	bool operator==(const NullVertexData&) const = default;
+
+public:
+	static const DXInputElementList& MakeLayout();
+};
+
 /**
  * 정점 정보 및 텍스처 uv 소유한 VS Input
  */

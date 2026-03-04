@@ -53,7 +53,7 @@ private:
 
 struct MaterialBulkData : public BulkData
 {
-	GEN_STRUCT_REFLECTION(MaterialBulkData)
+	GEN_BULK_STRUCT_REFLECTION(MaterialBulkData)
 
 public:
 	PROPERTY(mSamplerStateDatas)

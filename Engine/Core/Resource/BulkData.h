@@ -5,16 +5,20 @@
  */
 struct BulkData
 {
-	GEN_STRUCT_REFLECTION(BulkData)
+	GEN_BULK_STRUCT_REFLECTION(BulkData)
 
 public:
 	using Bulk = std::true_type;
+
+public:
+	PROPERTY(mIsLoad)
+	bool mIsLoad = false;
 };
 
 template<typename T>
 struct BulkWrapper : public BulkData
 {
-	GEN_STRUCT_REFLECTION(BulkWrapper<T>)
+	GEN_BULK_STRUCT_REFLECTION(BulkWrapper<T>)
 
 public:
 	PROPERTY(mValue)

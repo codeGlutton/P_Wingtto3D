@@ -42,7 +42,8 @@ void DXSwapChain::Resize(uint32 width, uint32 height)
 
 void DXSwapChain::BeginRender(std::shared_ptr<DXViewport> viewport, bool clearRTV, bool clearDSV)
 {
-	DX_DEVICE_CONTEXT->OMSetRenderTargets(1, _mRenderTargetView.GetAddressOf(), _mDepthStencilView.Get());
+	//DX_DEVICE_CONTEXT->OMSetRenderTargets(1, _mRenderTargetView.GetAddressOf(), _mDepthStencilView.Get());
+	DX_DEVICE_CONTEXT->OMSetRenderTargets(1, _mRenderTargetView.GetAddressOf(), nullptr);
 	if (viewport != nullptr)
 	{
 		DX_DEVICE_CONTEXT->RSSetViewports(1, &viewport->GetDesc());

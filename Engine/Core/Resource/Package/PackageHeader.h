@@ -27,6 +27,8 @@ public:
 	std::vector<std::string> mLinkedExternalPackageClassNames;
 	PROPERTY(mLinkedExternalPackagePaths)
 	std::vector<std::wstring> mLinkedExternalPackagePaths;
+	PROPERTY(mLinkedExternalPackageScopes)
+	std::vector<PackageBuildScope> mLinkedExternalPackageScopes;
 
 public:
 	PROPERTY(mBulkClassNames)

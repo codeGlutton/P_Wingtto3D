@@ -67,6 +67,27 @@ void RenderThread::RegisterDefaultRuntimeResources()
 
 		_mDefaultResources.push_back(shader);
 	}
+	// 테스트
+	{
+		std::shared_ptr<DXGraphicShader> shader = RESOURCE_MANAGER->CreateOrGetRuntimeRenderResource<DXGraphicShader>(L"Test", DXSharedResourceType::Shader);
+
+		std::vector<ShaderCompileDesc> descs;
+		{
+			ShaderCompileDesc desc;
+			desc.mEntryName = "VS";
+			desc.mUsageBit = DXResourceUsageBit::VertexBit;
+			descs.push_back(desc);
+		}
+		{
+			ShaderCompileDesc desc;
+			desc.mEntryName = "PS";
+			desc.mUsageBit = DXResourceUsageBit::PixelBit;
+			descs.push_back(desc);
+		}
+		shader->Init(NullVertexData::MakeLayout(), descs, L"TestQuadRender.hlsl");
+
+		_mDefaultResources.push_back(shader);
+	}
 
 
 	/* 샘플러 스테이트 */
@@ -154,6 +175,18 @@ void RenderThread::RegisterDefaultRuntimeResources()
 		state->Init(D3D11_FILL_WIREFRAME, D3D11_CULL_NONE, true);
 
 		_mDefaultResources.push_back(state);
+	}
+
+	/* 텍스처 */
+
+	// 기본 흰 배경
+	{
+		std::shared_ptr<DXConstTexture2D> texture = RESOURCE_MANAGER->CreateOrGetRuntimeRenderResource<DXConstTexture2D>(L"White", DXSharedResourceType::Texture);
+
+		const float whitePixel[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
+		texture->Init(&whitePixel, 1, 1, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, DXResourceUsageFlag::Pixel);
+
+		_mDefaultResources.push_back(texture);
 	}
 }
 

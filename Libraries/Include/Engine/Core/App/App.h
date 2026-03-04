@@ -70,6 +70,14 @@ public:
 	{
 		_mDesc.mMode->OnMoveMouse(event);
 	}
+	void OnChangeFocus(std::shared_ptr<Widget>& focusWidget)
+	{
+		_mDesc.mMode->OnChangeFocus(focusWidget);
+	}
+	void OnDropFile(const wchar_t* fileFullPath) 
+	{
+		_mDesc.mMode->OnDropFile(fileFullPath);
+	}
 
 public:
 	const AppDesc& GetDesc() const 

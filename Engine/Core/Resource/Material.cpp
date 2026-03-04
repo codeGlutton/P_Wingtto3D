@@ -26,6 +26,11 @@ void Material::PostLoad()
 	_mNeedInitProxy = true;
 }
 
+bool Material::HasBulkData() const
+{
+	return _mBulkData->mIsLoad;
+}
+
 const Material::ProxyType& Material::GetProxy() const
 {
 	if (_mNeedInitProxy == true)
@@ -54,6 +59,16 @@ const Material::ProxyType& Material::GetProxy() const
 	return _mProxy;
 }
 
+#ifdef _EDITOR
+
+void Material::PushBulkData(std::shared_ptr<MaterialBulkData> bulkData)
+{
+	ASSERT_MSG(HasBulkData() == false, "Already bulk data is existed");
+
+	_mBulkData = bulkData;
+	PostLoad();
+}
+
 void Material::UpdateProxy(std::shared_ptr<MaterialBulkData> newBulkData, const std::vector<std::pair<std::string, std::shared_ptr<ConstantDataBase>>>& newMatConstantDatas, const std::vector<std::pair<std::string, std::shared_ptr<Texture2D>>>& newBoundTextures)
 {
 	_mBulkData = newBulkData;
@@ -62,3 +77,5 @@ void Material::UpdateProxy(std::shared_ptr<MaterialBulkData> newBulkData, const 
 
 	_mNeedInitProxy = true;
 }
+
+#endif

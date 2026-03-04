@@ -29,5 +29,8 @@
     <ClInclude Include="TestGame.h">
       <Filter>Main</Filter>
     </ClInclude>
+    <ClInclude Include="ClientPch.h">
+      <Filter>Headers\Global</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

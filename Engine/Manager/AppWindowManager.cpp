@@ -10,6 +10,8 @@
 #include "Core/Archive.h"
 #include "Core/ObjectLinker.h"
 
+#include "Utils/WidgetUtils.h"
+
 AppWindowManager::AppWindowManager()
 {
 }
@@ -39,15 +41,32 @@ void AppWindowManager::Update()
 void AppWindowManager::Destroy()
 {
 	Save();
+	_mNullWidgetInst.reset();
 	_mAppWindows.clear();
 	_mPackage = nullptr;
 }
 
+std::shared_ptr<NullWidget> AppWindowManager::NullWidgetInst()
+{
+	AppWindowManager* manager = GetInst();
+	if (manager->_mNullWidgetInst == nullptr)
+	{
+		manager->_mNullWidgetInst = NEW_EDIT_WIDGET(NullWidget).Visibility(VisibilityType::Hidden);
+	}
+	return manager->_mNullWidgetInst;
+}
+
 std::shared_ptr<AppWindow> AppWindowManager::CreateAppWindow(std::shared_ptr<AppWindow> owner, const ObjectTypeInfo* typeInfo, ObjectCreateFlag::Type flags)
+{
+	std::wstring typeName = ConvertUtf8ToWString(typeInfo->GetName());
+	return CreateAppWindow(typeName, owner, typeInfo, flags);
+}
+
+std::shared_ptr<AppWindow> AppWindowManager::CreateAppWindow(const std::wstring& name, std::shared_ptr<AppWindow> owner, const ObjectTypeInfo* typeInfo, ObjectCreateFlag::Type flags)
 {
 	ASSERT_MSG(typeInfo->IsChildOf<AppWindow>() == true, "CreateAppWindow func is not allowed to create non AppWindow class");
 
-	std::shared_ptr<AppWindow> appWindow = std::static_pointer_cast<AppWindow>(CreateAppWindowWidget(nullptr, typeInfo, flags));
+	std::shared_ptr<AppWindow> appWindow = std::static_pointer_cast<AppWindow>(CreateAppWindowWidget(name, nullptr, typeInfo, flags));
 	if (appWindow == nullptr)
 	{
 		return nullptr;
@@ -58,10 +77,15 @@ std::shared_ptr<AppWindow> AppWindowManager::CreateAppWindow(std::shared_ptr<App
 
 std::shared_ptr<Widget> AppWindowManager::CreateAppWindowWidget(std::shared_ptr<Widget> parent, const ObjectTypeInfo* typeInfo, ObjectCreateFlag::Type flags)
 {
+	std::wstring typeName = ConvertUtf8ToWString(typeInfo->GetName());
+	return CreateAppWindowWidget(typeName, parent, typeInfo, flags);
+}
+
+std::shared_ptr<Widget> AppWindowManager::CreateAppWindowWidget(const std::wstring& name, std::shared_ptr<Widget> parent, const ObjectTypeInfo* typeInfo, ObjectCreateFlag::Type flags)
+{
 	ASSERT_MSG(typeInfo->IsChildOf<Widget>() == true, "CreateAppWindowWidget func is not allowed to create non Widget class");
 
-	std::wstring typeName = ConvertUtf8ToWString(typeInfo->GetName());
-	std::shared_ptr<Widget> widget = std::static_pointer_cast<Widget>(NewObject(_mPackage, typeInfo, typeName, flags));
+	std::shared_ptr<Widget> widget = std::static_pointer_cast<Widget>(NewObject(_mPackage, typeInfo, name, flags));
 	if (widget == nullptr)
 	{
 		return nullptr;
@@ -121,39 +145,17 @@ void AppWindowManager::NotifyToChangeFocus(HWND hWnd)
 		return;
 	}
 
-	if (GetFocusWindow() != nullptr)
-	{
-		GetFocusWindow()->OnEndFocus();
-	}
 	_mFocusHWnd = hWnd;
 	if (GetFocusWindow() != nullptr)
 	{
-		GetFocusWindow()->OnBeginFocus();
-	}
-	mOnChangeFocus.Multicast(GetFocusWindow());
-}
-
-void AppWindowManager::NotifyToChangeFocus(std::shared_ptr<Widget> widget)
-{
-	std::shared_ptr<AppWindow> preFocusedWindow = GetFocusWindow();
-	std::shared_ptr<AppWindow> nextFocusedWindow = widget->GetRootWindow();
-
-	if (preFocusedWindow == nextFocusedWindow)
-	{
-		if (nextFocusedWindow != nullptr)
-		{
-			nextFocusedWindow->ChangeFocusWidget(widget);
-		}
-	}
-	else if (nextFocusedWindow != nullptr)
-	{
 		FLASHWINFO flashWin = {};
 		flashWin.cbSize = sizeof(FLASHWINFO);
-		flashWin.hwnd = nextFocusedWindow->GetDesc().mHWndRef->mData;
+		flashWin.hwnd = hWnd;
 		flashWin.dwFlags = FLASHW_TRAY;
 		flashWin.uCount = 3;
 		::FlashWindowEx(&flashWin);
 	}
+	mOnChangeFocus.Multicast(GetFocusWindow());
 }
 
 void AppWindowManager::NotifyToChangeAppActivation(bool isActive)
@@ -164,14 +166,14 @@ void AppWindowManager::NotifyToChangeAppActivation(bool isActive)
 void AppWindowManager::NotifyToMove(HWND hWnd)
 {
 	ASSERT_MSG(_mAppWindows.find(hWnd) != _mAppWindows.end(), "Trying to move empty app window");
-	_mAppWindows[hWnd]->OnMove();
+	_mAppWindows[hWnd]->OnMoveWindow();
 }
 
 void AppWindowManager::NotifyToResize(HWND hWnd, bool isWindowed, RECT clientSize)
 {
 	ASSERT_MSG(_mAppWindows.find(hWnd) != _mAppWindows.end(), "Trying to resize empty app window");
 	bool isChangedWindowMode = _mAppWindows[hWnd]->GetDesc().mWindowed != isWindowed;
-	_mAppWindows[hWnd]->OnResize(isWindowed, clientSize);
+	_mAppWindows[hWnd]->OnResizeWindow(isWindowed, clientSize);
 	if (isChangedWindowMode == true)
 	{
 		mOnChangeWindowMode.Multicast(_mAppWindows[hWnd], isWindowed);

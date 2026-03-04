@@ -24,11 +24,15 @@ protected:
 	virtual void PostLoad() override;
 
 public:
+	virtual bool HasBulkData() const override;
+
+public:
 	const ProxyType& GetProxy() const;
 
 #ifdef _EDITOR
 
 public:
+	void PushBulkData(std::shared_ptr<MaterialBulkData> bulkData);
 	void UpdateProxy(
 		std::shared_ptr<MaterialBulkData> newBulkData,
 		const std::vector<std::pair<std::string, std::shared_ptr<ConstantDataBase>>>& newMatConstantDatas,

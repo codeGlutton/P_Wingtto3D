@@ -3,12 +3,17 @@
 #include "Graphics/Render/WidgetDrawBuffer.h"
 #include "Graphics/Scene/Scene.h"
 
+#include "Graphics/DXConstantData.h"
+
 #define RENDER_MANAGER RenderManager::GetInst()
 #define SCENE RENDER_MANAGER->GetScene()
 
 class DXSwapChain;
 class DXViewport;
 class DXWidgetBatchMesh;
+
+template<typename T>
+class DXConstantBufferTemplate;
 
 struct WindowDrawInputs
 {
@@ -43,7 +48,7 @@ public:
 public:
 	const WidgetDrawBuffer& GetWidgetBuffer() const
 	{
-		return mWidgetBuffer;
+		return _mWidgetBuffer;
 	}
 
 public:
@@ -58,11 +63,17 @@ private:
 
 	/* 위젯 관련 */
 private:
-	WidgetDrawBuffer mWidgetBuffer;
-	std::shared_ptr<DXWidgetBatchMesh> mWidgetMesh;
+	WidgetDrawBuffer _mWidgetBuffer;
+	std::shared_ptr<DXWidgetBatchMesh> _mWidgetMesh;
+
+	std::shared_ptr<DXConstantBufferTemplate<WidgetConstantData>> _mWidgetCBuffer;
+	std::shared_ptr<DXConstantBufferTemplate<ScreenConstantData>> _mScreenCBuffer;
 
 	/* 월드 관련 */
 private:
 	Scene _mSceneSnapShot;
+
+	CameraConstantData _mCameraData;
+	std::shared_ptr<DXConstantBufferTemplate<CameraConstantData>> _mCameraCBuffer;
 };
 

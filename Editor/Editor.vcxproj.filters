@@ -22,6 +22,18 @@
     <Filter Include="Tool">
       <UniqueIdentifier>{55056716-a561-49cc-bf3e-c59c77c0f0bb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Graphics">
+      <UniqueIdentifier>{a8fecfff-68dc-4d75-8255-924c810b2a8f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Graphics\Widget">
+      <UniqueIdentifier>{d5d953fb-ff8b-4b3b-b295-292025bb66d4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Graphics\Widget\Slot">
+      <UniqueIdentifier>{9bb06a5b-68b8-4b0a-8b4c-158eb301a14d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utils">
+      <UniqueIdentifier>{e2a27c4a-d08f-4926-9b33-a419600895fb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -42,6 +54,18 @@
     <ClCompile Include="Tool\LODGenerator.cpp">
       <Filter>Tool</Filter>
     </ClCompile>
+    <ClCompile Include="Graphics\Widget\ConsoleView.cpp">
+      <Filter>Graphics\Widget</Filter>
+    </ClCompile>
+    <ClCompile Include="Tool\Logger.cpp">
+      <Filter>Tool</Filter>
+    </ClCompile>
+    <ClCompile Include="Tool\FontAtlasGenerator.cpp">
+      <Filter>Tool</Filter>
+    </ClCompile>
+    <ClCompile Include="App\AppWindow\EditorAppWindow.cpp">
+      <Filter>App\AppWindow</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -61,6 +85,24 @@
     </ClInclude>
     <ClInclude Include="Tool\LODGenerator.h">
       <Filter>Tool</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\Widget\ConsoleView.h">
+      <Filter>Graphics\Widget</Filter>
+    </ClInclude>
+    <ClInclude Include="Tool\Logger.h">
+      <Filter>Tool</Filter>
+    </ClInclude>
+    <ClInclude Include="EditorDefine.h">
+      <Filter>Headers\Global</Filter>
+    </ClInclude>
+    <ClInclude Include="Tool\FontAtlasGenerator.h">
+      <Filter>Tool</Filter>
+    </ClInclude>
+    <ClInclude Include="App\AppWindow\EditorAppWindow.h">
+      <Filter>App\AppWindow</Filter>
+    </ClInclude>
+    <ClInclude Include="EditorPch.h">
+      <Filter>Headers\Global</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

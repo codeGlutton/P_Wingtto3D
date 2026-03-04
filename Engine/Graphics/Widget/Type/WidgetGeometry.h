@@ -5,24 +5,35 @@
 class Widget;
 struct Margin;
 
+class LayoutTransform2D
+{
+public:
+	Vec2 mBoxSize;
+	Transform2D mTransformLocalToParent;
+};
+
 class WidgetGeometry
 {
 public:
 	WidgetGeometry();
-	WidgetGeometry(const WidgetGeometry& other) = default;
 
 private:
-	WidgetGeometry(const Vec2& boxSize, const Transform2D& layoutTransform, const Transform2D& renderTransform);
-	WidgetGeometry(const Vec2& boxSize, const Transform2D& layoutTransform, const Transform2D& renderTransform, const Matrix2D& parentAccLayoutMat, const Matrix2D& parentAccRenderMat);
+	WidgetGeometry(const Vec2& boxSize, const Transform2D& layoutTransform);
+	WidgetGeometry(const Vec2& boxSize, const Transform2D& layoutTransform, const Transform2D& renderTransform, const Vec2& renderTransformPivot, const Matrix2D& parentAccLayoutMat, const Matrix2D& parentAccRenderMat);
 
 public:
 	static WidgetGeometry MakeRoot(const Vec2& boxSize, const Transform2D& layoutTransform);
 
 public:
-	WidgetGeometry MakeChild(const Vec2& boxSize, const Transform2D& layoutTransform, const Transform2D& renderTransform) const;
+	WidgetGeometry MakeChild(const Vec2& boxSize, const Transform2D& layoutTransform) const;
+	WidgetGeometry MakeChild(const Vec2& boxSize, const Transform2D& layoutTransform, const Transform2D& renderTransform, const Vec2& renderTransformPivot) const;
 	WidgetGeometry MakeChild(std::shared_ptr<const Widget> childWidget, const Vec2& boxSize, const Transform2D& layoutTransform) const;
 
 public:
+	/**
+	 * 최상단 부모쪽에서 추가적인 연산을 더해주는 함수
+	 * \param layoutTransform 추가적인 트랜스폼 연산
+	 */
 	void AppendTransform(const Transform2D& layoutTransform);
 
 public:

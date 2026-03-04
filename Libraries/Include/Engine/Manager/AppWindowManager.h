@@ -33,6 +33,9 @@ public:
 	void Destroy();
 
 public:
+	static std::shared_ptr<NullWidget> NullWidgetInst();
+
+public:
 	std::shared_ptr<AppWindow> GetAppWindow(HWND hWnd) const
 	{
 		auto iter = _mAppWindows.find(hWnd);
@@ -62,6 +65,9 @@ public:
 	template<typename T> requires std::is_base_of_v<AppWindow, T>
 	std::shared_ptr<T> CreateAppWindow(std::shared_ptr<AppWindow> owner = nullptr, ObjectCreateFlag::Type flags = ObjectCreateFlag::None);
 	std::shared_ptr<AppWindow> CreateAppWindow(std::shared_ptr<AppWindow> owner, const ObjectTypeInfo* typeInfo, ObjectCreateFlag::Type flags = ObjectCreateFlag::None);
+	template<typename T> requires std::is_base_of_v<AppWindow, T>
+	std::shared_ptr<T> CreateAppWindow(const std::wstring& name, std::shared_ptr<AppWindow> owner = nullptr, ObjectCreateFlag::Type flags = ObjectCreateFlag::None);
+	std::shared_ptr<AppWindow> CreateAppWindow(const std::wstring& name, std::shared_ptr<AppWindow> owner, const ObjectTypeInfo* typeInfo, ObjectCreateFlag::Type flags = ObjectCreateFlag::None);
 
 	/**
 	 * 상태 저장이 필요한 에디터 용 위젯을 생성할 때, 사용
@@ -73,6 +79,9 @@ public:
 	template<typename T> requires std::is_base_of_v<Widget, T>
 	std::shared_ptr<T> CreateAppWindowWidget(std::shared_ptr<Widget> parent = nullptr, ObjectCreateFlag::Type flags = ObjectCreateFlag::None);
 	std::shared_ptr<Widget> CreateAppWindowWidget(std::shared_ptr<Widget> parent, const ObjectTypeInfo* typeInfo, ObjectCreateFlag::Type flags = ObjectCreateFlag::None);
+	template<typename T> requires std::is_base_of_v<Widget, T>
+	std::shared_ptr<T> CreateAppWindowWidget(const std::wstring& name, std::shared_ptr<Widget> parent = nullptr, ObjectCreateFlag::Type flags = ObjectCreateFlag::None);
+	std::shared_ptr<Widget> CreateAppWindowWidget(const std::wstring& name, std::shared_ptr<Widget> parent, const ObjectTypeInfo* typeInfo, ObjectCreateFlag::Type flags = ObjectCreateFlag::None);
 
 public:
 	virtual void RegisterPackage(std::shared_ptr<Package> package) override;
@@ -85,7 +94,6 @@ public:
 
 public:
 	void NotifyToChangeFocus(HWND hWnd);
-	void NotifyToChangeFocus(std::shared_ptr<Widget> widget);
 	void NotifyToChangeAppActivation(bool isActive);
 
 public:
@@ -96,6 +104,9 @@ public:
 	OnRegisterAppWindow mOnRegisterAppWindow;
 	OnChangeFocus mOnChangeFocus;
 	OnChangeWindowMode mOnChangeWindowMode;
+
+private:
+	std::shared_ptr<NullWidget> _mNullWidgetInst;
 
 private:
 	std::shared_ptr<AppWindowPackage> _mPackage;
@@ -122,9 +133,21 @@ inline std::shared_ptr<T> AppWindowManager::CreateAppWindow(std::shared_ptr<AppW
 	return std::static_pointer_cast<T>(CreateAppWindow(owner, &T::GetStaticTypeInfo(), flags));
 }
 
+template<typename T> requires std::is_base_of_v<AppWindow, T>
+inline std::shared_ptr<T> AppWindowManager::CreateAppWindow(const std::wstring& name, std::shared_ptr<AppWindow> owner, ObjectCreateFlag::Type flags)
+{
+	return std::static_pointer_cast<T>(CreateAppWindow(name, owner, &T::GetStaticTypeInfo(), flags));
+}
+
 template<typename T> requires std::is_base_of_v<Widget, T>
 inline std::shared_ptr<T> AppWindowManager::CreateAppWindowWidget(std::shared_ptr<Widget> parent, ObjectCreateFlag::Type flags)
 {
 	return std::static_pointer_cast<T>(CreateAppWindowWidget(parent, &T::GetStaticTypeInfo(), flags));
+}
+
+template<typename T> requires std::is_base_of_v<Widget, T>
+inline std::shared_ptr<T> AppWindowManager::CreateAppWindowWidget(const std::wstring& name, std::shared_ptr<Widget> parent, ObjectCreateFlag::Type flags)
+{
+	return std::static_pointer_cast<T>(CreateAppWindowWidget(name, parent, &T::GetStaticTypeInfo(), flags));
 }
 

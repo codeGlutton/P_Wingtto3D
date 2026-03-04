@@ -6,7 +6,7 @@
 
 struct Texture2DBulkData : public BulkData
 {
-	GEN_STRUCT_REFLECTION(Texture2DBulkData)
+	GEN_BULK_STRUCT_REFLECTION(Texture2DBulkData)
 
 public:
 	bool IsArray() const
@@ -220,4 +220,84 @@ protected:
 public:
 	void Init(const void* initData, uint32 arraySize, uint32 width, uint32 height, DXGI_FORMAT format, uint32 slot, DXResourceUsageFlag::Type usageFlags);
 	void Init(std::shared_ptr<Texture2DBulkData> bulkData, uint32 slot, DXResourceUsageFlag::Type usageFlags);
+};
+
+struct GlyphData
+{
+	GEN_MINIMUM_STRUCT_REFLECTION(GlyphData)
+
+public:
+	bool operator==(const GlyphData&) const = default;
+
+public:
+	PROPERTY(mBaseSize)
+	IntPoint<int32> mBaseSize;
+
+	PROPERTY(mBearingX)
+	int32 mBearingX;
+	PROPERTY(mBearingY)
+	int32 mBearingY;
+
+	PROPERTY(mUVStart)
+	Vec2 mUVStart;
+	PROPERTY(mUVSize)
+	Vec2 mUVSize;
+
+	PROPERTY(mAdvance)
+	int32 mAdvance;
+};
+
+struct FontAtlasData
+{
+	GEN_MINIMUM_STRUCT_REFLECTION(FontAtlasData)
+
+public:
+	bool operator==(const FontAtlasData&) const = default;
+
+public:
+	PROPERTY(mData)
+	std::vector<char> mData;
+
+public:
+	PROPERTY(mPixelSize)
+	uint32 mPixelSize;
+	PROPERTY(mWidth)
+	int32 mWidth;
+	PROPERTY(mHeight)
+	int32 mHeight;
+
+public:
+	PROPERTY(mLineHeight)
+	int32 mLineHeight;
+	PROPERTY(mAscender)
+	int32 mAscender;
+	PROPERTY(mDescender)
+	int32 mDescender;
+
+	PROPERTY(mGlyphs)
+	std::unordered_map<wchar_t, GlyphData> mGlyphs;
+};
+
+struct FontAtlasBulkData : public BulkData
+{
+	GEN_BULK_STRUCT_REFLECTION(FontAtlasBulkData)
+
+public:
+	PROPERTY(mValue)
+	std::vector<FontAtlasData> mValue;
+};
+
+/**
+ * 2D 텍스처 베이스 클래스
+ */
+class DXFontTexture : public DXTexture2DBase
+{
+	friend class ResourceManager;
+
+protected:
+	DXFontTexture();
+	~DXFontTexture();
+
+public:
+	void Init(std::shared_ptr<FontAtlasBulkData> bulkData, std::size_t bulkIndex, uint32 slot, DXResourceUsageFlag::Type usageFlags);
 };

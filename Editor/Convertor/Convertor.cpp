@@ -4,19 +4,25 @@
 #include "Manager/PathManager.h"
 #include "Graphics/Resource/DXTexture.h"
 
-bool TextureConvertor::LoadAndConvertToMemory(const std::wstring& filePath, OUT std::shared_ptr<Texture2DBulkData> bulkData)
+bool TextureConvertor::LoadAndConvertToMemoryByPath(const std::wstring& filePath, OUT std::shared_ptr<Texture2DBulkData>& bulkData)
+{
+	std::filesystem::path fileFullPath = PATH_MANAGER->GetResourcePath() / filePath;
+	return LoadAndConvertToMemoryByFullPath(fileFullPath.wstring(), bulkData);
+}
+
+bool TextureConvertor::LoadAndConvertToMemoryByFullPath(const std::wstring& fileFullPath, OUT std::shared_ptr<Texture2DBulkData>& bulkData)
 {
 	if (bulkData == nullptr)
 	{
-		return false;
+		EDITOR_LOG("Create output texture data because of empty bulk data");
+		bulkData = std::make_shared<Texture2DBulkData>();
 	}
 
 	// 외부 라이브러리인 DirectTex를 활용
 	// PNG, JPG 등 로드 함수가 존재
 	// WIC (Window Image Component)는 다양한 양식 호환
 
-	std::filesystem::path fileFullPath = PATH_MANAGER->GetResourcePath() / filePath;
-	std::wstring fileExtension = fileFullPath.extension().wstring();
+	std::wstring fileExtension = std::filesystem::path(fileFullPath).extension().wstring();
 	std::transform(fileExtension.begin(), fileExtension.end(), fileExtension.begin(), ::towlower);
 
 	DirectX::TexMetadata md;
@@ -50,9 +56,9 @@ bool TextureConvertor::LoadAndConvertToMemory(const std::wstring& filePath, OUT 
 			);
 		}
 
-		//CHECK_WIN_MSG(hr, "Texture file can't be load");
 		if (FAILED(hr) == true)
 		{
+			EDITOR_LOG("Texture file can't be load");
 			return false;
 		}
 	}
@@ -67,9 +73,9 @@ bool TextureConvertor::LoadAndConvertToMemory(const std::wstring& filePath, OUT 
 			blob
 		);
 
-		//CHECK_WIN_MSG(hr, "Texture can't be saved to dds memory");
 		if (FAILED(hr) == true)
 		{
+			EDITOR_LOG("Texture can't be saved to dds memory");
 			return false;
 		}
 	}
@@ -77,7 +83,8 @@ bool TextureConvertor::LoadAndConvertToMemory(const std::wstring& filePath, OUT 
 	bulkData->mValue.resize(blob.GetBufferSize());
 	memcpy(bulkData->mValue.data(), blob.GetBufferPointer(), blob.GetBufferSize());
 
-    return true;
+	bulkData->mIsLoad = true;
+	return true;
 }
 
 //bool MeshConvertor::LoadAndConvertToMemory(const std::wstring& filePath, OUT std::shared_ptr<StaticMeshBulkData> bulkData)
@@ -90,3 +97,19 @@ bool TextureConvertor::LoadAndConvertToMemory(const std::wstring& filePath, OUT 
 //	std::shared_ptr<Assimp::Importer> importer = std::make_shared<Assimp::Importer>();
 //
 //}
+
+bool FontConvertor::LoadAndConvertToMemoryByPath(const std::wstring& filePath, const std::vector<uint32>& pixelSizes, int32 atlasXSize, OUT std::vector<FontAtlasGenerator::Result>& bulkDatas)
+{
+	std::filesystem::path fileFullPath = PATH_MANAGER->GetResourcePath() / filePath;
+	return LoadAndConvertToMemoryByFullPath(fileFullPath.wstring(), pixelSizes, atlasXSize, bulkDatas);
+}
+
+bool FontConvertor::LoadAndConvertToMemoryByFullPath(const std::wstring& fileFullPath, const std::vector<uint32>& pixelSizes, int32 atlasXSize, OUT std::vector<FontAtlasGenerator::Result>& bulkDatas)
+{
+	bulkDatas = FontAtlasGenerator::Create(fileFullPath, pixelSizes, atlasXSize);
+	for (auto& bulkData : bulkDatas)
+	{
+		bulkData.mBulkData->mIsLoad = true;
+	}
+	return true;
+}

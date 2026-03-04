@@ -13,3 +13,7 @@ void Viewport::OnResize(const RECT& windowSize)
 {
 
 }
+
+void Viewport::Render()
+{
+}

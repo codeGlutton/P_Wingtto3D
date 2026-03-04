@@ -15,6 +15,12 @@ DXInputLayout::~DXInputLayout()
 
 void DXInputLayout::Init(const std::vector<D3D11_INPUT_ELEMENT_DESC>& descs, const DXVertexShader& shader)
 {
+	if (descs.empty() == true)
+	{
+		_mLayout.Reset();
+		return;
+	}
+
 	// 데이터 바이트 구성이 어떻게 되어 있는지를 알림
 	CHECK_WIN_MSG(DX_DEVICE->CreateInputLayout(
 		descs.data(), 

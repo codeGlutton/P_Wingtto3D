@@ -66,6 +66,9 @@ public:
 		return _mExternalResourceFolderName;
 	}
 
+public:
+	void ExtractFromFullPath(const std::wstring& fullPath, OUT std::wstring& name, OUT std::wstring& packagePath) const;
+
 private:
 	// 메인 폴더
 	std::filesystem::path _mRootPath;

@@ -64,6 +64,11 @@ public:
 	HWND mHWnd;
 };
 
+struct DragDropPayload
+{
+	GEN_STRUCT_REFLECTION(DragDropPayload)
+};
+
 struct DragDropEvent : public PointEvent
 {
 public:
@@ -78,5 +83,5 @@ public:
 	}
 
 public:
-	std::shared_ptr<Object> mPayload;
+	std::shared_ptr<DragDropPayload> mPayload;
 };

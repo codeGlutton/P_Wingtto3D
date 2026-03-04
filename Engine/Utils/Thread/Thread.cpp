@@ -9,6 +9,7 @@ void WorkerThread::Run()
 	{
 		LEndTickCount = GetTickCount64() + mThreadMaxTick;
 		Work();
+		std::this_thread::sleep_for(std::chrono::milliseconds(1));
 	}
 }
 

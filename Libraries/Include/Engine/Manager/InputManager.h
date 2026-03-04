@@ -107,8 +107,5 @@ private:
 private:
 	DelegateHandle _mChangeFocusDelegateHandle;
 	DelegateHandle _mChangeWindowModeDelegateHandle;
-
-private:
-	WidgetPath _mFocusWidgetPath;
 };
 
