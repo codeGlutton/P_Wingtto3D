@@ -50,15 +50,18 @@ std::vector<FontAtlasGenerator::Result> FontAtlasGenerator::Create(const std::ws
         // 픽셀 지정 크기별로 캐싱
         for (const uint32 pixelSize : pixelSizes)
         {
+            ASSERT_MSG(pixelSize < static_cast<uint32>(atlasXSize), "Too big font pixel size to create altas");
+
             FT_Set_Pixel_Sizes(ftFace, 0, pixelSize);
 
             FontAtlasData atlasData;
+            atlasData.mData.resize(atlasXSize);
             atlasData.mPixelSize = pixelSize;
             atlasData.mAscender = INT_MIN;
             atlasData.mDescender = INT_MIN;
 
-            int32 accTexX = 0;
-            int32 accTexY = 0;
+            int32 accTexX = 1;
+            int32 accTexY = 1;
             int32 curRowMaxY = 0;
 
             // 일단 영문만 글자별로 아틀라스에 그리기
@@ -71,15 +74,22 @@ std::vector<FontAtlasGenerator::Result> FontAtlasGenerator::Create(const std::ws
                 }
 
                 FT_GlyphSlot ftSlot = ftFace->glyph;
+                const int32 charPitch = static_cast<int32>(ftSlot->bitmap.pitch);
                 const int32 charWidth = static_cast<int32>(ftSlot->bitmap.width);
                 const int32 charHeight = static_cast<int32>(ftSlot->bitmap.rows);
 
                 // 텍스처 X 방향으로 한줄 채움
-                if (accTexX + charWidth >= atlasXSize)
+                if (accTexX + charWidth + 1 >= atlasXSize)
                 {
-                    accTexX = 0;
+                    accTexX = 1;
                     accTexY += curRowMaxY;
                     curRowMaxY = 0;
+                }
+
+                const int32 texMinSize = atlasXSize * (charHeight + accTexY);
+                if (texMinSize > atlasData.mData.size())
+                {
+                    atlasData.mData.resize(texMinSize, 0);
                 }
 
                 // 비트맵 복사
@@ -88,8 +98,8 @@ std::vector<FontAtlasGenerator::Result> FontAtlasGenerator::Create(const std::ws
                 {
                     for (int32 charX = 0; charX < charWidth; ++charX)
                     {
-                        int32 texIndex = (accTexX + charX) + (accTexY + charY) * atlasXSize;
-                        int32 charIndex = charX + charY * charWidth;
+                        const int32 texIndex = (accTexX + charX) + (accTexY + charY) * atlasXSize;
+                        const int32 charIndex = charX + charY * charPitch;
                         atlasData.mData[texIndex] = ftSlot->bitmap.buffer[charIndex];
                     }
                 }
@@ -105,8 +115,8 @@ std::vector<FontAtlasGenerator::Result> FontAtlasGenerator::Create(const std::ws
                         static_cast<float>(accTexY)
                     );
                     glyph.mUVSize = Vec2(
-                        static_cast<float>(accTexX + charWidth),
-                        static_cast<float>(accTexY + charHeight)
+                        static_cast<float>(charWidth),
+                        static_cast<float>(charHeight)
                     );
                     glyph.mBearingX = ftSlot->bitmap_left;
                     glyph.mBearingY = ftSlot->bitmap_top;
@@ -115,12 +125,34 @@ std::vector<FontAtlasGenerator::Result> FontAtlasGenerator::Create(const std::ws
                     atlasData.mAscender = std::max<int32>(atlasData.mAscender, glyph.mBearingY);
                     atlasData.mDescender = std::max<int32>(atlasData.mDescender, charHeight - glyph.mBearingY);
                 }
+
+
+#ifdef _DEBUG
+
+                const int32 startOffset = static_cast<int32>(accTexX + accTexY * atlasXSize);
+                char c = static_cast<const char>(glyphPair.first);
+                DEBUG_LOG("%c", c);
+                GlyphData& glyph = glyphPair.second;
+
+                for (int32 charY = 0; charY < ftSlot->bitmap.rows; ++charY)
+                {
+                    char buffer[1024] = {};
+                    for (int32 charX = 0; charX < ftSlot->bitmap.width; ++charX)
+                    {
+                        buffer[charX] = atlasData.mData[startOffset + charX + charY * atlasXSize] == 0 ? ' ' : 'o';
+                    }
+                    buffer[ftSlot->bitmap.width] = '\n';
+                    OutputDebugStringA(buffer);
+                }
+
+#endif // DEBUG
+
                 atlasData.mGlyphs.insert(std::move(glyphPair));
 
-                accTexX += ftSlot->bitmap.width + 1; // 겹침 방지
-                if (curRowMaxY < charHeight)
+                accTexX += charWidth + 1; // 겹침 방지
+                if (curRowMaxY < charHeight + 1)
                 {
-                    curRowMaxY = charHeight;
+                    curRowMaxY = charHeight + 1;
                 }
             }
             accTexY += curRowMaxY;
@@ -137,12 +169,10 @@ std::vector<FontAtlasGenerator::Result> FontAtlasGenerator::Create(const std::ws
                 glyphPair.second.mUVSize.x /= static_cast<float>(atlasData.mWidth);
                 glyphPair.second.mUVSize.y /= static_cast<float>(atlasData.mHeight);
             }
-
             fontData->mValue.emplace_back(std::move(atlasData));
         }
+        FT_Done_Face(ftFace);
     }
-
-    FT_Done_Face(ftFace);
     FT_Done_FreeType(ftLib);
 
     return genResults;

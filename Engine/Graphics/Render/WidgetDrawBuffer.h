@@ -28,6 +28,10 @@ namespace WidgetRenderElementType
 
 struct WidgetRenderElement
 {
+public:
+	virtual ~WidgetRenderElement() = default;
+
+public:
 	WidgetRenderElementType::Type mType;
 
 	Matrix mRenderMat = Matrix::Identity;
@@ -84,7 +88,7 @@ struct WidgetRenderBatch
 	{
 	}
 
-	const std::shared_ptr<DXTextureBase>& mTexture;
+	const std::shared_ptr<DXTextureBase> mTexture;
 	bool mIsText;
 	uint32 mStartIndex;
 	uint32 mIndexCount;

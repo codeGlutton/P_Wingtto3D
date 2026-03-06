@@ -9,6 +9,9 @@
 #include "Core/Resource/Resource.h"
 #include "Core/Resource/Material.h"
 
+#include "Manager/PackageManager.h"
+#include "Core/Resource/Package/Package.h"
+
 void AppModeBase::Init()
 {
 	/* 싱글톤 초기화 */
@@ -16,6 +19,7 @@ void AppModeBase::Init()
 	{
 		// 순서 무관계
 
+		DX_GRAPHICS->Init();
 		PATH_MANAGER->Init();
 		INPUT_MANAGER->Init();
 	}
@@ -32,6 +36,7 @@ void AppModeBase::Init()
 		// 패키징 로드 요구
 
 		RESOURCE_MANAGER->Init();
+		RegisterDefaultResources();
 		WIDGET_STYLE_MANAGER->Init();
 		APP_WIN_MANAGER->Init();
 	}
@@ -39,12 +44,10 @@ void AppModeBase::Init()
 	{
 		// 최후 시작 요구
 
-		DX_GRAPHICS->Init();
 		RENDER_MANAGER->Init();
 		THREAD_MANAGER->Init();
+		BeginThread();
 	}
-
-	BeginThread();
 }
 
 void AppModeBase::Update()
@@ -60,15 +63,12 @@ void AppModeBase::Update()
 
 void AppModeBase::End()
 {
-	ClearUserData();
-	EndThread();
-
 	{
 		// 최후 시작 요구
 
+		EndThread();
 		THREAD_MANAGER->Destroy();
 		RENDER_MANAGER->Destroy();
-		DX_GRAPHICS->Destroy();
 	}
 
 	{
@@ -84,6 +84,7 @@ void AppModeBase::End()
 
 		OBJECT_MANAGER->Destroy();
 		TIME_MANAGER->Destroy();
+		UnregisterDefaultResources();
 		PACKAGE_MANAGER->Destroy();
 	}
 
@@ -92,16 +93,13 @@ void AppModeBase::End()
 
 		INPUT_MANAGER->Destroy();
 		PATH_MANAGER->Destroy();
+		DX_GRAPHICS->Destroy();
 	}
 }
 
 void AppModeBase::OnPressKey(std::shared_ptr<KeyEvent>& event)
 {
 	ReplyData reply = ReplyData::Unhandled();
-	if (event->mPath == nullptr)
-	{
-		return;
-	}
 
 	// 버블 검사
 	WidgetPath path = _mFocusWeakPath.Lock();
@@ -126,10 +124,6 @@ void AppModeBase::OnPressKey(std::shared_ptr<KeyEvent>& event)
 void AppModeBase::OnReleaseKey(std::shared_ptr<KeyEvent>& event)
 {
 	ReplyData reply = ReplyData::Unhandled();
-	if (event->mPath == nullptr)
-	{
-		return;
-	}
 
 	// 버블 검사
 	WidgetPath path = _mFocusWeakPath.Lock();
@@ -154,10 +148,6 @@ void AppModeBase::OnReleaseKey(std::shared_ptr<KeyEvent>& event)
 void AppModeBase::OnChangeAnalogValue(std::shared_ptr<AnalogInputEvent>& event)
 {
 	ReplyData reply = ReplyData::Unhandled();
-	if (event->mPath == nullptr)
-	{
-		return;
-	}
 
 	// 버블 검사
 	WidgetPath path = _mFocusWeakPath.Lock();
@@ -182,10 +172,6 @@ void AppModeBase::OnChangeAnalogValue(std::shared_ptr<AnalogInputEvent>& event)
 void AppModeBase::OnPressChar(std::shared_ptr<CharEvent>& event)
 {
 	ReplyData reply = ReplyData::Unhandled();
-	if (event->mPath == nullptr)
-	{
-		return;
-	}
 
 	// 버블 검사
 	WidgetPath path = _mFocusWeakPath.Lock();
@@ -519,12 +505,36 @@ void AppModeBase::OnMoveMouse(std::shared_ptr<PointEvent>& event)
 	_mPreHoverWeakPath = hoverPath;
 }
 
+void AppModeBase::OnWheelMouse(std::shared_ptr<PointEvent>& event)
+{
+	ReplyData reply = ReplyData::Unhandled();
+
+	// 버블 검사
+	WidgetPath path = _mFocusWeakPath.Lock();
+	event->mPath = &path;
+
+	const auto iterEnd = path.mWidgets.end();
+	for (auto iter = path.mWidgets.begin(); iter != iterEnd; ++iter)
+	{
+		std::shared_ptr<Widget> curWidget = iter->mWidget;
+		if (curWidget != nullptr && curWidget->IsValid() == true)
+		{
+			reply = curWidget->OnWheelMouse(iter->mGeometry, event);
+			if (reply.IsHandle() == true)
+			{
+				ProcessReplyData(reply, event);
+				break;
+			}
+		}
+	}
+}
+
 void AppModeBase::OnChangeFocus(std::shared_ptr<Widget>& focusWidget)
 {
 	std::shared_ptr<AppWindow> preFocusWindow = nullptr;
 	if (_mFocusWeakPath.mWidgets.empty() == false)
 	{
-		std::shared_ptr<Widget> preFocusWidget = _mFocusWeakPath.mWidgets.back().lock();
+		std::shared_ptr<Widget> preFocusWidget = _mFocusWeakPath.mWidgets.front().lock();
 		preFocusWidget->OnEndFocus();
 		preFocusWindow = preFocusWidget->GetRootWindow();
 	}
@@ -638,7 +648,6 @@ void AppModeBase::BeginThread()
 	}
 
 	// 메인 스레드 실행
-	RegisterDefaultResources();
 	std::array<std::shared_ptr<MainThread>, MainThreadType::Count - 1> mainThreads = {
 		std::make_shared<RenderThread>()
 	};
@@ -648,23 +657,46 @@ void AppModeBase::BeginThread()
 void AppModeBase::EndThread()
 {
 	THREAD_MANAGER->Join();
-	UnregisterDefaultResources();
+	ClearUserData();
 }
 
 void AppModeBase::RegisterDefaultResources()
 {
-	std::wstring packagePath = PATH_MANAGER->GetEngineResourceFolderName();
+	const std::wstring packagePath = PATH_MANAGER->GetEngineResourceFolderName();
 
 	/* 메테리얼 */
 
-	// UI
+	// 기본 UI 메테리얼
 	{
-		std::shared_ptr<Material> matUI = RESOURCE_MANAGER->LoadOrGetResource<Material>(packagePath + L"\\M_UI");
+		const std::wstring resourcePath = packagePath + L"\\Material\\M_UI";
+		std::shared_ptr<Material> matUI = RESOURCE_MANAGER->LoadOrGetResource<Material>(resourcePath);
+
+#ifdef _EDITOR
+		// 없다면 만들어주기
+		if (matUI == nullptr)
+		{
+			DEBUG_LOG("Create UI material to %s", ConvertWStringToUtf8(resourcePath).c_str());
+
+			std::shared_ptr<ResourcePackage> package = PACKAGE_MANAGER->LoadPackage<ResourcePackage>(resourcePath);
+			matUI = RESOURCE_MANAGER->CreateResource<Material>(package);
+
+			std::shared_ptr<MaterialBulkData> bulkData = std::make_shared<MaterialBulkData>();
+			bulkData->mSamplerStateDatas.push_back({ "linearWrapSS" , L"LinearWrap" });
+			bulkData->mBlendStateName = L"DefaultAlpha";
+			bulkData->mRasterizerStateName = L"BackCulling";
+			bulkData->mShaderName = L"UI";
+			matUI->UpdateProxy(
+				bulkData,
+				std::vector<std::pair<std::string, std::shared_ptr<ConstantDataBase>>>(),
+				std::vector<std::pair<std::string, std::shared_ptr<Texture2D>>>()
+			);
+
+			matUI->Save();
+		}
+#endif // _EDITOR
+
 		matUI->GetProxy();
 		_mDefaultResources.push_back(matUI);
-
-		// 게임 빌드 옵션에서는 엔진 리소스가 없는 경우, 에러 발생
-		// 에디터 빌드 옵션에서는 Editor 참고
 	}
 }
 

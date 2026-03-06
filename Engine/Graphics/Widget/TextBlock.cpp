@@ -8,17 +8,18 @@ void TextBlock::OnConstruct(const Arguments& args)
 {
 	Widget::OnConstruct(args);
 
+	WidgetFontData fontData;
 	if (args.mStyle != nullptr)
 	{
 		_mStyle = args.mStyle;
 
-		WidgetFontData fontData;
 		fontData.SetFont(args.mStyle->mFont);
-		fontData.SetPixelSize(24u);
 		fontData.SetCharSpacing(args.mStyle->mCharSpacing);
-		SetFontData(fontData);
 		_mBackgroundColor.Set(args.mStyle->mBackgroundColor);
 	}
+
+	fontData.SetPixelSize(args.mPixelSize);
+	SetFontData(fontData);
 
 	SetText(args.mText);
 	SetTransformPolicy(args.mTransformPolicy);
@@ -70,7 +71,7 @@ Vec2 TextBlock::ComputeDesireSize(const Vec2& layoutMultiplyValue)
 		layoutMultiplyValue
 	);
 	
-	const Vec2 textSize = _mTextCache.GetDesiredSingleLineSize();
+	const Vec2 textSize = _mTextCache.GetDesiredSize();
 	return Vec2(std::max<float>(_mMinDesiredWidth.GetValue(this), textSize.x), textSize.y);
 }
 
@@ -78,6 +79,10 @@ uint32 TextBlock::OnPaint(OUT WindowRenderElementContainer& drawElements, uint32
 {
 	// 배정된 사이즈와 비교해서 실제 랜더링 데이터 계산
 	_mTextCache.UpdateOnPaint(allottedGeometry.mBoxSize, GetJustifyPolicy(), GetAutoWrap());
+	if (_mTextCache.IsResized() == true)
+	{
+		MarkLayoutDirty();
+	}
 	
 	// 계산된 데이터는 이미 스케일링 되어있기 때문에 스케일 역으로 감소 필요
 	Vec2 matReverseScale = Vec2(1.f) / allottedGeometry.mRootSize;
@@ -123,7 +128,7 @@ void TextBlock::SetJustifyPolicy(Attribute<TextJustifyPolicy> policy)
 	if (policy.IsSet() == true)
 	{
 		_mJustifyPolicy.Set(this, policy);
-		_mTextCache.MarkOnlyLineDirty();
+		_mTextCache.MarkPaintDirty();
 	}
 }
 
@@ -166,6 +171,6 @@ void TextBlock::SetAutoWrap(Attribute<bool> isAutoWrapping)
 	if (isAutoWrapping.IsSet() == true)
 	{
 		_mAutoWrap.Set(this, isAutoWrapping);
-		_mTextCache.MarkOnlyLineDirty();
+		_mTextCache.MarkPaintDirty();
 	}
 }

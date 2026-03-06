@@ -119,7 +119,7 @@ public:
  * Pair
  */
 template<typename K, typename D>
-class PairTypeInfo : public ComparableDefaultTypeInfo<std::pair<K, D>>
+class PairTypeInfo : public DefaultTypeInfo<std::pair<K,D>>
 {
 	GEN_STRUCT_REFLECTION(PairTypeInfo<K, D>)
 
@@ -127,6 +127,7 @@ private:
 	using C = std::pair<K,D>;
 
 public:
+	virtual bool IsInstanceValueEqual(const void* lhsInst, const void* rhsInst) const override;
 	virtual void Serialize(OUT Archive& archive, const void* inst) const override;
 	virtual void Deserialize(Archive& archive, OUT void* inst) const override;
 

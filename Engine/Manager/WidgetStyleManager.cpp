@@ -6,6 +6,7 @@
 
 #include "Manager/PathManager.h"
 #include "Manager/PackageManager.h"
+#include "Manager/ResourceManager.h"
 
 #include "Graphics/Widget/VirtualWindow.h"
 #include "Graphics/Widget/Splitter.h"
@@ -98,7 +99,10 @@ void WidgetStyleManager::CreateDefaultStyles()
 	}
 	std::shared_ptr<TextBlockStyle> windowTextStyle = CreateStyle<TextBlockStyle>(L"WindowTextStyle");
 	{
-		windowTextStyle->mFont = nullptr; // TODO
+		const std::wstring resourcePath = PATH_MANAGER->GetEngineResourceFolderName() + L"\\Font\\F_Cafe24Decobox_Regular";
+		std::shared_ptr<Font> defaultFont = RESOURCE_MANAGER->LoadOrGetResource<Font>(resourcePath);
+
+		windowTextStyle->mFont = defaultFont;
 		windowTextStyle->mCharSpacing = 0;
 		windowTextStyle->mBackgroundColor = windowTextColor;
 	}

@@ -36,6 +36,7 @@ void RenderManager::Destroy()
 {
 	_mWidgetMesh.reset();
 	_mWidgetCBuffer.reset();
+	_mScreenCBuffer.reset();
 	_mCameraCBuffer.reset();
 }
 
@@ -62,7 +63,7 @@ void RenderManager::DrawWindow(std::shared_ptr<WindowRenderElementContainer> con
 
 	for (const auto& layer : container->mElementLayers)
 	{
-		DXTextureBase* currentTexture = reinterpret_cast<DXTextureBase*>(&container);
+		DXTextureBase* currentTexture = nullptr;
 		for (const std::unique_ptr<WidgetRenderElement>& element : layer)
 		{
 			switch (element->mType)
@@ -117,7 +118,7 @@ void RenderManager::DrawWindow(std::shared_ptr<WindowRenderElementContainer> con
 					// 새로운 배처 데이터 생성
 					currentTexture = text.mResource.get();
 					container->mBatches.push_back(
-						WidgetRenderBatch(text.mResource, false, static_cast<uint32>(container->mIndices.size()))
+						WidgetRenderBatch(text.mResource, true, static_cast<uint32>(container->mIndices.size()))
 					);
 				}
 
@@ -156,7 +157,7 @@ void RenderManager::DrawWindow(std::shared_ptr<WindowRenderElementContainer> con
 	}
 
 	THREAD_MANAGER->PushRenderThreadRenderJob(ObjectPool<Job>::MakeShared([winDrawInputs = std::move(windowDrawInputs)]() {
-		RENDER_MANAGER->DrawWindow_Internal(*winDrawInputs.get());
+		RENDER_MANAGER->DrawWindow_Internal(*winDrawInputs);
 		}));
 }
 
@@ -188,7 +189,7 @@ void RenderManager::DrawWindow_Internal(const WindowDrawInputs& drawInputs)
 	static const std::string textureBindName = "widgetResourceTB";
 	static const std::string widgetCBufferBindName = "M_WidgetTypeCB";
 	static const std::string screenCBufferBindName = "F_ScreenCB";
-	const std::wstring matPath = PATH_MANAGER->GetEngineResourceFolderName() + L"\\M_UI";
+	const std::wstring matPath = PATH_MANAGER->GetEngineResourceFolderName() + L"\\Material\\M_UI";
 
 	std::shared_ptr<DXMaterial> matUI = RESOURCE_MANAGER->GetRenderResource<DXMaterial>(matPath, DXSharedResourceType::Material);
 	{
@@ -217,15 +218,7 @@ void RenderManager::DrawWindow_Internal(const WindowDrawInputs& drawInputs)
 				preCBuffer.SetIsText(batch.mIsText);
 				_mWidgetCBuffer->UpdateData(preCBuffer);
 			}
-			if (batch.mTexture == nullptr)
-			{
-				std::shared_ptr<DXTextureBase> defaultWhiteTexture = RESOURCE_MANAGER->CreateOrGetRuntimeRenderResource<DXConstTexture2D>(L"White", DXSharedResourceType::Texture);
-				matUI->PushTransientData(textureBindName, defaultWhiteTexture);
-			}
-			else
-			{
-				matUI->PushTransientData(textureBindName, batch.mTexture);
-			}
+			matUI->PushTransientData(textureBindName, batch.mTexture);
 			DX_DEVICE_CONTEXT->DrawIndexed(batch.mIndexCount, batch.mStartIndex, 0);	// 인덱스로 드로잉
 		}
 

@@ -20,4 +20,8 @@ public:
 	void Init() override;
 	void Update() override;
 	void End() override;
+
+protected:
+	virtual void RegisterDefaultResources() override;
+	virtual void UnregisterDefaultResources() override;
 };

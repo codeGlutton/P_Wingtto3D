@@ -10,6 +10,11 @@ void Resource::PostLoad()
 {
 	Super::PostLoad();
 	RESOURCE_MANAGER->NotifyToAddResource(std::static_pointer_cast<Resource>(shared_from_this()));
+
+	if (_mHeader == nullptr)
+	{
+		MakeHeader();
+	}
 }
 
 void Resource::BeginDestroy()
@@ -35,5 +40,5 @@ void Resource::SaveAsync(std::function<void()> callback) const
 
 void Resource::MakeHeader()
 {
-	//_mHeader = 
+	_mHeader = RESOURCE_MANAGER->CreateResourceHeader(GetName(), std::static_pointer_cast<Resource>(shared_from_this()));
 }

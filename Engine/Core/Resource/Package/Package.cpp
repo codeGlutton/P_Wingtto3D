@@ -15,6 +15,7 @@
 
 #include "Manager/ResourceManager.h"
 #include "Core/Resource/ResourceHeader.h"
+#include "Core/Resource/Resource.h"
 
 #include "Manager/WidgetStyleManager.h"
 #include "Graphics/Widget/Type/WidgetStyle.h"
@@ -269,6 +270,24 @@ std::shared_ptr<Object> ResourcePackage::RequestToCreateObject(const std::wstrin
 {
 	_mResource = RESOURCE_MANAGER->CreateResource(objectName, std::static_pointer_cast<ResourcePackage>(shared_from_this()), typeInfo, flags);
 	return _mResource;
+}
+
+std::shared_ptr<Resource> ResourcePackage::GetResource()
+{
+	std::shared_ptr<Resource> resource = nullptr;
+	if (IsValid() == true)
+	{
+		if (_mResource != nullptr)
+		{
+			resource = _mResource;
+			_mResource = nullptr;
+		}
+		else
+		{
+			resource = std::static_pointer_cast<Resource>(_mChildSharedObjects.begin()->second.lock());
+		}
+	}
+	return resource;
 }
 
 void WidgetStylePackage::RegisterPackage()

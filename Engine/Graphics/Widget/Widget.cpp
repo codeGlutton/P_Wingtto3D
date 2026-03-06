@@ -171,6 +171,11 @@ ReplyData Widget::OnMoveMouse(const WidgetGeometry& geometry, const std::shared_
     return ReplyData::Unhandled();
 }
 
+ReplyData Widget::OnWheelMouse(const WidgetGeometry& geometry, const std::shared_ptr<const PointEvent>& event)
+{
+    return ReplyData::Unhandled();
+}
+
 void Widget::OnEnterMouse(const WidgetGeometry& geometry, const std::shared_ptr<const PointEvent>& event)
 {
     if (mOnEnterMouse.IsBound() == true)

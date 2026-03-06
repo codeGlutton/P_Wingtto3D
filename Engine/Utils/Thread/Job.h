@@ -14,6 +14,10 @@ public:
 	Job(CallBackType&& callback) : _mCallback(std::move(callback))
 	{
 	}
+	~Job()
+	{
+		_mCallback = nullptr;
+	}
 
 	Job& operator=(const CallBackType& callback)
 	{

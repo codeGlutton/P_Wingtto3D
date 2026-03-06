@@ -32,6 +32,7 @@ public:
 		// 객체 스타일
 		// 초기 값으로 선택됨
 		DECLARE_WIDGET_ARG_CONST(std::shared_ptr<const TextBlockStyle>, Style)
+		DECLARE_INIT_WIDGET_ARG_CONST(uint32, PixelSize, 24u)
 
 		DECLARE_WIDGET_ARG_ATTRIBUTE(std::wstring, Text)
 		DECLARE_WIDGET_ARG_ATTRIBUTE(TextTransformPolicy, TransformPolicy)

@@ -9,10 +9,12 @@ To* Cast(From* src)
 {
 	if (src != nullptr)
 	{
+		// 타입 자체가 정적으로 변환이 가능한 경우
 		if constexpr (std::is_base_of_v<To, From> == true)
 		{
 			return static_cast<To*>(src);
 		}
+		// 인터페이스의 경우 포인터 오프셋 적용 (다중 상속 고려)
 		else if constexpr (IsInterface<To> == true)
 		{
 			bool isInherited = false;
@@ -22,6 +24,7 @@ To* Cast(From* src)
 				return reinterpret_cast<To*>(reinterpret_cast<std::size_t>(src) + offset);
 			}
 		}
+		// 실제 다이나믹 캐스팅이 요구되는 경우
 		else if (src->GetTypeInfo().template IsChildOf<To>() == true)
 		{
 			return reinterpret_cast<To*>(src);

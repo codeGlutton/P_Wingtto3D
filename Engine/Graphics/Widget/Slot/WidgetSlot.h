@@ -34,6 +34,7 @@ struct WidgetSlotBase abstract
 public:
 	struct Arguments abstract
 	{
+		virtual ~Arguments() = default;
 	};
 
 public:
@@ -44,7 +45,7 @@ public:
 		_mOwner(owner)
 	{
 	}
-	~WidgetSlotBase()
+	virtual ~WidgetSlotBase()
 	{
 	}
 
@@ -222,6 +223,7 @@ public:
 		_mOwner(owner)
 	{
 	}
+	virtual ~WidgetSlotContainer() = default;
 
 public:
 	std::shared_ptr<Widget> GetOwner() const

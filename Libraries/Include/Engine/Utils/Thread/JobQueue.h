@@ -68,7 +68,7 @@ public:
 
 	virtual void Execute() = 0;
 
-private:
+public:
 	virtual void Push(const std::shared_ptr<Job>& job, bool pushOnly = false) = 0;
 	virtual void Push(std::shared_ptr<Job>&& job, bool pushOnly = false) = 0;
 
@@ -85,7 +85,7 @@ class SequentialJobQueue : public JobQueue
 public:
 	virtual void Execute() override;
 
-private:
+public:
 	virtual void Push(const std::shared_ptr<Job>& job, bool pushOnly = false) override;
 	virtual void Push(std::shared_ptr<Job>&& job, bool pushOnly = false) override;
 };
@@ -99,7 +99,7 @@ public:
 	void Append(std::shared_ptr<ConcurrentJobQueue> jobQueue);
 	virtual void Execute() override;
 
-private:
+public:
 	virtual void Push(const std::shared_ptr<Job>& job, bool pushOnly = false) override;
 	virtual void Push(std::shared_ptr<Job>&& job, bool pushOnly = false) override;
 

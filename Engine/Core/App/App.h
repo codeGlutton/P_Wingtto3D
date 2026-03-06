@@ -70,6 +70,10 @@ public:
 	{
 		_mDesc.mMode->OnMoveMouse(event);
 	}
+	void OnWheelMouse(std::shared_ptr<PointEvent>& event)
+	{
+		_mDesc.mMode->OnWheelMouse(event);
+	}
 	void OnChangeFocus(std::shared_ptr<Widget>& focusWidget)
 	{
 		_mDesc.mMode->OnChangeFocus(focusWidget);
@@ -117,6 +121,12 @@ inline WPARAM App::Run(HINSTANCE hInst, const std::wstring& appName)
 	ASSERT_MSG(isRun == false, "Multiple run app");
 	isRun = true;
 
+#ifdef _DEBUG
+
+	//_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+
+#endif // _DEBUG
+
 	_mDesc.mHInstance = hInst;
 	_mDesc.mName = appName;
 	if (_mDesc.mMode == nullptr)
@@ -132,7 +142,7 @@ inline WPARAM App::Run(HINSTANCE hInst, const std::wstring& appName)
 	BOOT_SYSTEM->Boot();
 	// 모드 내 초기화
 	_mDesc.mMode->Init();
-	APP_WIN_MANAGER->CreateDefaultMainAppWindow<typename T::DefaultWindow>();
+	APP_WIN_MANAGER->CreateDefaultMainAppWindow<typename T::DefaultWindow>(L"Main");
 
 	MSG msg = { 0 };
 	while (msg.message != WM_QUIT)
@@ -155,6 +165,7 @@ inline WPARAM App::Run(HINSTANCE hInst, const std::wstring& appName)
 	BOOT_SYSTEM->Destroy();
 
 	isRun = false;
+	_mDesc.mMode = nullptr;
 	return msg.wParam;
 }
 

@@ -42,7 +42,7 @@ public:
 	DECALRE_WIDGET_ARGS_BEGIN(VirtualWindowContent)
 
 		DECLARE_INIT_WIDGET_ARG_CONST(bool, ShowHeader, true)
-		DECLARE_INIT_WIDGET_ARG_CONST(bool, ShouldAutosize, false)
+		DECLARE_INIT_WIDGET_ARG_CONST(bool, ShouldAutosize, true)
 		DECLARE_INIT_WIDGET_ARG_CONST(float, HeaderScale, 1.f)
 
 		DECLARE_INIT_WIDGET_ARG_CONST(Margin, ContentPadding, Margin(0.f))
@@ -143,7 +143,6 @@ private:
 	std::weak_ptr<const TextBlockStyle> _mTextStyle;
 
 private:
-	PROPERTY(_mHasContent)
-	bool _mHasContent;
+	bool _mHasContent = false;
 };
 

@@ -10,6 +10,12 @@ void WidgetTextCache::UpdateOnPrepass(const std::wstring& text, TextTransformPol
 	}
 	_mState = State::Updating;
 
+	if (_mIsResized == true)
+	{
+		_mIsResized = false;
+		return;
+	}
+
 	/* 캐싱 초기화 */
 
 	_mCharLocalCaches.clear();
@@ -20,11 +26,11 @@ void WidgetTextCache::UpdateOnPrepass(const std::wstring& text, TextTransformPol
 	_mScaleAscender = 0.f;
 	_mScaleMargin = 0.f;
 	_mTransformedText.clear();
-	_mDesiredSingleLineSize = Vec2(0.f);
+	_mDesiredSize = Vec2(0.f);
 
 	if (text.empty() == true || font.IsValid() == false)
 	{
-		_mDesiredSingleLineSize = Vec2(0.f);
+		_mDesiredSize = Vec2(0.f);
 		return;
 	}
 
@@ -95,13 +101,14 @@ void WidgetTextCache::UpdateOnPrepass(const std::wstring& text, TextTransformPol
 	preRenderScaleOffset.y += _mScaleMargin.mDown + _mScaleLineHeight;
 
 	// 한줄 DesiredSize 크기 계산 완료
-	_mDesiredSingleLineSize = preRenderScaleOffset;
+	_mDesiredSize = preRenderScaleOffset;
 }
 
 void WidgetTextCache::UpdateOnPaint(const Vec2& allottedSize, TextJustifyPolicy justifyPolicy, bool autoWrap)
 {
 	if (_mState != State::Updating)
 	{
+		_mIsResized = false;
 		return;
 	}
 	_mState = State::OnCache;
@@ -110,11 +117,12 @@ void WidgetTextCache::UpdateOnPaint(const Vec2& allottedSize, TextJustifyPolicy 
 	_mBoxOffset = Vec2::Zero;
 
 	// 텍스트가 비어있거나, Wrap을 요구하지 않는 경우, 사이즈가 충분한 경우 한줄로 출력
-	if (_mTransformedText.empty() == true || autoWrap == false || allottedSize.x > _mDesiredSingleLineSize.x)
+	if (_mTransformedText.empty() == true || autoWrap == false || allottedSize.x >= _mDesiredSize.x)
 	{
-		_mBoxOffset.x = AlignTextLine(_mDesiredSingleLineSize.x, allottedSize.x, justifyPolicy, 0, _mTransformedText.size());
-		_mBoxSize = _mDesiredSingleLineSize;
+		_mBoxOffset.x = ComputeTextLineOffset(_mDesiredSize.x, allottedSize.x, justifyPolicy);
+		_mBoxSize = _mDesiredSize;
 
+		_mIsResized = false;
 		_mCharLocalCaches.clear();
 		return;
 	}
@@ -167,14 +175,13 @@ void WidgetTextCache::UpdateOnPaint(const Vec2& allottedSize, TextJustifyPolicy 
 
 	_mBoxSize.x = allottedSize.x;
 	_mBoxSize.y = _mScaleMargin.mUp + lineIndex * _mScaleLineHeight + _mScaleMargin.mDown;
+	_mDesiredSize = _mBoxSize;
 	
-	_mCharLocalCaches.clear();
+	_mIsResized = true;
 }
 
-float WidgetTextCache::AlignTextLine(float desiredLineSizeX, float allottedSizeX, TextJustifyPolicy justifyPolicy, std::size_t startIndex, std::size_t endIndex)
+float WidgetTextCache::ComputeTextLineOffset(float desiredLineSizeX, float allottedSizeX, TextJustifyPolicy justifyPolicy)
 {
-	/* 줄 정렬 맞추기 */
-
 	float lineOffset = 0.f;
 	switch (justifyPolicy)
 	{
@@ -186,6 +193,14 @@ float WidgetTextCache::AlignTextLine(float desiredLineSizeX, float allottedSizeX
 		break;
 	}
 
+	return lineOffset;
+}
+
+float WidgetTextCache::AlignTextLine(float desiredLineSizeX, float allottedSizeX, TextJustifyPolicy justifyPolicy, std::size_t startIndex, std::size_t endIndex)
+{
+	/* 줄 정렬 맞추기 */
+
+	float lineOffset = ComputeTextLineOffset(desiredLineSizeX, allottedSizeX, justifyPolicy);
 	for (; startIndex < endIndex; ++startIndex)
 	{
 		WidgetCharRenderCache& renderCache = _mCharRenderCaches[startIndex];

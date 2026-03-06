@@ -63,6 +63,7 @@ public:
 	virtual void OnDoubleClickMouse(std::shared_ptr<AppWindow> target, std::shared_ptr<PointEvent>& event) = 0;
 
 	virtual void OnMoveMouse(std::shared_ptr<PointEvent>& event) = 0;
+	virtual void OnWheelMouse(std::shared_ptr<PointEvent>& event) = 0;
 
 	virtual void OnChangeFocus(std::shared_ptr<Widget>& focusWidget) = 0;
 

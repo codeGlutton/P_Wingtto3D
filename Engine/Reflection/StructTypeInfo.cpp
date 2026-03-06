@@ -129,6 +129,7 @@ void StructTypeInfo::Deserialize(Archive& archive, OUT void* inst) const
 			{
 				void* propertyPtr = iter->second->GetRawPtr(inst);
 				iter->second->GetTypeInfo().Deserialize(archive, propertyPtr);
+				break;
 			}
 		}
 	}

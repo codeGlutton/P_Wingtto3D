@@ -25,9 +25,9 @@ namespace KeyType
 		None = 0x00,
 		Start = 0x01,
 		MouseStart = 0x01,
-		KeyBoardStart = 0x05,
-		GamepadStart = 0x5F,
-		Last = 0x70,
+		KeyBoardStart = 0x06,
+		GamepadStart = 0x60,
+		Last = 0x71,
 	};
 
 	enum Mouse : uint8
@@ -35,6 +35,7 @@ namespace KeyType
 		LButton = MouseStart,
 		RButton,
 		MButton,
+		Wheel,
 		Pos,
 	};
 
@@ -111,12 +112,18 @@ namespace KeyType
 		GpadY,
 	};
 
-	enum Modifier : uint8
+	inline bool IsAlt(KeyType::Type key)
 	{
-		Alt = KeyBoard::LAlt | KeyBoard::RAlt,
-		Ctrl = KeyBoard::LCtrl | KeyBoard::RCtrl,
-		Shift = KeyBoard::LShift | KeyBoard::RShift
-	};
+		return key == KeyBoard::LAlt || key == KeyBoard::RAlt;
+	}
+	inline bool IsCtrl(KeyType::Type key)
+	{
+		return key == KeyBoard::LCtrl || key == KeyBoard::RCtrl;
+	}
+	inline bool IsShift(KeyType::Type key)
+	{
+		return key == KeyBoard::LShift || key == KeyBoard::RShift;
+	}
 }
 
 namespace KeyState

@@ -10,6 +10,8 @@
 
 #define RESOURCE_MANAGER ResourceManager::GetInst()
 
+DECLARE_MULTICAST_DELEGATE_1_PARAM(OnAddResourceHeader, std::shared_ptr<ResourceHeader>);
+
 class ResourceHeader;
 class ResourcePreviewPackage;
 class ResourcePackage;
@@ -38,11 +40,17 @@ public:
 	void Save() const override;
 	void Load() override;
 
+	/* 게임 스레드 Only */
 public:
+	/**
+	 * 전체적인 리소스들을 파악할 수 있도록 하기 위한 리소스 헤더 생성
+	 * \param target 타겟 리소스
+	 * \param flags 생성 플래그
+	 * \return 리소스 헤더 객체
+	 */
 	std::shared_ptr<ResourceHeader> CreateResourceHeader(std::shared_ptr<Resource> target = nullptr, ObjectCreateFlag::Type flags = ObjectCreateFlag::None);
 	std::shared_ptr<ResourceHeader> CreateResourceHeader(const std::wstring& objectName, std::shared_ptr<Resource> target = nullptr, ObjectCreateFlag::Type flags = ObjectCreateFlag::None);
 
-	/* 게임 스레드 Only */
 public:
 	/**
 	 * 게임 스레드 측에서 Object 파생 객체 리소스 가져오기. 필요시 패키징 로드
@@ -125,6 +133,9 @@ public:
 
 	void NotifyToAddRenderResource(DXSharedResourceType::Type type, std::shared_ptr<DXSharedResource> resource);
 	void NotifyToRemoveRenderResource(DXSharedResourceType::Type type, const std::wstring& resourcePath);
+
+public:
+	OnAddResourceHeader mOnAddResourceHeader;
 
 private:
 	std::shared_ptr<ResourcePreviewPackage> _mPackage;

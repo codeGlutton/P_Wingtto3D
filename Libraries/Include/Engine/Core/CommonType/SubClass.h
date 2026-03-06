@@ -131,3 +131,8 @@ public:
 private:
 	const ObjectTypeInfo* _mTypeInfo = nullptr;
 };
+
+template <class T, class U>
+bool operator==(const SubClass<T>& lhs, const SubClass<U>& rhs) noexcept {
+	return lhs.Get() == rhs.Get();
+}

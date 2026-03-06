@@ -14,15 +14,12 @@ public:
 	ThreadSafeRefCountData()
 	{
 		// 데이터를 복제해 전달만 해도, 안전하게 지정해둔 스레드에서 제거 가능
-		_mDestructor = [data = mData]() {
-			};
+		_mDestructor = [](const T& data) {};
 	}
 	ThreadSafeRefCountData(std::function<void(const T&)> destructor)
 	{
 		// 데이터를 복제해 전달만 해도, 안전하게 지정해둔 스레드에서 제거 가능
-		_mDestructor = [data = mData, destructor]() {
-			destructor(data);
-			};
+		_mDestructor = destructor;
 	}
 	~ThreadSafeRefCountData()
 	{
@@ -30,14 +27,22 @@ public:
 		{
 			if (_mDestructor != nullptr)
 			{
-				THREAD_MANAGER->PushGameThreadJob(ObjectPool<Job>::MakeShared(_mDestructor));
+				THREAD_MANAGER->PushGameThreadJob(ObjectPool<Job>::MakeShared(
+					[data = this->mData, destructor = this->_mDestructor]() {
+						destructor(data);
+					}
+				));
 			}
 		}
 		else if constexpr (MainThreadT == MainThreadType::Render)
 		{
 			if (_mDestructor != nullptr)
 			{
-				THREAD_MANAGER->PushRenderThreadLogicUpdateJob(ObjectPool<Job>::MakeShared(_mDestructor));
+				THREAD_MANAGER->PushRenderThreadLogicUpdateJob(ObjectPool<Job>::MakeShared(
+					[data = this->mData, destructor = this->_mDestructor]() {
+						destructor(data);
+					}
+				));
 			}
 		}
 	}
@@ -48,7 +53,7 @@ public:
 
 private:
 	// 지정 스레드에서 처리할 람다
-	std::function<void()> _mDestructor;
+	std::function<void(const T&)> _mDestructor;
 };
 
 template<typename T, MainThreadType::Type MainThreadT = MainThreadType::Game>

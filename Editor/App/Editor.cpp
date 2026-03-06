@@ -57,14 +57,25 @@ void Editor::OnDropFile(const wchar_t* fileFullPath)
 	{
 		// 텍스처
 		std::shared_ptr<Texture2D> texture = RESOURCE_MANAGER->LoadOrGetResource<Texture2D>(relativePath);
-		if (texture->HasBulkData() == true)
+
+		// 없다면 만들어주기
+		if (texture == nullptr)
 		{
-			EDITOR_LOG("Already loaded resource");
-			return;
+			EDITOR_LOG("Create texture to %s", ConvertWStringToUtf8(relativePath).c_str());
+
+			std::shared_ptr<ResourcePackage> package = PACKAGE_MANAGER->LoadPackage<ResourcePackage>(relativePath);
+			texture = RESOURCE_MANAGER->CreateResource<Texture2D>(package, ObjectCreateFlag::DeferredLoad);
+
+			std::shared_ptr<Texture2DBulkData> newBulkData;
+			ASSERT_MSG(TextureConvertor::LoadAndConvertToMemoryByFullPath(fileFullPath, newBulkData) == true, "Drop file is invalid");
+			
+			texture->PushBulkData(newBulkData);
+			texture->Save();
 		}
-		std::shared_ptr<Texture2DBulkData> newBulkData;
-		ASSERT_MSG(TextureConvertor::LoadAndConvertToMemoryByFullPath(fileFullPath, newBulkData) == true, "Drop file is invalid");
-		texture->PushBulkData(newBulkData);
+		else
+		{
+			EDITOR_LOG("Already loaded resource : %s", ConvertWStringToUtf8(relativePath).c_str());
+		}
 	}
 	else if (extStr == L".ttf" || extStr == L".otf")
 	{
@@ -77,13 +88,30 @@ void Editor::OnDropFile(const wchar_t* fileFullPath)
 		
 		for (auto& bulkData : newBulkDatas)
 		{
-			std::shared_ptr<Font> font = RESOURCE_MANAGER->LoadOrGetResource<Font>(relativePath.wstring() + L"_" + bulkData.mSuffixName);
-			if (font->HasBulkData() == true)
+			const std::wstring fontFullPath = (((
+				relativePath.replace_extension()
+				+= L"_")
+				+= bulkData.mSuffixName)
+				+= ext)
+				.wstring();
+
+			std::shared_ptr<Font> font = RESOURCE_MANAGER->LoadOrGetResource<Font>(fontFullPath);
+			
+			// 없다면 만들어주기
+			if (font == nullptr)
 			{
-				EDITOR_LOG("Already loaded resource");
-				return;
+				EDITOR_LOG("Create font to %s", ConvertWStringToUtf8(fontFullPath).c_str());
+
+				std::shared_ptr<ResourcePackage> package = PACKAGE_MANAGER->LoadPackage<ResourcePackage>(fontFullPath);
+				font = RESOURCE_MANAGER->CreateResource<Font>(package, ObjectCreateFlag::DeferredLoad);
+
+				font->PushBulkData(bulkData.mBulkData);
+				font->Save();
 			}
-			font->PushBulkData(bulkData.mBulkData);
+			else
+			{
+				EDITOR_LOG("Already loaded resource : %s", ConvertWStringToUtf8(fontFullPath).c_str());
+			}
 		}
 	}
 }
@@ -97,43 +125,48 @@ void Editor::BeginThread()
 
 void Editor::RegisterDefaultResources()
 {
-	std::wstring packagePath = PATH_MANAGER->GetEngineResourceFolderName();
+	AppModeBase::RegisterDefaultResources();
 
-	/* 메테리얼 */
+	const std::wstring packagePath = PATH_MANAGER->GetEngineResourceFolderName();
 
-	// UI
+	// 기본 흰 텍스처
 	{
-		std::wstring resourcePath = packagePath + L"\\M_UI";
-		std::shared_ptr<Material> matUI = RESOURCE_MANAGER->LoadOrGetResource<Material>(resourcePath);
+		const std::wstring resourcePath = packagePath + L"\\Texture\\T_White";
+		std::shared_ptr<Texture2D> whiteTex = RESOURCE_MANAGER->LoadOrGetResource<Texture2D>(resourcePath);
+
+		if (whiteTex == nullptr)
+		{
+			const std::wstring resourceFullPath = PATH_MANAGER->GetEngineResourcePath().wstring() + L"\\Texture\\T_White.png";
+			OnDropFile(resourceFullPath.c_str());
+
+			whiteTex = RESOURCE_MANAGER->LoadOrGetResource<Texture2D>(resourcePath);
+		}
+
+		whiteTex->GetProxy();
+		_mDefaultResources.push_back(whiteTex);
+	}
+
+	// 기본 폰트
+	{
+		const std::wstring resourcePath = packagePath + L"\\Font\\F_Cafe24Decobox_Regular";
+		std::shared_ptr<Font> defaultFont = RESOURCE_MANAGER->LoadOrGetResource<Font>(resourcePath);
 
 		// 없다면 만들어주기
-		if (matUI == nullptr)
+		if (defaultFont == nullptr)
 		{
-			DEBUG_LOG("Create UI material to %s", ConvertWStringToUtf8(resourcePath).c_str());
+			const std::wstring resourceFullPath = PATH_MANAGER->GetEngineResourcePath().wstring() + L"\\Font\\F_Cafe24Decobox.ttf";
+			OnDropFile(resourceFullPath.c_str());
 
-			std::shared_ptr<ResourcePackage> package = PACKAGE_MANAGER->LoadPackage<ResourcePackage>(resourcePath);
-			matUI = RESOURCE_MANAGER->CreateResource<Material>(package);
-
-			std::shared_ptr<MaterialBulkData> bulkData = std::make_shared<MaterialBulkData>();
-			bulkData->mSamplerStateDatas.push_back({ "linearWrapSS" , L"LinearWrap" });
-			bulkData->mBlendStateName = L"DefaultAlpha";
-			bulkData->mRasterizerStateName = L"BackCulling";
-			bulkData->mShaderName = L"UI";
-			matUI->UpdateProxy(
-				bulkData,
-				std::vector<std::pair<std::string, std::shared_ptr<ConstantDataBase>>>(),
-				std::vector<std::pair<std::string, std::shared_ptr<Texture2D>>>()
-			);
-
-			matUI->Save();
+			defaultFont = RESOURCE_MANAGER->LoadOrGetResource<Font>(resourcePath);
 		}
-		matUI->GetProxy();
-		_mDefaultResources.push_back(matUI);
+
+		defaultFont->GetProxies();
+		_mDefaultResources.push_back(defaultFont);
 	}
 }
 
 void Editor::UnregisterDefaultResources()
 {
-	_mDefaultResources.clear();
+	AppModeBase::UnregisterDefaultResources();
 }
 

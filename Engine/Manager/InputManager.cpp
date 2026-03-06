@@ -9,7 +9,9 @@
 
 #include "Utils/InputUtils.h"
 
-InputManager::InputManager()
+InputManager::InputManager() :
+    _mChangeFocusDelegateHandle(0),
+    _mChangeWindowModeDelegateHandle(0)
 {
 }
 
@@ -96,6 +98,10 @@ void InputManager::Destroy()
 
     _mWinKeyMessages.clear();
     _mState.reset();
+
+    _mDInput.Reset();
+    _mDInputKeyboard.Reset();
+    _mDInputMouse.Reset();
 }
 
 void InputManager::PushWinKeyMessage(const WindowMessageData& data)
@@ -174,15 +180,15 @@ void InputManager::ProcessWinKeyMessagesForWinInput()
                 _mState->mKeyStates[keyType] = KeyState::Press;
             }
 
-            if (keyType & KeyType::Alt)
+            if (KeyType::IsAlt(keyType) == true)
             {
                 _mState->mUseAlt = true;
             }
-            else if (keyType & KeyType::Ctrl)
+            else if (KeyType::IsCtrl(keyType) == true)
             {
                 _mState->mUseCtrl = true;
             }
-            else if (keyType & KeyType::Shift)
+            else if (KeyType::IsShift(keyType) == true)
             {
                 _mState->mUseShift = true;
             }
@@ -209,15 +215,15 @@ void InputManager::ProcessWinKeyMessagesForWinInput()
 
             _mState->mKeyStates[keyType] = KeyState::Release;
 
-            if (keyType & KeyType::Alt)
+            if (KeyType::IsAlt(keyType) == true)
             {
                 _mState->mUseAlt = IsActiveButtonState(_mState->mKeyStates[KeyType::LAlt]) || IsActiveButtonState(_mState->mKeyStates[KeyType::RAlt]);
             }
-            else if (keyType & KeyType::Ctrl)
+            else if (KeyType::IsCtrl(keyType) == true)
             {
                 _mState->mUseCtrl = IsActiveButtonState(_mState->mKeyStates[KeyType::LCtrl]) || IsActiveButtonState(_mState->mKeyStates[KeyType::RCtrl]);
             }
-            else if (keyType & KeyType::Shift)
+            else if (KeyType::IsShift(keyType) == true)
             {
                 _mState->mUseShift = IsActiveButtonState(_mState->mKeyStates[KeyType::LShift]) || IsActiveButtonState(_mState->mKeyStates[KeyType::RShift]);
             }
@@ -258,6 +264,7 @@ void InputManager::ProcessWinKeyMessagesForWinInput()
                 event->mKeyInfo.mKeyValueType = KeyValueType::Bool;
                 event->mPreMouseScreenPos = _mState->mCurrentMouseScreenPos;
                 event->mCurrentMouseScreenPos = POINT(currentMousePos.x, currentMousePos.y);
+                event->mWheelDelta = 0;
                 event->mHWnd = keyMessage.mHWnd;
                 event->mIsRepeat = _mState->mKeyStates[keyType] == KeyState::Hold;
                 event->mUseAlt = _mState->mUseAlt;
@@ -294,6 +301,7 @@ void InputManager::ProcessWinKeyMessagesForWinInput()
                 event->mKeyInfo.mKeyValueType = KeyValueType::Bool;
                 event->mPreMouseScreenPos = _mState->mCurrentMouseScreenPos;
                 event->mCurrentMouseScreenPos = POINT(currentMousePos.x, currentMousePos.y);
+                event->mWheelDelta = 0;
                 event->mHWnd = keyMessage.mHWnd;
                 event->mIsRepeat = _mState->mKeyStates[keyType] == KeyState::Hold;
                 event->mUseAlt = _mState->mUseAlt;
@@ -329,6 +337,7 @@ void InputManager::ProcessWinKeyMessagesForWinInput()
                 event->mKeyInfo.mKeyValueType = KeyValueType::Bool;
                 event->mPreMouseScreenPos = _mState->mCurrentMouseScreenPos;
                 event->mCurrentMouseScreenPos = POINT(currentMousePos.x, currentMousePos.y);
+                event->mWheelDelta = 0;
                 event->mHWnd = keyMessage.mHWnd;
                 event->mIsRepeat = _mState->mKeyStates[keyType] == KeyState::Hold;
                 event->mUseAlt = _mState->mUseAlt;
@@ -357,6 +366,7 @@ void InputManager::ProcessWinKeyMessagesForWinInput()
                 event->mKeyInfo.mKeyValueType = KeyValueType::Bool;
                 event->mPreMouseScreenPos = _mState->mCurrentMouseScreenPos;
                 event->mCurrentMouseScreenPos = POINT(currentMousePos.x, currentMousePos.y);
+                event->mWheelDelta = 0;
                 event->mHWnd = keyMessage.mHWnd;
                 event->mIsRepeat = false;
                 event->mUseAlt = _mState->mUseAlt;
@@ -385,6 +395,7 @@ void InputManager::ProcessWinKeyMessagesForWinInput()
                 event->mKeyInfo.mKeyValueType = KeyValueType::Bool;
                 event->mPreMouseScreenPos = _mState->mCurrentMouseScreenPos;
                 event->mCurrentMouseScreenPos = POINT(currentMousePos.x, currentMousePos.y);
+                event->mWheelDelta = 0;
                 event->mHWnd = keyMessage.mHWnd;
                 event->mIsRepeat = false;
                 event->mUseAlt = _mState->mUseAlt;
@@ -413,6 +424,7 @@ void InputManager::ProcessWinKeyMessagesForWinInput()
                 event->mKeyInfo.mKeyValueType = KeyValueType::Bool;
                 event->mPreMouseScreenPos = _mState->mCurrentMouseScreenPos;
                 event->mCurrentMouseScreenPos = POINT(currentMousePos.x, currentMousePos.y);
+                event->mWheelDelta = 0;
                 event->mHWnd = keyMessage.mHWnd;
                 event->mIsRepeat = false;
                 event->mUseAlt = _mState->mUseAlt;
@@ -440,6 +452,7 @@ void InputManager::ProcessWinKeyMessagesForWinInput()
                 event->mKeyInfo.mKeyValueType = KeyValueType::Bool;
                 event->mPreMouseScreenPos = _mState->mCurrentMouseScreenPos;
                 event->mCurrentMouseScreenPos = POINT(currentMousePos.x, currentMousePos.y);
+                event->mWheelDelta = 0;
                 event->mHWnd = keyMessage.mHWnd;
                 event->mIsRepeat = false;
                 event->mUseAlt = _mState->mUseAlt;
@@ -467,6 +480,7 @@ void InputManager::ProcessWinKeyMessagesForWinInput()
                 event->mKeyInfo.mKeyValueType = KeyValueType::Bool;
                 event->mPreMouseScreenPos = _mState->mCurrentMouseScreenPos;
                 event->mCurrentMouseScreenPos = POINT(currentMousePos.x, currentMousePos.y);
+                event->mWheelDelta = 0;
                 event->mHWnd = keyMessage.mHWnd;
                 event->mIsRepeat = false;
                 event->mUseAlt = _mState->mUseAlt;
@@ -494,6 +508,7 @@ void InputManager::ProcessWinKeyMessagesForWinInput()
                 event->mKeyInfo.mKeyValueType = KeyValueType::Bool;
                 event->mPreMouseScreenPos = _mState->mCurrentMouseScreenPos;
                 event->mCurrentMouseScreenPos = POINT(currentMousePos.x, currentMousePos.y);
+                event->mWheelDelta = 0;
                 event->mHWnd = keyMessage.mHWnd;
                 event->mIsRepeat = false;
                 event->mUseAlt = _mState->mUseAlt;
@@ -525,6 +540,7 @@ void InputManager::ProcessWinKeyMessagesForWinInput()
             event->mKeyInfo.mKeyValueType = KeyValueType::Vec2;
             event->mPreMouseScreenPos = _mState->mPreMouseScreenPos;
             event->mCurrentMouseScreenPos = _mState->mCurrentMouseScreenPos;
+            event->mWheelDelta = 0;
             event->mHWnd = keyMessage.mHWnd;
             event->mIsRepeat = false;
             event->mUseAlt = _mState->mUseAlt;
@@ -562,6 +578,26 @@ void InputManager::ProcessWinKeyMessagesForWinInput()
             APP->OnMoveMouse(event);
 
             break;
+        }
+
+        case WM_MOUSEWHEEL:
+        {
+            int32 wheelDelta = GET_WHEEL_DELTA_WPARAM(keyMessage.mWParam);
+            if (wheelDelta != 0)
+            {
+                std::shared_ptr<PointEvent> event = ObjectPool<PointEvent>::MakeShared();
+                event->mKeyInfo.mType = KeyType::Mouse::Wheel;
+                event->mKeyInfo.mKeyValueType = KeyValueType::Float;
+                event->mPreMouseScreenPos = _mState->mPreMouseScreenPos;
+                event->mCurrentMouseScreenPos = _mState->mCurrentMouseScreenPos;
+                event->mWheelDelta = wheelDelta;
+                event->mHWnd = keyMessage.mHWnd;
+                event->mIsRepeat = false;
+                event->mUseAlt = _mState->mUseAlt;
+                event->mUseCtrl = _mState->mUseCtrl;
+                event->mUseShift = _mState->mUseShift;
+                APP->OnMoveMouse(event);
+            }
         }
         }
     }
@@ -858,6 +894,7 @@ void InputManager::UpdateDInputState()
                         event->mKeyInfo.mKeyValueType = KeyValueType::Bool;
                         event->mPreMouseScreenPos = _mState->mPreMouseScreenPos;
                         event->mCurrentMouseScreenPos = _mState->mCurrentMouseScreenPos;
+                        event->mWheelDelta = 0;
                         event->mHWnd = hWnd;
                         event->mIsRepeat = _mState->mKeyStates[KeyType::Mouse::LButton] == KeyState::Hold;
                         event->mUseAlt = _mState->mUseAlt;
@@ -880,6 +917,7 @@ void InputManager::UpdateDInputState()
                         event->mKeyInfo.mKeyValueType = KeyValueType::Bool;
                         event->mPreMouseScreenPos = _mState->mPreMouseScreenPos;
                         event->mCurrentMouseScreenPos = _mState->mCurrentMouseScreenPos;
+                        event->mWheelDelta = 0;
                         event->mIsRepeat = false;
                         event->mUseAlt = _mState->mUseAlt;
                         event->mUseCtrl = _mState->mUseCtrl;
@@ -888,6 +926,23 @@ void InputManager::UpdateDInputState()
                         APP->OnReleaseMouse(event);
                     }
                 }
+            }
+
+            int32 wheelDelta = _mDInputMouseState.lZ;
+            if (wheelDelta != 0)
+            {
+                std::shared_ptr<PointEvent> event = ObjectPool<PointEvent>::MakeShared();
+                event->mKeyInfo.mType = KeyType::Mouse::Wheel;
+                event->mKeyInfo.mKeyValueType = KeyValueType::Float;
+                event->mPreMouseScreenPos = _mState->mPreMouseScreenPos;
+                event->mCurrentMouseScreenPos = _mState->mCurrentMouseScreenPos;
+                event->mWheelDelta = wheelDelta;
+                event->mIsRepeat = false;
+                event->mUseAlt = _mState->mUseAlt;
+                event->mUseCtrl = _mState->mUseCtrl;
+                event->mUseShift = _mState->mUseShift;
+
+                APP->OnWheelMouse(event);
             }
         }
     }
@@ -899,6 +954,7 @@ void InputManager::UpdateDInputState()
         event->mKeyInfo.mKeyValueType = KeyValueType::Vec2;
         event->mPreMouseScreenPos = _mState->mPreMouseScreenPos;
         event->mCurrentMouseScreenPos = _mState->mCurrentMouseScreenPos;
+        event->mWheelDelta = 0;
         event->mIsRepeat = false;
         event->mUseAlt = _mState->mUseAlt;
         event->mUseCtrl = _mState->mUseCtrl;
@@ -1120,6 +1176,7 @@ void InputManager::UpdateAdditionalMouseState()
                 event->mKeyInfo.mKeyValueType = KeyValueType::Bool;
                 event->mPreMouseScreenPos = _mState->mPreMouseScreenPos;
                 event->mCurrentMouseScreenPos = _mState->mCurrentMouseScreenPos;
+                event->mWheelDelta = 0;
                 event->mHWnd = hWnd;
                 event->mIsRepeat = false;
                 event->mUseAlt = _mState->mUseAlt;
@@ -1146,6 +1203,7 @@ void InputManager::UpdateAdditionalMouseState()
                 event->mKeyInfo.mKeyValueType = KeyValueType::Bool;
                 event->mPreMouseScreenPos = _mState->mPreMouseScreenPos;
                 event->mCurrentMouseScreenPos = _mState->mCurrentMouseScreenPos;
+                event->mWheelDelta = 0;
                 event->mHWnd = hWnd;
                 event->mIsRepeat = false;
                 event->mUseAlt = _mState->mUseAlt;

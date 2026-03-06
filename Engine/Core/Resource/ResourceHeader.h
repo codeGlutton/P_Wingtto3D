@@ -14,15 +14,15 @@ class ResourceHeader : public Object
 
 	friend class ResourceManager;
 
+protected:
+	virtual void PostLoad() override;
+
 public:
 	PROPERTY(mResourceName)
 	std::wstring mResourceName;
-	PROPERTY(mResourcePtr)
-	SoftObjectPtr<Package> mResourcePtr;
+	PROPERTY(mResourcePath)
+	SoftObjectPtr<Resource> mResourcePath;
 	PROPERTY(mResourceTypeInfo)
 	SubClass<Resource> mResourceTypeInfo;
-
-private:
-	std::weak_ptr<Resource> _mTarget;
 };
 

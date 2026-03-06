@@ -12,6 +12,7 @@ void GlobalWorkerThread::Work()
 
 ThreadManager::ThreadManager() :
 	_mIsAlive(true),
+	_mIsShutDown(false),
 	_mGlobalConcurrentJobQueue(std::make_shared<ConcurrentJobQueue>()),
 	_mGameThreadJobQueue(std::make_shared<MPSCJobQueue>()),
 	_mRenderThreadSceneUpdateJobQueue(std::make_shared<SceneJobQueue>()),
@@ -121,15 +122,16 @@ void ThreadManager::Join(bool isForced)
 		}
 	}
 	_mThreads.clear();
+	_mIsShutDown = true;
 }
 
 void ThreadManager::PushGameThreadJob(std::shared_ptr<Job> job)
 {
-	if (job == nullptr)
+	if (job == nullptr || IsAlive() == false)
 	{
 		return;
 	}
-	_mGameThreadJobQueue->DoAsync(*job);
+	_mGameThreadJobQueue->Push(job);
 }
 
 void ThreadManager::DoGameJob()
@@ -145,29 +147,29 @@ void ThreadManager::ClearGameJob()
 
 void ThreadManager::PushRenderThreadLogicUpdateJob(std::shared_ptr<Job> job)
 {
-	if (job == nullptr)
+	if (job == nullptr || _mIsShutDown == true)
 	{
 		return;
 	}
-	_mRenderThreadLogicUpdateJobQueue->DoAsync(*job);
+	_mRenderThreadLogicUpdateJobQueue->Push(job);
 }
 
 void ThreadManager::PushRenderThreadSceneUpdateJob(std::shared_ptr<JobContext<float>> job)
 {
-	if (job == nullptr)
+	if (job == nullptr || _mIsShutDown == true)
 	{
 		return;
 	}
-	_mRenderThreadSceneUpdateJobQueue->DoAsync(*job);
+	_mRenderThreadSceneUpdateJobQueue->Push(job);
 }
 
 void ThreadManager::PushRenderThreadRenderJob(std::shared_ptr<Job> job)
 {
-	if (job == nullptr)
+	if (job == nullptr || _mIsShutDown == true)
 	{
 		return;
 	}
-	_mRenderThreadRenderJobQueue->DoAsync(*job);
+	_mRenderThreadRenderJobQueue->Push(job);
 }
 
 void ThreadManager::DoRenderJob()
@@ -192,20 +194,28 @@ void ThreadManager::ClearRenderJob()
 
 void ThreadManager::PushGlobalSequentialJobQ(std::shared_ptr<SequentialJobQueue> jobQueue)
 {
+	if (_mIsShutDown == true)
+	{
+		return;
+	}
 	_mGlobalSequentialJobQueues.Push(jobQueue);
 }
 
 void ThreadManager::PushGlobalConcurrentJob(std::shared_ptr<Job> job, bool pushOnly)
 {
-	if (job == nullptr)
+	if (job == nullptr || _mIsShutDown == true)
 	{
 		return;
 	}
-	_mGlobalConcurrentJobQueue->DoAsync(*job, pushOnly);
+	_mGlobalConcurrentJobQueue->Push(job, pushOnly);
 }
 
 void ThreadManager::PushGlobalConcurrentJobQ(std::shared_ptr<ConcurrentJobQueue> jobQueue)
 {
+	if (_mIsShutDown == true)
+	{
+		return;
+	}
 	_mGlobalConcurrentJobQueue->Append(jobQueue);
 }
 

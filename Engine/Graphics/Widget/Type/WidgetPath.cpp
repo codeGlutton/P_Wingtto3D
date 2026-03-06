@@ -6,23 +6,15 @@
 
 WidgetPath WidgetPath::GetPathDownTo(std::shared_ptr<Widget> widget)
 {
-	std::stack<std::shared_ptr<Widget>> widgetStack;
+	WidgetPath path;
 	while (widget != nullptr)
 	{
-		widgetStack.push(widget);
+		path.mWidgets.push_back(ArrangedWidget(widget, widget->GetScreenGeometry()));
 		widget = widget->GetParent();
 	}
-
-	WidgetPath path;
-	if (widgetStack.empty() == false)
+	if (path.mWidgets.empty() == false)
 	{
-		path.mRootWindow = std::static_pointer_cast<AppWindow>(widgetStack.top());
-		while (widgetStack.empty() == false)
-		{
-			std::shared_ptr<Widget> topWidget = widgetStack.top();
-			path.mWidgets.push_back(ArrangedWidget(topWidget, topWidget->GetScreenGeometry()));
-			widgetStack.pop();
-		}
+		path.mRootWindow = std::static_pointer_cast<AppWindow>(path.mWidgets.back().mWidget);
 	}
 
 	return path;

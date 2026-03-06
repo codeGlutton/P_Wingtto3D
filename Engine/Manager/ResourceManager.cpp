@@ -29,6 +29,8 @@ void ResourceManager::Destroy()
 #ifdef _EDITOR
 	Save();
 #endif
+	mOnAddResourceHeader.Clear();
+	
 	_mHeaders.clear();
 	_mPackage = nullptr;
 }
@@ -60,9 +62,18 @@ std::shared_ptr<ResourceHeader> ResourceManager::CreateResourceHeader(std::share
 
 std::shared_ptr<ResourceHeader> ResourceManager::CreateResourceHeader(const std::wstring& objectName, std::shared_ptr<Resource> target, ObjectCreateFlag::Type flags)
 {
-	std::shared_ptr<ResourceHeader> resourceHeader = NewObject<ResourceHeader>(_mPackage, objectName, flags);
-	resourceHeader->_mTarget = target;
-
+	bool isDeferredRequest = (flags & ObjectCreateFlag::DeferredLoad);
+	std::shared_ptr<ResourceHeader> resourceHeader = NewObject<ResourceHeader>(_mPackage, objectName, ObjectCreateFlag::Type(flags | ObjectCreateFlag::DeferredLoad));
+	if (target != nullptr)
+	{
+		resourceHeader->mResourceName = target->GetName();
+		resourceHeader->mResourcePath = target;
+		resourceHeader->mResourceTypeInfo = &target->GetTypeInfo();
+	}
+	if (isDeferredRequest == false)
+	{
+		resourceHeader->PostLoad();
+	}
 	return resourceHeader;
 }
 
@@ -76,16 +87,16 @@ std::shared_ptr<Resource> ResourceManager::LoadOrGetResource(const std::wstring&
 	ASSERT_MSG(typeInfo->IsChildOf<Resource>() == true, "GetResource func is not allowed to create non Resource class");
 	
 	std::shared_ptr<ResourcePackage> package = PACKAGE_MANAGER->LoadPackage<ResourcePackage>(resourcePath);
+	std::shared_ptr<Resource> resource = package->GetResource();
 #ifdef _EDITOR
-	if (package->IsValid() == false)
+	if (resource == nullptr)
 	{
 		DEBUG_LOG("Try to load non existent resource");
-		return nullptr;
 	}
 #else
-	ASSERT_MSG(package->IsValid() == true, "Try to load non existent resource");
+	ASSERT_MSG(resource != nullptr, "Try to load non existent resource");
 #endif
-	return package->GetResource();
+	return resource;
 }
 
 void ResourceManager::LoadOrGetResourceAsync(const std::wstring& resourcePath, const ObjectTypeInfo* typeInfo, std::function<void(std::shared_ptr<Resource>)> callback)
@@ -99,17 +110,16 @@ void ResourceManager::LoadOrGetResourceAsync(const std::wstring& resourcePath, c
 	ASSERT_MSG(typeInfo->IsChildOf<Resource>() == true, "GetResource func is not allowed to create non Resource class");
 
 	PACKAGE_MANAGER->LoadPackageAsync<ResourcePackage>(resourcePath, [callback, typeInfo](std::shared_ptr<Package> package) {
+		std::shared_ptr<Resource> resource = std::static_pointer_cast<ResourcePackage>(package)->GetResource();
 #ifdef _EDITOR
-		if (package->IsValid() == false)
+		if (resource == nullptr)
 		{
-			DEBUG_LOG("Try to load non existent resource. So create new package");
-			std::shared_ptr<Resource> resource = RESOURCE_MANAGER->CreateResource(std::static_pointer_cast<ResourcePackage>(package), typeInfo, ObjectCreateFlag::DeferredLoad);
-			callback(resource);
+			DEBUG_LOG("Try to load non existent resource");
 		}
 #else
-		ASSERT_MSG(package->IsValid() == true, "Try to load non existent resource");
+		ASSERT_MSG(resource != nullptr, "Try to load non existent resource");
 #endif
-		callback(std::static_pointer_cast<ResourcePackage>(package)->GetResource());
+		callback(resource);
 		});
 }
 
@@ -134,9 +144,8 @@ std::shared_ptr<Resource> ResourceManager::CreateResource(const std::wstring& ob
 
 void ResourceManager::NotifyToAddResourceHeader(std::shared_ptr<ResourceHeader> resourceHeader)
 {
-	ASSERT_MSG(resourceHeader != nullptr, "Can't add nullptr resource header");
-
-	std::wstring resourcePath = resourceHeader->mResourcePtr.GetFullPath();
+	ASSERT_MSG(resourceHeader != nullptr && resourceHeader->mResourceTypeInfo != nullptr, "Can't add nullptr resource header");
+	std::wstring resourcePath = resourceHeader->mResourcePath.GetFullPath();
 
 	// 이미 있는 리소스 헤더면 반환
 	auto headerIter = _mHeaders.find(resourcePath);
@@ -144,7 +153,10 @@ void ResourceManager::NotifyToAddResourceHeader(std::shared_ptr<ResourceHeader> 
 	{
 		return;
 	}
-	_mHeaders[resourcePath] = std::move(resourceHeader);
+	_mHeaders[resourcePath] = resourceHeader;
+	_mClassFilter[resourceHeader->mResourceTypeInfo.Get()].insert(resourcePath);
+
+	mOnAddResourceHeader.Multicast(resourceHeader);
 }
 
 void ResourceManager::NotifyToAddResource(std::shared_ptr<Resource> resource)

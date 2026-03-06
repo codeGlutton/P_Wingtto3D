@@ -33,7 +33,7 @@ uint32 PanelWidget::PaintArrangedChildren(OUT WindowRenderElementContainer& draw
 		{
 			if (IsChildWidgetCulling(currentCulling, arrangedWidget) == false)
 			{
-				uint32 childAccLayerId = arrangedWidget.mWidget->Paint(drawElements, maxChildAccLayerId, args, arrangedWidget.mGeometry, currentCulling, contentInheritedColor);
+				uint32 childAccLayerId = arrangedWidget.mWidget->Paint(drawElements, maxChildAccLayerId, childArgs, arrangedWidget.mGeometry, currentCulling, contentInheritedColor);
 				if (maxChildAccLayerId < childAccLayerId)
 				{
 					maxChildAccLayerId = childAccLayerId;

@@ -26,6 +26,10 @@ void VirtualWindowContent::PostLoad()
 		_mHeaderLeft = std::static_pointer_cast<HorizonBox::Slot>(_mTitleBarWidget->GetChildren().GetSlot(0ull));
 		_mHeaderRight = std::static_pointer_cast<HorizonBox::Slot>(_mTitleBarWidget->GetChildren().GetSlot(2ull));
 	}
+	if (_mContentBorder != nullptr && _mContentBorder->GetContent() != nullptr)
+	{
+		_mHasContent = true;
+	}
 }
 
 void VirtualWindowContent::OnConstruct(const Arguments& args)
@@ -47,6 +51,8 @@ void VirtualWindowContent::OnConstruct(const Arguments& args)
 
 	_mHeaderLeft.reset();
 	_mHeaderRight.reset();
+	_mHasContent = true;
+
 	std::shared_ptr<VerticalBox::Slot> titleBarSlot = nullptr;
 
 
@@ -100,6 +106,7 @@ void VirtualWindowContent::OnConstruct(const Arguments& args)
 								.Visibility(VisibilityType::SelfHitTestInvisible)
 									+ Border::MakeSlot()
 										.Padding(GetContentPadding())
+										.VerticalAlignment(SlotAlignmentType::Middle)
 										[
 											// 임시 콘텐츠
 											NEW_EDIT_WIDGET(TextBlock)
@@ -128,10 +135,11 @@ void VirtualWindowContent::OnConstruct(const Arguments& args)
 			+ HorizonBox::MakeSlot() // 타이틀
 				.AllottedRate(1.f)
 				.VerticalAlignment(SlotAlignmentType::Down)
-				.Padding(Margin(0.f))
+				.Padding(Margin(2.f, 0.f))
 				[
 					NEW_EDIT_WIDGET(TextBlock)
 						.Style(_mTextStyle.lock())
+						.PixelSize(18)
 						.Text_Bind(Attribute<std::wstring>::OnGet::Binder::BIND_DYNAMIC(shared_from_this(), GetContentName))
 						.Visibility(VisibilityType::SelfHitTestInvisible)
 						.JustifyPolicy(TextJustifyPolicy::Left)

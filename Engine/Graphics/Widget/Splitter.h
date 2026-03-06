@@ -57,6 +57,9 @@ class Splitter : public PanelWidget
 
 public:
 	Splitter();
+	~Splitter()
+	{
+	}
 
 	/* 슬롯 구조체 정의 */
 public:

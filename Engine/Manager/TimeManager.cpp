@@ -101,6 +101,12 @@ void TimeManager::Update()
 
 void TimeManager::Destroy()
 {
+	for (auto& phase : _mPhases)
+	{
+		phase.mAsyncTargets.clear();
+		phase.mSyncTargets.clear();
+	}
+	_mTargets.clear();
 }
 
 void TimeManager::UpdateTime()

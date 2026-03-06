@@ -37,6 +37,11 @@ public:
 		return _mScope;
 	}
 
+	bool IsValid() const
+	{
+		return _mChildSharedObjects.empty() == false;
+	}
+
 protected:
 	const std::vector<std::string>& GetExternalPackageClassNames(std::shared_ptr<ObjectLinker> linker) const;
 	const std::vector<std::wstring>& GetExternalPackagePaths(std::shared_ptr<ObjectLinker> linker) const;
@@ -98,15 +103,8 @@ private:
 	virtual std::shared_ptr<Object> RequestToCreateObject(const std::wstring& objectName, const ObjectTypeInfo* typeInfo, ObjectCreateFlag::Type flags) override;
 
 public:
-	std::shared_ptr<Resource> GetResource()
-	{
-		return std::move(_mResource);
-	}
-	bool IsValid() const
-	{
-		return _mResource != nullptr;
-	}
-
+	std::shared_ptr<Resource> GetResource();
+	
 private:
 	std::shared_ptr<Resource> _mResource;
 };

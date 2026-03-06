@@ -5,6 +5,9 @@
 class DXResource : public std::enable_shared_from_this<DXResource>
 {
 public:
+	virtual ~DXResource() = default;
+
+public:
 	inline bool IsUpdatable() const
 	{
 		return _mResourceFlags & DXResourceFlag::Updatable;

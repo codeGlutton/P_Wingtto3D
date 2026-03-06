@@ -176,18 +176,6 @@ void RenderThread::RegisterDefaultRuntimeResources()
 
 		_mDefaultResources.push_back(state);
 	}
-
-	/* 텍스처 */
-
-	// 기본 흰 배경
-	{
-		std::shared_ptr<DXConstTexture2D> texture = RESOURCE_MANAGER->CreateOrGetRuntimeRenderResource<DXConstTexture2D>(L"White", DXSharedResourceType::Texture);
-
-		const float whitePixel[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
-		texture->Init(&whitePixel, 1, 1, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, DXResourceUsageFlag::Pixel);
-
-		_mDefaultResources.push_back(texture);
-	}
 }
 
 void RenderThread::UnregisterDefaultRuntimeResources()

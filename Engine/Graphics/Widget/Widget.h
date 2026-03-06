@@ -203,6 +203,8 @@ DECLARE_DYNAMIC_DELEGATE_1_PARAM(OnCallLeavePointEvent, const std::shared_ptr<co
 
 struct WidgetArgumentsBase abstract
 {
+	virtual ~WidgetArgumentsBase() = default;
+
 	WIDGET_ARG_ATTRIBUTE_PROPERTY(VisibilityType::Flag, Visibility);
 	WIDGET_ARG_ATTRIBUTE_PROPERTY(Transform2D, RenderTransform) = Transform2D();
 	WIDGET_ARG_ATTRIBUTE_PROPERTY(Vec2, RenderTransformPivot) = Vec2(0.5f);
@@ -352,6 +354,7 @@ public:
 	virtual ReplyData OnReleaseMouse(const WidgetGeometry& geometry, const std::shared_ptr<const PointEvent>& event);
 	virtual ReplyData OnDoubleClickMouse(const WidgetGeometry& geometry, const std::shared_ptr<const PointEvent>& event);
 	virtual ReplyData OnMoveMouse(const WidgetGeometry& geometry, const std::shared_ptr<const PointEvent>& event);
+	virtual ReplyData OnWheelMouse(const WidgetGeometry& geometry, const std::shared_ptr<const PointEvent>& event);
 
 	/* Focus 연관성 없음 */
 public:

@@ -127,6 +127,7 @@ private:
 
 private:
 	std::atomic<bool> _mIsAlive;
+	bool _mIsShutDown;
 
 	/* 디버깅 */
 private:

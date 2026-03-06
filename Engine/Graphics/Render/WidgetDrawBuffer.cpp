@@ -1,6 +1,7 @@
 ﻿#include "pch.h"
 #include "WidgetDrawBuffer.h"
 
+#include "Manager/PathManager.h"
 #include "Manager/ResourceManager.h"
 
 #include "Core/App/AppWindow/AppWindow.h"
@@ -16,6 +17,12 @@ void WindowRenderElementContainer::CreateBoxElement(uint32 layerId, const Widget
     }
 
     std::unique_ptr<WidgetRenderBoxElement> box = std::make_unique<WidgetRenderBoxElement>();
+
+    std::shared_ptr<Texture2D> defaultBoxTexture = RESOURCE_MANAGER->LoadOrGetResource<Texture2D>(
+        PATH_MANAGER->GetEngineResourceFolderName() + L"\\Texture\\T_White"
+    );
+    box->mResource = defaultBoxTexture->GetProxy()->mData;
+
     switch (brush.mType)
     {
     case WidgetBrushType::Image:

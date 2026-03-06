@@ -42,6 +42,18 @@ void PackageManager::Init()
 
 void PackageManager::Destroy()
 {
+	_mWaitPackages.clear();
+	for (auto& package : _mLoadedPackages)
+	{
+		std::shared_ptr<Package> packageRef = package.second.lock();
+		std::shared_ptr<ResourcePackage> resourcePackageRef = CastSharedPointer<ResourcePackage>(packageRef);
+		if (resourcePackageRef != nullptr)
+		{
+			resourcePackageRef->GetResource();
+		}
+	}
+	_mLoadedPackages.clear();
+	_mAsyncStorage.reset();
 }
 
 std::shared_ptr<Package> PackageManager::GetLoadedPackage(const std::wstring& packagePath) const

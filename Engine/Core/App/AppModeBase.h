@@ -27,6 +27,7 @@ public:
 	virtual void OnDoubleClickMouse(std::shared_ptr<AppWindow> target, std::shared_ptr<PointEvent>& event) override;
 
 	virtual void OnMoveMouse(std::shared_ptr<PointEvent>& event) override;
+	virtual void OnWheelMouse(std::shared_ptr<PointEvent>& event) override;
 
 	virtual void OnChangeFocus(std::shared_ptr<Widget>& focusWidget) override;
 

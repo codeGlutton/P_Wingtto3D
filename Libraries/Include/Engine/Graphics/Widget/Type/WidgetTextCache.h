@@ -61,7 +61,7 @@ public:
 	{
 		_mState = State::Dirty;
 	}
-	void MarkOnlyLineDirty()
+	void MarkPaintDirty()
 	{
 		_mState = State::Updating;
 	}
@@ -71,6 +71,10 @@ public:
 	{
 		return _mState != State::OnCache;
 	}
+	bool IsResized() const
+	{
+		return _mIsResized;
+	}
 	State GetState() const
 	{
 		return _mState;
@@ -79,9 +83,9 @@ public:
 	{
 		return _mTransformedText;
 	}
-	const Vec2& GetDesiredSingleLineSize() const
+	const Vec2& GetDesiredSize() const
 	{
-		return _mDesiredSingleLineSize;
+		return _mDesiredSize;
 	}
 	const Vec2& GetBoxSize() const
 	{
@@ -101,6 +105,11 @@ public:
 	}
 
 private:
+	float ComputeTextLineOffset(
+		float desiredLineSizeX,
+		float allottedSizeX,
+		TextJustifyPolicy justifyPolicy
+	);
 	float AlignTextLine(
 		float desiredLineSizeX, 
 		float allottedSizeX, 
@@ -117,13 +126,14 @@ private:
 
 private:
 	std::wstring _mTransformedText;
-	Vec2 _mDesiredSingleLineSize;
+	Vec2 _mDesiredSize;
 
 private:
 	Vec2 _mBoxSize;
 	Vec2 _mBoxOffset;
 
 private:
+	bool _mIsResized = false;
 	std::vector<WidgetCharLocalCache> _mCharLocalCaches;
 	std::vector<WidgetCharRenderCache> _mCharRenderCaches;
 };

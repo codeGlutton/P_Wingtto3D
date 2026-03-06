@@ -9,6 +9,9 @@ class WidgetPath;
 struct InputEvent
 {
 public:
+	virtual ~InputEvent() = default;
+
+public:
 	virtual bool IsPointEvent() const
 	{
 		return false;
@@ -61,12 +64,16 @@ public:
 	KeyInfo mKeyInfo;
 	POINT mPreMouseScreenPos;
 	POINT mCurrentMouseScreenPos;
+	int32 mWheelDelta;
 	HWND mHWnd;
 };
 
 struct DragDropPayload
 {
 	GEN_STRUCT_REFLECTION(DragDropPayload)
+
+public:
+	virtual ~DragDropPayload() = default;
 };
 
 struct DragDropEvent : public PointEvent

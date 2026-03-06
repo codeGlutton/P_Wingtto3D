@@ -121,7 +121,7 @@ public:
 	}
 
 	template<typename C>
-	static NativeDelegateBinder BindNativeMethod(Ret(C::* func)(Args...), bool isWeakPtr = false)
+	static NativeDelegateBinder BindNativeMethod(Ret(C::* func)(Args...), bool isWeakPtr = true)
 	{
 		return NativeDelegateBinder(
 			[func](const std::shared_ptr<Object>& sp, Args... args) {
@@ -136,7 +136,7 @@ public:
 			}, isWeakPtr, false);
 	}
 	template<typename C>
-	static NativeDelegateBinder BindNativeMethod(Ret(C::* func)(Args...) const, bool isWeakPtr = false)
+	static NativeDelegateBinder BindNativeMethod(Ret(C::* func)(Args...) const, bool isWeakPtr = true)
 	{
 		return NativeDelegateBinder(
 			[func](const std::shared_ptr<Object>& sp, Args... args) {
@@ -151,7 +151,7 @@ public:
 			}, isWeakPtr, false);
 	}
 
-	static NativeDelegateBinder BindMethod(const Method* method, bool isWeakPtr = false)
+	static NativeDelegateBinder BindMethod(const Method* method, bool isWeakPtr = true)
 	{
 		return NativeDelegateBinder(
 			[method](const std::shared_ptr<Object>& sp, Args... args) {
@@ -168,7 +168,7 @@ public:
 
 private:
 	std::function<Ret(const std::shared_ptr<Object>&, Args...)> _mCallback;
-	bool _mIsWeakPtr = false;
+	bool _mIsWeakPtr = true;
 	bool _mIsStatic = false;
 };
 
@@ -198,14 +198,14 @@ public:
 	}
 
 	template<typename C>
-	DelegateHandle BindNativeMethod(const std::shared_ptr<C>& object, Ret(C::* func)(Args...), bool isWeakPtr = false);
+	DelegateHandle BindNativeMethod(const std::shared_ptr<C>& object, Ret(C::* func)(Args...), bool isWeakPtr = true);
 	template<typename C>
-	DelegateHandle BindNativeMethod(const std::shared_ptr<C>& object, Ret(C::* func)(Args...) const, bool isWeakPtr = false);
+	DelegateHandle BindNativeMethod(const std::shared_ptr<C>& object, Ret(C::* func)(Args...) const, bool isWeakPtr = true);
 	template<typename C>
-	DelegateHandle BindNativeMethod(const std::shared_ptr<const C>& object, Ret(C::* func)(Args...) const, bool isWeakPtr = false);
+	DelegateHandle BindNativeMethod(const std::shared_ptr<const C>& object, Ret(C::* func)(Args...) const, bool isWeakPtr = true);
 
 	template<typename C>
-	DelegateHandle BindMethod(const std::shared_ptr<C>& object, const Method* method, bool isWeakPtr = false);
+	DelegateHandle BindMethod(const std::shared_ptr<C>& object, const Method* method, bool isWeakPtr = true);
 
 	bool Unbind(DelegateHandle handle);
 
@@ -631,14 +631,14 @@ public:
 	}
 
 	template<typename C>
-	DelegateHandle BindNativeMethod(const std::shared_ptr<C>& object, void(C::* func)(Args...), bool isWeakPtr = false);
+	DelegateHandle BindNativeMethod(const std::shared_ptr<C>& object, void(C::* func)(Args...), bool isWeakPtr = true);
 	template<typename C>
-	DelegateHandle BindNativeMethod(const std::shared_ptr<C>& object, void(C::* func)(Args...) const, bool isWeakPtr = false);
+	DelegateHandle BindNativeMethod(const std::shared_ptr<C>& object, void(C::* func)(Args...) const, bool isWeakPtr = true);
 	template<typename C>
-	DelegateHandle BindNativeMethod(const std::shared_ptr<const C>& object, void(C::* func)(Args...) const, bool isWeakPtr = false);
+	DelegateHandle BindNativeMethod(const std::shared_ptr<const C>& object, void(C::* func)(Args...) const, bool isWeakPtr = true);
 
 	template<typename C>
-	DelegateHandle BindMethod(const std::shared_ptr<C>& object, const Method* method, bool isWeakPtr = false);
+	DelegateHandle BindMethod(const std::shared_ptr<C>& object, const Method* method, bool isWeakPtr = true);
 
 	bool Unbind(DelegateHandle handle);
 
@@ -934,6 +934,12 @@ class DynamicSingleDelegate : public DynamicDelegateBase
 	GEN_MINIMUM_STRUCT_REFLECTION(DynamicSingleDelegate<Ret, Args...>)
 
 public:
+	bool operator==(const DynamicSingleDelegate& other) const
+	{
+		return _mBinding.first.lock() == other._mBinding.first.lock() && _mBinding.second == other._mBinding.second;
+	}
+
+public:
 	using Binder = DynamicDelegateBinder<Ret, Args...>;
 
 public:
@@ -950,7 +956,7 @@ public:
 public:
 	bool IsBound() const
 	{
-		return _mBinding.first != nullptr;
+		return _mBinding.first.lock() != nullptr;
 	}
 
 	void Clear()
@@ -967,13 +973,14 @@ public:
 
 protected:
 	PROPERTY(_mBinding)
-	mutable std::pair<std::shared_ptr<Object>, std::string> _mBinding;
+	mutable std::pair<std::weak_ptr<Object>, std::string> _mBinding;
 };
 
 template<typename Ret, typename ...Args> requires (!HasAnyReference<Ret, Args...>)
 inline DynamicDelegateHandle DynamicSingleDelegate<Ret, Args...>::Bind(const Binder& binder)
 {
-	_mBinding = binder._mBinding;
+	_mBinding.first = binder._mBinding.first;
+	_mBinding.second = binder._mBinding.second;
 
 	return DynamicDelegateHandle{ _mBinding.first, _mBinding.second };
 }
@@ -1001,7 +1008,8 @@ inline DynamicDelegateHandle DynamicSingleDelegate<Ret, Args...>::BindMethod(con
 template<typename Ret, typename ...Args> requires (!HasAnyReference<Ret, Args...>)
 inline bool DynamicSingleDelegate<Ret, Args...>::Unbind(DynamicDelegateHandle handle)
 {
-	if (_mBinding.first == handle.first.lock() && _mBinding.second == handle.second && IsBound() == true)
+	std::shared_ptr<Object> object = handle.first.lock();
+	if (_mBinding.first.lock() == object && _mBinding.second == handle.second && IsBound() == true)
 	{
 		Clear();
 		return true;
@@ -1012,7 +1020,7 @@ inline bool DynamicSingleDelegate<Ret, Args...>::Unbind(DynamicDelegateHandle ha
 template<typename Ret, typename ...Args> requires (!HasAnyReference<Ret, Args...>)
 inline bool DynamicSingleDelegate<Ret, Args...>::Unbind(std::shared_ptr<Object> object)
 {
-	if (_mBinding.first == object && IsBound() == true)
+	if (_mBinding.first.lock() == object && IsBound() == true)
 	{
 		Clear();
 		return true;
@@ -1025,17 +1033,19 @@ template<typename ...InputArgs>
 inline Ret DynamicSingleDelegate<Ret, Args...>::Execute(InputArgs && ...args) const
 {
 	ASSERT_MSG(_mIsCalled == false, "Not safe delegate was called circularly");
+
+	std::shared_ptr<Object> object = _mBinding.first.lock();
 	_mIsCalled = true;
 
-	const Method* method = _mBinding.first->GetTypeInfo().GetMethod(_mBinding.second.c_str());
+	const Method* method = object->GetTypeInfo().GetMethod(_mBinding.second.c_str());
 	if constexpr (std::is_same_v<Ret, void> == true)
 	{
-		method->Invoke(_mBinding.first.get(), std::forward<InputArgs>(args)...);
+		method->Invoke(object.get(), std::forward<InputArgs>(args)...);
 		_mIsCalled = false;
 	}
 	else
 	{
-		Ret ret = method->Invoke<Object, Ret>(_mBinding.first.get(), std::forward<InputArgs>(args)...);
+		Ret ret = method->Invoke<Object, Ret>(object.get(), std::forward<InputArgs>(args)...);
 		_mIsCalled = false;
 		return ret;
 	}
@@ -1045,32 +1055,36 @@ template<typename Ret, typename ...Args> requires (!HasAnyReference<Ret, Args...
 template<typename ...InputArgs>
 inline Ret DynamicSingleDelegate<Ret, Args...>::ExecuteIfBound(InputArgs && ...args) const
 {
-	if (IsBound() == false)
+	ASSERT_MSG(_mIsCalled == false, "Not safe delegate was called circularly");
+	_mIsCalled = true;
+
+	std::shared_ptr<Object> object = _mBinding.first.lock();
+	if (object != nullptr)
+	{
+		_mIsCalled = true;
+
+		const Method* method = object->GetTypeInfo().GetMethod(_mBinding.second.c_str());
+		if constexpr (std::is_same_v<Ret, void> == true)
+		{
+			method->Invoke(object.get(), std::forward<InputArgs>(args)...);
+			_mIsCalled = false;
+		}
+		else
+		{
+			Ret ret = method->Invoke<Object, Ret>(object.get(), std::forward<InputArgs>(args)...);
+			_mIsCalled = false;
+			return ret;
+		}
+	}
+	else
 	{
 		if constexpr (std::is_same_v<Ret, void> == true)
 		{
-			return;
 		}
 		else
 		{
 			return {};
 		}
-	}
-
-	ASSERT_MSG(_mIsCalled == false, "Not safe delegate was called circularly");
-	_mIsCalled = true;
-
-	const Method* method = _mBinding.first->GetTypeInfo().GetMethod(_mBinding.second.c_str());
-	if constexpr (std::is_same_v<Ret, void> == true)
-	{
-		method->Invoke(_mBinding.first.get(), std::forward<InputArgs>(args)...);
-		_mIsCalled = false;
-	}
-	else
-	{
-		Ret ret = method->Invoke<Object, Ret>(_mBinding.first.get(), std::forward<InputArgs>(args)...);
-		_mIsCalled = false;
-		return ret;
 	}
 }
 

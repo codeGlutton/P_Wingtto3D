@@ -18,6 +18,23 @@ void DXGraphicSystem::Init()
 
 void DXGraphicSystem::Destroy()
 {
+	_mRenderTargetView.Reset();
+	_mDepthStencilView.Reset();
+	_mFactory.Reset();
+
+	_mDeviceContext->ClearState();
+	_mDeviceContext->Flush();
+
+	_mDeviceContext.Reset();
+
+#ifdef _DEBUG
+	ComPtr<ID3D11Debug> debug;
+	_mDevice.As(&debug);
+
+	debug->ReportLiveDeviceObjects(D3D11_RLDO_DETAIL);
+#endif // _DEBUG
+
+	_mDevice.Reset();
 }
 
 void DXGraphicSystem::SaveRenderTargets()

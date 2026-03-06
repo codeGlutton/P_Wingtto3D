@@ -39,6 +39,8 @@ void AppWindow::PostCreate()
 void AppWindow::PostLoad()
 {
 	Super::PostLoad();
+	_mDesc.mName = GetName();
+
 	ASSERT_MSG(InitWindow() == true, "Fail to create window");
 	APP_WIN_MANAGER->NotifyToAddAppWindow(std::static_pointer_cast<AppWindow>(shared_from_this()));
 

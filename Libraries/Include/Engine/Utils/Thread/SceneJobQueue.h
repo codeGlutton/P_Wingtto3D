@@ -55,7 +55,7 @@ public:
 
 	virtual void ExecuteOnce();
 
-private:
+public:
 	virtual void Push(const std::shared_ptr<JobContext<float>>& job);
 	virtual void Push(std::shared_ptr<JobContext<float>>&& job);
 

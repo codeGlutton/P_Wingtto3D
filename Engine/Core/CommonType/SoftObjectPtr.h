@@ -15,6 +15,17 @@ public:
 		_mObject()
 	{
 	}
+	template <typename U> requires(
+		std::is_convertible_v<U*, T*> == true
+		)
+	SoftObjectPtr(std::shared_ptr<U> object) :
+		_mObject(object)
+	{
+		if (object != nullptr)
+		{
+			_mFullPath = object->GetFullPath();
+		}
+	}
 	// 다른 상속된 타입의 SubClass 객체로 초기화
 	template <typename U> requires(
 		std::is_convertible_v<U*, T*> == true
@@ -47,6 +58,18 @@ public:
 	{
 		_mFullPath = std::move(path);
 		_mObject.reset();
+		return *this;
+	}
+	template <typename U> requires(
+		std::is_convertible_v<U*, T*> == true
+		)
+	SoftObjectPtr& operator=(std::shared_ptr<U> object)
+	{
+		_mObject = object;
+		if (object != nullptr)
+		{
+			_mFullPath = object->GetFullPath();
+		}
 		return *this;
 	}
 	template <typename U> requires(
@@ -98,3 +121,7 @@ private:
 	std::weak_ptr<T> _mObject;
 };
 
+template <class T, class U>
+bool operator==(const SoftObjectPtr<T>& lhs, const SoftObjectPtr<U>& rhs) noexcept {
+	return lhs.GetFullPath() == rhs.GetFullPath();
+}

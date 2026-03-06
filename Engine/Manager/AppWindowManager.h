@@ -60,7 +60,7 @@ public:
 
 public:
 	template<typename T> requires std::is_base_of_v<AppWindow, T>
-	void CreateDefaultMainAppWindow();
+	void CreateDefaultMainAppWindow(const std::wstring& name);
 
 	template<typename T> requires std::is_base_of_v<AppWindow, T>
 	std::shared_ptr<T> CreateAppWindow(std::shared_ptr<AppWindow> owner = nullptr, ObjectCreateFlag::Type flags = ObjectCreateFlag::None);
@@ -119,11 +119,11 @@ private:
 };
 
 template<typename T> requires std::is_base_of_v<AppWindow, T>
-inline void AppWindowManager::CreateDefaultMainAppWindow()
+inline void AppWindowManager::CreateDefaultMainAppWindow(const std::wstring& name)
 {
 	if (GetMainWindow() == nullptr)
 	{
-		CreateAppWindow(nullptr, &T::GetStaticTypeInfo(), ObjectCreateFlag::None);
+		CreateAppWindow(name, nullptr, &T::GetStaticTypeInfo(), ObjectCreateFlag::None);
 	}
 }
 

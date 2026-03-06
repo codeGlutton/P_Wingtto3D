@@ -69,6 +69,18 @@ template<typename K, typename D>
 const PairTypeInfo<K, D> PairTypeInfo< K, D>::mStatic;
 
 template<typename K, typename D>
+inline bool PairTypeInfo<K, D>::IsInstanceValueEqual(const void* lhsInst, const void* rhsInst) const
+{
+	const TypeInfo& keyTypeInfo = TypeInfoResolver<std::remove_const_t<K>>::Get();
+	const TypeInfo& dataTypeInfo = TypeInfoResolver<D>::Get();
+
+	const C* lhsInstPtr = reinterpret_cast<const C*>(lhsInst);
+	const C* rhsInstPtr = reinterpret_cast<const C*>(rhsInst);
+	
+	return keyTypeInfo.IsInstanceValueEqual(&lhsInstPtr->first, &rhsInstPtr->first) && dataTypeInfo.IsInstanceValueEqual(&lhsInstPtr->second, &rhsInstPtr->second);
+}
+
+template<typename K, typename D>
 inline void PairTypeInfo<K, D>::Serialize(OUT Archive& archive, const void* inst) const
 {
 	const TypeInfo& keyTypeInfo = TypeInfoResolver<std::remove_const_t<K>>::Get();
